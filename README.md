@@ -31,18 +31,21 @@ Una aplicación web moderna para crear y gestionar recetas de cocina con intelig
 ## 🚀 Instalación
 
 ### 1. Clonar el repositorio
+
 ```bash
 git clone <repository-url>
 cd chef-at-home
 ```
 
 ### 2. Configurar variables de entorno
+
 ```bash
 cp .env.example .env.local
 # Editar .env.local con tus credenciales
 ```
 
 ### 3. Iniciar con Docker (Recomendado)
+
 ```bash
 # Desarrollo
 docker-compose up -d
@@ -53,6 +56,7 @@ docker-compose up
 ```
 
 ### 4. Iniciar sin Docker
+
 ```bash
 npm install
 npm run dev
@@ -61,11 +65,13 @@ npm run dev
 ## 🐳 Docker
 
 ### Desarrollo
+
 ```bash
 docker-compose up -d
 ```
 
 ### Producción
+
 ```bash
 docker build -t chef-at-home .
 docker run -p 3000:3000 chef-at-home
