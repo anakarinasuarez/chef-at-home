@@ -31,7 +31,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${poppins.variable} ${inter.variable} antialiased`}
-        style={{ fontFamily: 'var(--font-poppins), system-ui, sans-serif' }}
+        style={{ fontFamily: "var(--font-poppins), system-ui, sans-serif" }}
       >
         <AuthProvider>{children}</AuthProvider>
       </body>
