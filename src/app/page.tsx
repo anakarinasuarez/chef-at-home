@@ -68,36 +68,6 @@ export default function HomePage() {
             driven recipes
           </h1>
 
-          {/* Texto de prueba para verificar letterSpacing */}
-          <div className="mb-6 text-center lg:text-left">
-            <p
-              className="mb-2"
-              style={{
-                fontSize: typography.styles["title-2"].fontSize,
-                fontWeight: typography.styles["title-2"].fontWeight,
-                lineHeight: typography.styles["title-2"].lineHeight,
-                letterSpacing: typography.styles["title-2"].letterSpacing,
-                fontFamily: typography.styles["title-2"].fontFamily.join(", "),
-                color: colors.brand.primary[500],
-              }}
-            >
-              🔍 Prueba de letterSpacing: Títulos con -0.02em
-            </p>
-            <p
-              className="mb-2"
-              style={{
-                fontSize: typography.styles["body"].fontSize,
-                fontWeight: typography.styles["body"].fontWeight,
-                lineHeight: typography.styles["body"].lineHeight,
-                letterSpacing: typography.styles["body"].letterSpacing,
-                fontFamily: typography.styles["body"].fontFamily.join(", "),
-                color: colors.interface.text.secondary,
-              }}
-            >
-              📝 Body text con 0em (normal spacing)
-            </p>
-          </div>
-
           {/* Lista de Beneficios - Usando el estilo 'subtitle' */}
           <div
             className="space-y-4 mb-12"
@@ -160,24 +130,24 @@ export default function HomePage() {
 
           {/* Botones de Acción - Usando el estilo 'button' */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-            <Link
+            <Link 
               href="/auth/signup"
-              className="rounded-lg font-semibold text-lg transition-colors text-center hover:opacity-90"
+              className="rounded-lg font-semibold text-lg transition-colors text-center hover:bg-green-400 hover:text-black"
               style={{
                 backgroundColor: colors.app.button.primary.background,
                 color: colors.app.button.primary.text,
                 padding: spacingSystem.components.button.padding.large,
                 borderRadius: spacingSystem.components.button.borderRadius,
-                fontSize: typography.styles["button"].fontSize,
-                fontWeight: typography.styles["button"].fontWeight,
-                lineHeight: typography.styles["button"].lineHeight,
-                letterSpacing: typography.styles["button"].letterSpacing,
-                fontFamily: typography.styles["button"].fontFamily.join(", "),
+                fontSize: typography.styles['button'].fontSize,
+                fontWeight: typography.styles['button'].fontWeight,
+                lineHeight: typography.styles['button'].lineHeight,
+                letterSpacing: typography.styles['button'].letterSpacing,
+                fontFamily: typography.styles['button'].fontFamily.join(', ')
               }}
             >
               Sign up free
             </Link>
-            <Link
+            <Link 
               href="/auth/login"
               className="rounded-lg font-semibold text-lg transition-colors text-center hover:bg-green-400 hover:text-black"
               style={{
@@ -186,11 +156,11 @@ export default function HomePage() {
                 border: `1px solid ${colors.app.button.secondary.border}`,
                 padding: spacingSystem.components.button.padding.large,
                 borderRadius: spacingSystem.components.button.borderRadius,
-                fontSize: typography.styles["button"].fontSize,
-                fontWeight: typography.styles["button"].fontWeight,
-                lineHeight: typography.styles["button"].lineHeight,
-                letterSpacing: typography.styles["button"].letterSpacing,
-                fontFamily: typography.styles["button"].fontFamily.join(", "),
+                fontSize: typography.styles['button'].fontSize,
+                fontWeight: typography.styles['button'].fontWeight,
+                lineHeight: typography.styles['button'].lineHeight,
+                letterSpacing: typography.styles['button'].letterSpacing,
+                fontFamily: typography.styles['button'].fontFamily.join(', ')
               }}
             >
               Login

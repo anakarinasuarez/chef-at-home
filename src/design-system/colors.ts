@@ -142,15 +142,16 @@ export const appColors = {
   button: {
     primary: {
       background: '#96B462',    // Tu color primary
-      text: '#FFFFFF',
-      hover: '#E8F0DB',        // Tu color secondary
+      text: '#FFFFFF',          // Texto blanco para contraste
+      hover: '#E8F0DB',        // Tu color secondary en hover
+      hoverText: '#131313',    // Texto oscuro en hover para contraste
     },
     secondary: {
       background: 'transparent',
-      text: '#FFFFFF',
-      border: '#96B462',       // Tu color primary
-      hover: '#E8F0DB',        // Tu color secondary
-      hoverText: '#131313',    // Tu color background
+      text: '#96B462',         // Tu color primary como texto
+      border: '#96B462',       // Tu color primary como borde
+      hover: '#E8F0DB',        // Tu color secondary en hover
+      hoverText: '#131313',    // Texto oscuro en hover para contraste
     },
   },
   
