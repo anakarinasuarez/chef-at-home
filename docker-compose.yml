@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL para desarrollo
+  postgres:
+    image: postgres:15-alpine
+    container_name: chef-at-home-db
+    environment:
+      POSTGRES_DB: chef_at_home
+      POSTGRES_USER: chef_user
+      POSTGRES_PASSWORD: chef_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - chef-network
+
+  # Redis para sesiones y caché
+  redis:
+    image: redis:7-alpine
+    container_name: chef-at-home-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - chef-network
+
+  # Aplicación Next.js en desarrollo
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: chef-at-home-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://chef_user:chef_password@postgres:5432/chef_at_home
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - chef-network
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  chef-network:
+    driver: bridge
