@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 import { colors, typography, spacingSystem } from "@/design-system";
+import Button from "@/components/Button";
 
 export default function HomePage() {
   return (
@@ -10,8 +10,8 @@ export default function HomePage() {
     >
       {/* Header con Logo */}
       <header
-        className="px-8 py-6"
-        style={{ padding: `${spacingSystem.base[8]} ${spacingSystem.base[8]}` }}
+        className="px-8 py-4"
+        style={{ padding: `${spacingSystem.base[4]} ${spacingSystem.base[8]}` }}
       >
         <div className="flex items-center gap-3">
           <div
@@ -48,9 +48,9 @@ export default function HomePage() {
       </header>
 
       {/* Contenido Principal - Layout de 2 columnas */}
-      <main className="flex min-h-[calc(100vh-120px)]">
+      <main className="flex min-h-[calc(100vh-120px)] pt-8">
         {/* Columna Izquierda - Texto y Botones */}
-        <div className="flex-1 flex flex-col justify-center px-8 lg:px-16">
+        <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 pt-8">
           {/* Headline Principal - Usando el estilo 'display' */}
           <h1
             className="mb-8 text-center lg:text-left leading-tight"
@@ -128,57 +128,28 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Botones de Acción - Usando el estilo 'button' */}
+          {/* Botones de Acción - Usando el componente Button reutilizable */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-            <Link 
-              href="/auth/signup"
-              className="rounded-lg font-semibold text-lg transition-colors text-center hover:bg-green-400 hover:text-black"
-              style={{
-                backgroundColor: colors.app.button.primary.background,
-                color: colors.app.button.primary.text,
-                padding: spacingSystem.components.button.padding.large,
-                borderRadius: spacingSystem.components.button.borderRadius,
-                fontSize: typography.styles['button'].fontSize,
-                fontWeight: typography.styles['button'].fontWeight,
-                lineHeight: typography.styles['button'].lineHeight,
-                letterSpacing: typography.styles['button'].letterSpacing,
-                fontFamily: typography.styles['button'].fontFamily.join(', ')
-              }}
-            >
+            <Button href="/auth/signup" variant="primary">
               Sign up free
-            </Link>
-            <Link 
-              href="/auth/login"
-              className="rounded-lg font-semibold text-lg transition-colors text-center hover:bg-green-400 hover:text-black"
-              style={{
-                backgroundColor: colors.app.button.secondary.background,
-                color: colors.app.button.secondary.text,
-                border: `1px solid ${colors.app.button.secondary.border}`,
-                padding: spacingSystem.components.button.padding.large,
-                borderRadius: spacingSystem.components.button.borderRadius,
-                fontSize: typography.styles['button'].fontSize,
-                fontWeight: typography.styles['button'].fontWeight,
-                lineHeight: typography.styles['button'].lineHeight,
-                letterSpacing: typography.styles['button'].letterSpacing,
-                fontFamily: typography.styles['button'].fontFamily.join(', ')
-              }}
-            >
+            </Button>
+            <Button href="/auth/login" variant="secondary">
               Login
-            </Link>
+            </Button>
           </div>
         </div>
 
         {/* Columna Derecha - Imagen Gourmet */}
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-start justify-center p-4 sm:p-6 lg:p-8">
           <div
-            className="relative w-full max-w-lg h-96 lg:h-[500px]"
+            className="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] md:w-[500px] md:h-[500px] lg:w-[600px] lg:h-[600px] xl:w-[700px] xl:h-[700px]"
             style={{
-              maxWidth: spacingSystem.components.page.maxWidth,
-              height: spacingSystem.base[96],
+              width: "480px",
+              height: "480px",
             }}
           >
             <Image
-              src="/images/gourmet-dish.jpg"
+              src="/images/plate.png"
               alt="Gourmet dish with steak and vegetables"
               fill
               className="object-cover rounded-2xl"
