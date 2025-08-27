@@ -1,6 +1,7 @@
-import Image from "next/image";
 import { colors, typography, spacingSystem } from "@/design-system";
 import Button from "@/components/Button";
+import Nav from "@/components/Nav";
+import Image from "next/image";
 
 export default function HomePage() {
   return (
@@ -8,45 +9,8 @@ export default function HomePage() {
       className="min-h-screen text-white"
       style={{ backgroundColor: colors.interface.background.primary }}
     >
-      {/* Header con Logo */}
-      <header
-        className="px-8 py-4"
-        style={{ padding: `${spacingSystem.base[4]} ${spacingSystem.base[8]}` }}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{
-              backgroundColor: colors.brand.primary[500],
-              width: spacingSystem.base[8],
-              height: spacingSystem.base[8],
-            }}
-          >
-            <span
-              className="text-black text-lg"
-              style={{
-                color: colors.interface.text.inverse,
-                fontSize: typography.sizes.lg,
-              }}
-            >
-              👨‍🍳
-            </span>
-          </div>
-          <div
-            className="text-xl font-bold"
-            style={{
-              fontSize: typography.styles["title-3"].fontSize,
-              fontWeight: typography.styles["title-3"].fontWeight,
-              fontFamily: typography.styles["title-3"].fontFamily.join(", "),
-              color: colors.interface.text.primary,
-            }}
-          >
-            <span>Chef</span>
-            <span> at home</span>
-          </div>
-        </div>
-      </header>
-
+      {/* Navigation */}
+      <Nav showMenu={false} /> {/* Menú oculto en la página principal */}
       {/* Contenido Principal - Layout de 2 columnas */}
       <main className="flex min-h-[calc(100vh-120px)] pt-8">
         {/* Columna Izquierda - Texto y Botones */}

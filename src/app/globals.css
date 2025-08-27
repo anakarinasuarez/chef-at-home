@@ -5,6 +5,7 @@
   --foreground: #ffffff;
   --font-poppins: var(--font-poppins);
   --font-inter: var(--font-inter);
+  --font-alegreya: var(--font-alegreya);
 }
 
 @theme inline {
@@ -12,6 +13,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
   --font-display: var(--font-poppins);
+  --font-logo: var(--font-alegreya);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,4 +40,8 @@ body {
 
 .font-inter {
   font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.font-alegreya {
+  font-family: var(--font-alegreya), serif;
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins, Inter } from "next/font/google";
+import { Poppins, Inter, Alegreya } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/hooks/useAuth";
 
@@ -17,6 +17,13 @@ const inter = Inter({
   display: "swap",
 });
 
+const alegreya = Alegreya({
+  variable: "--font-alegreya",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Chef at Home",
   description: "Create delicious recipes with AI",
@@ -30,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${poppins.variable} ${inter.variable} antialiased`}
+        className={`${poppins.variable} ${inter.variable} ${alegreya.variable} antialiased`}
         style={{ fontFamily: "var(--font-poppins), system-ui, sans-serif" }}
       >
         <AuthProvider>{children}</AuthProvider>
