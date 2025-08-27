@@ -35,12 +35,14 @@ export default function HomePage() {
           <div 
             className="text-xl font-bold"
             style={{ 
-              fontSize: typography.sizes.xl,
-              fontWeight: typography.weights.bold
+              fontSize: typography.styles['title-3'].fontSize,
+              fontWeight: typography.styles['title-3'].fontWeight,
+              fontFamily: typography.styles['title-3'].fontFamily.join(', '),
+              color: colors.interface.text.primary
             }}
           >
-            <span style={{ color: colors.interface.text.primary }}>Chef</span>
-            <span style={{ color: colors.interface.text.primary }}> at home</span>
+            <span>Chef</span>
+            <span> at home</span>
           </div>
         </div>
       </header>
@@ -49,15 +51,15 @@ export default function HomePage() {
       <main className="flex min-h-[calc(100vh-120px)]">
         {/* Columna Izquierda - Texto y Botones */}
         <div className="flex-1 flex flex-col justify-center px-8 lg:px-16">
-          {/* Headline Principal */}
+          {/* Headline Principal - Usando el estilo 'display' */}
           <h1 
             className="mb-8 text-center lg:text-left leading-tight"
             style={{
-              fontSize: typography.styles['display-2'].fontSize,
-              fontWeight: typography.styles['display-2'].fontWeight,
-              lineHeight: typography.styles['display-2'].lineHeight,
-              letterSpacing: typography.styles['display-2'].letterSpacing,
-              fontFamily: typography.styles['display-2'].fontFamily.join(', '),
+              fontSize: typography.styles['display'].fontSize,
+              fontWeight: typography.styles['display'].fontWeight,
+              lineHeight: typography.styles['display'].lineHeight,
+              letterSpacing: typography.styles['display'].letterSpacing,
+              fontFamily: typography.styles['display'].fontFamily.join(', '),
               marginBottom: spacingSystem.base[8],
               color: colors.interface.text.primary
             }}
@@ -66,7 +68,37 @@ export default function HomePage() {
             driven recipes
           </h1>
 
-          {/* Lista de Beneficios */}
+          {/* Texto de prueba para verificar letterSpacing */}
+          <div className="mb-6 text-center lg:text-left">
+            <p 
+              className="mb-2"
+              style={{
+                fontSize: typography.styles['title-2'].fontSize,
+                fontWeight: typography.styles['title-2'].fontWeight,
+                lineHeight: typography.styles['title-2'].lineHeight,
+                letterSpacing: typography.styles['title-2'].letterSpacing,
+                fontFamily: typography.styles['title-2'].fontFamily.join(', '),
+                color: colors.brand.primary[500]
+              }}
+            >
+              🔍 Prueba de letterSpacing: Títulos con -0.02em
+            </p>
+            <p 
+              className="mb-2"
+              style={{
+                fontSize: typography.styles['body'].fontSize,
+                fontWeight: typography.styles['body'].fontWeight,
+                lineHeight: typography.styles['body'].lineHeight,
+                letterSpacing: typography.styles['body'].letterSpacing,
+                fontFamily: typography.styles['body'].fontFamily.join(', '),
+                color: colors.interface.text.secondary
+              }}
+            >
+              📝 Body text con 0em (normal spacing)
+            </p>
+          </div>
+
+          {/* Lista de Beneficios - Usando el estilo 'subtitle' */}
           <div 
             className="space-y-4 mb-12"
             style={{ 
@@ -87,7 +119,11 @@ export default function HomePage() {
               <span 
                 className="text-lg"
                 style={{
-                  fontSize: typography.styles['body-large'].fontSize,
+                  fontSize: typography.styles['subtitle'].fontSize,
+                  fontWeight: typography.styles['subtitle'].fontWeight,
+                  lineHeight: typography.styles['subtitle'].lineHeight,
+                  letterSpacing: typography.styles['subtitle'].letterSpacing,
+                  fontFamily: typography.styles['subtitle'].fontFamily.join(', '),
                   color: colors.interface.text.primary
                 }}
               >
@@ -107,7 +143,11 @@ export default function HomePage() {
               <span 
                 className="text-lg"
                 style={{
-                  fontSize: typography.styles['body-large'].fontSize,
+                  fontSize: typography.styles['subtitle'].fontSize,
+                  fontWeight: typography.styles['subtitle'].fontWeight,
+                  lineHeight: typography.styles['subtitle'].lineHeight,
+                  letterSpacing: typography.styles['subtitle'].letterSpacing,
+                  fontFamily: typography.styles['subtitle'].fontFamily.join(', '),
                   color: colors.interface.text.primary
                 }}
               >
@@ -116,7 +156,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Botones de Acción */}
+          {/* Botones de Acción - Usando el estilo 'button' */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
             <Link 
               href="/auth/signup"
@@ -126,11 +166,11 @@ export default function HomePage() {
                 color: colors.app.button.primary.text,
                 padding: spacingSystem.components.button.padding.large,
                 borderRadius: spacingSystem.components.button.borderRadius,
-                fontWeight: typography.weights.semibold,
-                fontSize: typography.styles['button-large'].fontSize,
-                fontFamily: typography.styles['button-large'].fontFamily.join(', '),
-                letterSpacing: typography.styles['button-large'].letterSpacing,
-                lineHeight: typography.styles['button-large'].lineHeight
+                fontSize: typography.styles['button'].fontSize,
+                fontWeight: typography.styles['button'].fontWeight,
+                lineHeight: typography.styles['button'].lineHeight,
+                letterSpacing: typography.styles['button'].letterSpacing,
+                fontFamily: typography.styles['button'].fontFamily.join(', ')
               }}
             >
               Sign up free
@@ -144,11 +184,11 @@ export default function HomePage() {
                 border: `1px solid ${colors.app.button.secondary.border}`,
                 padding: spacingSystem.components.button.padding.large,
                 borderRadius: spacingSystem.components.button.borderRadius,
-                fontWeight: typography.weights.semibold,
-                fontSize: typography.styles['button-large'].fontSize,
-                fontFamily: typography.styles['button-large'].fontFamily.join(', '),
-                letterSpacing: typography.styles['button-large'].letterSpacing,
-                lineHeight: typography.styles['button-large'].lineHeight
+                fontSize: typography.styles['button'].fontSize,
+                fontWeight: typography.styles['button'].fontWeight,
+                lineHeight: typography.styles['button'].lineHeight,
+                letterSpacing: typography.styles['button'].letterSpacing,
+                fontFamily: typography.styles['button'].fontFamily.join(', ')
               }}
             >
               Login
