@@ -3,6 +3,7 @@
 import { colors } from "@/design-system";
 import { PiChefHatLight } from "react-icons/pi";
 import { MdOutlineMenu } from "react-icons/md";
+import Link from "next/link";
 
 interface NavProps {
   showMenu?: boolean;
@@ -14,8 +15,11 @@ export default function Nav({ showMenu = false }: NavProps) {
       className="w-full px-8 py-4 flex items-center justify-between"
       style={{ backgroundColor: colors.interface.background.secondary }}
     >
-      {/* Logo */}
-      <div className="flex items-end">
+      {/* Logo - Ahora es clickeable y navega a inicio */}
+      <Link
+        href="/"
+        className="flex items-end hover:opacity-80 transition-opacity"
+      >
         {/* Chef Hat Icon - Usando PiChefHatLight */}
         <div className="w-10 h-10 flex items-center justify-center">
           <PiChefHatLight
@@ -61,7 +65,7 @@ export default function Nav({ showMenu = false }: NavProps) {
             home
           </span>
         </div>
-      </div>
+      </Link>
 
       {/* Menu Hamburger - Solo se muestra si showMenu es true */}
       {showMenu && (

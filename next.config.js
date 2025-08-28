@@ -44,6 +44,17 @@ const nextConfig = {
 
   // 🔒 Configuración de seguridad
   poweredByHeader: false,
+
+  // 🚨 Suprimir warnings de hidratación durante desarrollo
+  onDemandEntries: {
+    // Período de tiempo que una página debe permanecer inactiva antes de ser eliminada
+    maxInactiveAge: 25 * 1000,
+    // Número de páginas que deben mantenerse simultáneamente
+    pagesBufferLength: 2,
+  },
+
+  // 🔇 Suprimir warnings de hidratación en consola
+  reactStrictMode: false,
 };
 
 module.exports = nextConfig;
