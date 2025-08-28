@@ -105,10 +105,14 @@ export default function LoginPage() {
                 onChange={handleChange}
                 placeholder="chef@example.com"
                 required
-                className="w-80 px-3 py-2 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-80 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
                 style={{
-                  fontSize: typography.styles["body"].fontSize,
-                  fontFamily: typography.styles["body"].fontFamily.join(", "),
+                  fontSize: typography.styles["caption"].fontSize,
+                  fontFamily:
+                    typography.styles["caption"].fontFamily.join(", "),
+                  fontWeight: typography.styles["caption"].fontWeight,
+                  lineHeight: typography.styles["caption"].lineHeight,
+                  letterSpacing: typography.styles["caption"].letterSpacing,
                 }}
               />
             </div>
@@ -134,10 +138,14 @@ export default function LoginPage() {
                 onChange={handleChange}
                 placeholder="Enter your password"
                 required
-                className="w-80 px-3 py-2 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-80 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
                 style={{
-                  fontSize: typography.styles["body"].fontSize,
-                  fontFamily: typography.styles["body"].fontFamily.join(", "),
+                  fontSize: typography.styles["caption"].fontSize,
+                  fontFamily:
+                    typography.styles["caption"].fontFamily.join(", "),
+                  fontWeight: typography.styles["caption"].fontWeight,
+                  lineHeight: typography.styles["caption"].lineHeight,
+                  letterSpacing: typography.styles["caption"].letterSpacing,
                 }}
               />
             </div>
