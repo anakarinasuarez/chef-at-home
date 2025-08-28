@@ -3,9 +3,13 @@ const nextConfig = {
   // 🐳 Configuración para Docker
   output: "standalone", // Necesario para Docker
 
-  // 🖼️ Optimización de imágenes - Simplificada para desarrollo
+  // 🖼️ Optimización de imágenes - Configuración estándar
   images: {
-    unoptimized: true, // Desactivar optimización para desarrollo
+    unoptimized: false, // Habilitar optimización de imágenes
+    // Permitir importaciones desde src/assets
+    dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   // 🔧 Configuración experimental

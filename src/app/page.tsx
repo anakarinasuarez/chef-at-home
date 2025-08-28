@@ -2,6 +2,7 @@ import { colors, typography, spacingSystem } from "@/design-system";
 import Button from "@/components/Button";
 import Nav from "@/components/Nav";
 import Image from "next/image";
+import plateImage from "@/assets/images/plate.png";
 
 export default function HomePage() {
   return (
@@ -112,8 +113,9 @@ export default function HomePage() {
               height: "480px",
             }}
           >
+            {/* Imagen usando Next.js Image con todas sus optimizaciones */}
             <Image
-              src="public/images/plate.png"
+              src={plateImage}
               alt="Gourmet dish with steak and vegetables"
               fill
               className="object-cover rounded-2xl"
@@ -121,6 +123,8 @@ export default function HomePage() {
                 borderRadius: spacingSystem.components.card.borderRadius,
               }}
               priority
+              sizes="(max-width: 640px) 300px, (max-width: 768px) 400px, (max-width: 1024px) 500px, (max-width: 1280px) 600px, 700px"
+              quality={85}
             />
           </div>
         </div>
