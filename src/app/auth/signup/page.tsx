@@ -66,15 +66,15 @@ export default function SignupPage() {
       <main className="flex min-h-[calc(100vh-120px)] pt-8">
         {/* Columna Izquierda - Formulario de Registro */}
         <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 pt-8">
-          {/* Título Principal */}
+          {/* Headline Principal */}
           <h1
             className="mb-8 text-center lg:text-left leading-tight"
             style={{
-              fontSize: typography.styles["display"].fontSize,
-              fontWeight: typography.styles["display"].fontWeight,
-              lineHeight: typography.styles["display"].lineHeight,
-              letterSpacing: typography.styles["display"].letterSpacing,
-              fontFamily: typography.styles["display"].fontFamily.join(", "),
+              fontSize: typography.styles["title-1"].fontSize,
+              fontWeight: typography.styles["title-1"].fontWeight,
+              lineHeight: typography.styles["title-1"].lineHeight,
+              letterSpacing: typography.styles["title-1"].letterSpacing,
+              fontFamily: typography.styles["title-1"].fontFamily.join(", "),
               marginBottom: spacingSystem.base[8],
               color: colors.interface.text.primary,
             }}
@@ -105,7 +105,7 @@ export default function SignupPage() {
                 onChange={handleChange}
                 placeholder="chef"
                 required
-                className="w-full px-4 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-80 px-3 py-2 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
                 style={{
                   fontSize: typography.styles["body"].fontSize,
                   fontFamily: typography.styles["body"].fontFamily.join(", "),
@@ -134,7 +134,7 @@ export default function SignupPage() {
                 onChange={handleChange}
                 placeholder="chef@example.com"
                 required
-                className="w-full px-4 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-80 px-3 py-2 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
                 style={{
                   fontSize: typography.styles["body"].fontSize,
                   fontFamily: typography.styles["body"].fontFamily.join(", "),
@@ -164,7 +164,7 @@ export default function SignupPage() {
                 placeholder="Enter your password"
                 required
                 minLength={6}
-                className="w-full px-4 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-80 px-3 py-2 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
                 style={{
                   fontSize: typography.styles["body"].fontSize,
                   fontFamily: typography.styles["body"].fontFamily.join(", "),
