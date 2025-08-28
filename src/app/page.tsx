@@ -35,12 +35,15 @@ export default function HomePage() {
   };
 
   const handleRemoveIngredient = (id: string) => {
-    setIngredients(ingredients.filter(ing => ing.id !== id));
+    setIngredients(ingredients.filter((ing) => ing.id !== id));
   };
 
   const handleCreateRecipe = () => {
     // TODO: Implementar lógica de creación de receta
-    console.log("Creating recipe with:", { ingredients, servings: selectedServings });
+    console.log("Creating recipe with:", {
+      ingredients,
+      servings: selectedServings,
+    });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -108,7 +111,8 @@ export default function HomePage() {
                 className="w-80 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
                 style={{
                   fontSize: typography.styles["caption"].fontSize,
-                  fontFamily: typography.styles["caption"].fontFamily.join(", "),
+                  fontFamily:
+                    typography.styles["caption"].fontFamily.join(", "),
                   fontWeight: typography.styles["caption"].fontWeight,
                   lineHeight: typography.styles["caption"].lineHeight,
                   letterSpacing: typography.styles["caption"].letterSpacing,
@@ -116,9 +120,10 @@ export default function HomePage() {
               />
               <button
                 onClick={handleAddIngredient}
-                className="w-12 h-12 bg-gray-700 hover:bg-gray-600 text-white rounded-lg flex items-center justify-center transition-colors"
+                className="w-12 h-12 bg-transparent text-white rounded-lg flex items-center justify-center transition-colors border"
                 style={{
-                  backgroundColor: colors.interface.background.secondary,
+                  borderColor: colors.brand.primary[500],
+                  color: colors.brand.primary[500],
                 }}
               >
                 <span className="text-xl font-bold">+</span>
@@ -142,7 +147,7 @@ export default function HomePage() {
               {ingredients.map((ingredient) => (
                 <div
                   key={ingredient.id}
-                  className="px-4 py-2 bg-transparent text-white rounded-lg flex items-center gap-2 border"
+                  className="px-4 py-2 bg-transparent text-white rounded-lg flex items-center gap-2 border group"
                   style={{
                     borderColor: colors.brand.primary[500],
                     color: colors.brand.primary[500],
@@ -151,14 +156,15 @@ export default function HomePage() {
                   <span
                     style={{
                       fontSize: typography.styles["caption"].fontSize,
-                      fontFamily: typography.styles["caption"].fontFamily.join(", "),
+                      fontFamily:
+                        typography.styles["caption"].fontFamily.join(", "),
                     }}
                   >
                     {ingredient.name}
                   </span>
                   <button
                     onClick={() => handleRemoveIngredient(ingredient.id)}
-                    className="text-gray-400 hover:text-white transition-colors"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                     style={{
                       color: colors.brand.primary[500],
                     }}
@@ -193,18 +199,20 @@ export default function HomePage() {
                       : "bg-gray-700 text-white hover:bg-gray-600"
                   }`}
                   style={{
-                    backgroundColor: selectedServings === serving 
-                      ? colors.interface.background.surface
-                      : colors.interface.background.secondary,
+                    backgroundColor:
+                      selectedServings === serving
+                        ? colors.interface.background.surface
+                        : colors.interface.background.secondary,
                   }}
                 >
                   {serving}
                 </button>
               ))}
               <button
-                className="w-12 h-12 bg-gray-700 hover:bg-gray-600 text-white rounded-lg flex items-center justify-center transition-colors"
+                className="w-12 h-12 bg-transparent text-white rounded-lg flex items-center justify-center transition-colors border"
                 style={{
-                  backgroundColor: colors.interface.background.secondary,
+                  borderColor: colors.brand.primary[500],
+                  color: colors.brand.primary[500],
                 }}
               >
                 <span className="text-xl font-bold">+</span>
@@ -214,10 +222,7 @@ export default function HomePage() {
 
           {/* Botones de Acción */}
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Button
-              onClick={handleCreateRecipe}
-              variant="primary"
-            >
+            <Button onClick={handleCreateRecipe} variant="primary">
               Create recipe
             </Button>
             <Button href="/" variant="secondary">
