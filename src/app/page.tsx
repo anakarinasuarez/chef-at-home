@@ -147,13 +147,14 @@ export default function HomePage() {
               {ingredients.map((ingredient) => (
                 <div
                   key={ingredient.id}
-                  className="px-4 py-2 bg-transparent text-white rounded-lg flex items-center gap-2 border group"
+                  className="relative px-4 py-2 bg-transparent text-white rounded-lg flex items-center justify-center border group"
                   style={{
                     borderColor: colors.brand.primary[500],
                     color: colors.brand.primary[500],
                   }}
                 >
                   <span
+                    className="text-center"
                     style={{
                       fontSize: typography.styles["caption"].fontSize,
                       fontFamily:
@@ -164,9 +165,11 @@ export default function HomePage() {
                   </span>
                   <button
                     onClick={() => handleRemoveIngredient(ingredient.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-5 h-5 flex items-center justify-center rounded-sm z-10"
                     style={{
                       color: colors.brand.primary[500],
+                      backgroundColor: colors.interface.background.primary,
+                      border: `2px solid ${colors.brand.primary[500]}`,
                     }}
                   >
                     ×
