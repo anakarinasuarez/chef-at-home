@@ -20,7 +20,7 @@ export default function HomePage() {
     { id: "4", name: "Garlic" },
   ]);
   const [newIngredient, setNewIngredient] = useState("");
-  const [selectedServings, setSelectedServings] = useState(4);
+  const [selectedServings, setSelectedServings] = useState<number | null>(4);
   const [userName, setUserName] = useState("Anna");
 
   // Nuevo estado para comensales personalizados
@@ -46,7 +46,7 @@ export default function HomePage() {
   const handleCreateRecipe = () => {
     // Obtener todos los comensales (selección simple + personalizados)
     const allServings =
-      customServings.length > 0 ? customServings : [selectedServings];
+      customServings.length > 0 ? customServings : [selectedServings || 4];
 
     console.log("Creating recipe with:", {
       ingredients,
@@ -69,6 +69,7 @@ export default function HomePage() {
       setCustomServings([...customServings, serving]);
       setNewCustomServing("");
       setShowCustomInput(false);
+      setSelectedServings(null); // Limpiar selección simple cuando se agregan personalizados
     }
   };
 
@@ -80,6 +81,18 @@ export default function HomePage() {
     if (e.key === "Enter") {
       handleAddCustomServing();
     }
+  };
+
+  // Función para resetear todo el estado
+  const handleCancel = () => {
+    console.log("handleCancel ejecutándose...");
+    setIngredients([]); // Eliminar todos los ingredientes
+    setNewIngredient("");
+    setSelectedServings(null); // No seleccionar ningún botón
+    setCustomServings([]);
+    setShowCustomInput(false);
+    setNewCustomServing("");
+    console.log("Estado reseteado completamente");
   };
 
   return (
@@ -246,7 +259,10 @@ export default function HomePage() {
                   </button>
                 ))}
                 <button
-                  onClick={() => setShowCustomInput(true)}
+                  onClick={() => {
+                    setShowCustomInput(true);
+                    setSelectedServings(null); // Limpiar selección simple cuando se muestra input personalizado
+                  }}
                   className="w-12 h-12 bg-transparent text-white rounded-lg flex items-center justify-center transition-colors"
                   style={{
                     color: colors.brand.primary[500],
@@ -341,7 +357,13 @@ export default function HomePage() {
             <Button onClick={handleCreateRecipe} variant="primary">
               Create recipe
             </Button>
-            <Button href="/" variant="secondary">
+            <Button
+              onClick={() => {
+                console.log("Botón cancel clickeado");
+                handleCancel();
+              }}
+              variant="secondary"
+            >
               cancel
             </Button>
           </div>
