@@ -181,17 +181,9 @@ export default function SignupPage() {
 
             {/* Botones de Acción */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 px-8 py-3 rounded-xl text-lg font-semibold transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: colors.brand.primary[500],
-                  color: colors.interface.background.primary,
-                }}
-              >
+              <Button type="submit" variant="primary" disabled={isLoading}>
                 {isLoading ? "Registrando..." : "Register now"}
-              </button>
+              </Button>
               <Button href="/" variant="secondary">
                 cancel
               </Button>
