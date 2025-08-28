@@ -1,55 +1,55 @@
-# Dockerfile para Chef at Home - Next.js 15
-FROM node:18-alpine AS base
+# 🐳 Dockerfile para Chef at Home
+# Usamos Node.js 18 Alpine (más ligero y seguro)
 
-# Instalar dependencias solo cuando sea necesario
-FROM base AS deps
-# Verificar https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine para entender por qué libc6-compat podría ser necesario.
-RUN apk add --no-cache libc6-compat
+# Etapa 1: Construcción (Build Stage)
+FROM node:18-alpine AS builder
+
+# Establecer directorio de trabajo
 WORKDIR /app
 
-# Instalar dependencias basadas en el archivo de lock preferido
-# Ver https://yarnpkg.com/advanced/lockfile#toc.yarn.lock
-COPY package.json package-lock.json* ./
-RUN npm ci --only=production
+# Copiar archivos de dependencias
+COPY package*.json ./
 
-# Reconstruir el código fuente solo cuando sea necesario
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Instalar TODAS las dependencias (incluyendo devDependencies para el build)
+RUN npm ci
+
+# Copiar todo el código fuente
 COPY . .
 
-# Generar la aplicación Next.js
+# Generar el cliente de Prisma
+RUN npx prisma generate
+
+# Construir la aplicación Next.js
 RUN npm run build
 
-# Imagen de producción, copiar todos los archivos y ejecutar next
-FROM base AS runner
+# Etapa 2: Producción (Production Stage)
+FROM node:18-alpine AS runner
+
+# Establecer directorio de trabajo
 WORKDIR /app
 
-ENV NODE_ENV production
-# Descomentar la siguiente línea en caso de que quieras deshabilitar telemetría durante el tiempo de ejecución.
-# ENV NEXT_TELEMETRY_DISABLED 1
-
+# Crear usuario no-root para seguridad
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Copiar archivos necesarios desde la etapa de construcción
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
-# Establecer el propietario correcto para la aplicación next
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+# Cambiar propietario de los archivos
+RUN chown -R nextjs:nodejs /app
 
-# Copiar la aplicación construida
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
+# Cambiar al usuario no-root
 USER nextjs
 
+# Exponer puerto 3000
 EXPOSE 3000
 
-ENV PORT 3000
-# set hostname to localhost
-ENV HOSTNAME "0.0.0.0"
+# Variable de entorno para el puerto
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-# server.js es creado por next build desde la configuración standalone
-# en next.config.js
+# Comando para ejecutar la aplicación
 CMD ["node", "server.js"]

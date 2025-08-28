@@ -58,9 +58,16 @@ export const getDesignToken = (
   switch (category) {
     case "colors":
       if (variant) {
-        return (colors as any)[variant]?.[token] || colors.brand.primary[500];
+        return (
+          (colors as unknown as Record<string, Record<string, string>>)[
+            variant
+          ]?.[token] || colors.brand.primary[500]
+        );
       }
-      return (colors as any)[token] || colors.brand.primary[500];
+      return (
+        (colors as unknown as Record<string, string>)[token] ||
+        colors.brand.primary[500]
+      );
 
     case "typography":
       return (
@@ -69,16 +76,16 @@ export const getDesignToken = (
       );
 
     case "spacing":
-      return (
-        spacingSystem.base[token as keyof typeof spacingSystem.base] ||
-        spacingSystem.base[4]
-      );
+      // Solucionar el error de tipos con un cast más seguro
+      const spacingToken = token as unknown as keyof typeof spacingSystem.base;
+      return spacingSystem.base[spacingToken] || spacingSystem.base[4];
 
     case "breakpoints":
+      const breakpointToken =
+        token as unknown as keyof typeof breakpointSystem.breakpoints;
       return (
-        breakpointSystem.breakpoints[
-          token as keyof typeof breakpointSystem.breakpoints
-        ] || breakpointSystem.breakpoints.md
+        breakpointSystem.breakpoints[breakpointToken] ||
+        breakpointSystem.breakpoints.md
       );
 
     default:
@@ -88,12 +95,12 @@ export const getDesignToken = (
 
 // Función helper para crear estilos consistentes
 export const createComponentStyle = (config: {
-  colors?: Record<string, any>;
+  colors?: Record<string, string>;
   typography?: keyof typeof typography.styles;
-  spacing?: Record<string, any>;
-  responsive?: Record<string, any>;
+  spacing?: Record<string, string | number>;
+  responsive?: Record<string, string | number>;
 }) => {
-  const style: Record<string, any> = {};
+  const style: Record<string, string | number> = {};
 
   // Aplicar colores
   if (config.colors) {
@@ -128,7 +135,9 @@ export const createComponentStyle = (config: {
 };
 
 // Función helper para crear variantes de componentes
-export const createComponentVariants = <T extends Record<string, any>>(
+export const createComponentVariants = <
+  T extends Record<string, string | number>
+>(
   baseStyle: T,
   variants: Record<string, Partial<T>>
 ) => {

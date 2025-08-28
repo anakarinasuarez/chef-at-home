@@ -113,7 +113,7 @@ export default function HomePage() {
             }}
           >
             <Image
-              src="/images/plate.png"
+              src="public/images/plate.png"
               alt="Gourmet dish with steak and vegetables"
               fill
               className="object-cover rounded-2xl"

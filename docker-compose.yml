@@ -1,59 +1,68 @@
-version: '3.8'
+# 🐳 Docker Compose para Chef at Home
+# Orquesta múltiples servicios en contenedores
 
 services:
-  # Base de datos PostgreSQL para desarrollo
-  postgres:
-    image: postgres:15-alpine
-    container_name: chef-at-home-db
-    environment:
-      POSTGRES_DB: chef_at_home
-      POSTGRES_USER: chef_user
-      POSTGRES_PASSWORD: chef_password
+  # 🚀 Aplicación Next.js
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://chef_user:chef_password@database:5432/chef_at_home
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - database
+      - redis
+    restart: unless-stopped
     networks:
       - chef-network
 
-  # Redis para sesiones y caché
+  # 🗄️ Base de datos PostgreSQL
+  database:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=chef_at_home
+      - POSTGRES_USER=chef_user
+      - POSTGRES_PASSWORD=chef_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - chef-network
+
+  # 🔴 Redis para cache
   redis:
     image: redis:7-alpine
-    container_name: chef-at-home-redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    restart: unless-stopped
     networks:
       - chef-network
 
-  # Aplicación Next.js en desarrollo
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    container_name: chef-at-home-app
+  # 📧 Mailhog para testing de emails (opcional)
+  mailhog:
+    image: mailhog/mailhog:latest
     ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgresql://chef_user:chef_password@postgres:5432/chef_at_home
-      - REDIS_URL=redis://redis:6379
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
-    depends_on:
-      - postgres
-      - redis
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    restart: unless-stopped
     networks:
       - chef-network
-    command: npm run dev
 
+# 📦 Volúmenes para persistir datos
 volumes:
   postgres_data:
   redis_data:
 
+# 🌐 Red personalizada para comunicación entre servicios
 networks:
   chef-network:
     driver: bridge

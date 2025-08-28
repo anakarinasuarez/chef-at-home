@@ -117,3 +117,5 @@ junit.xml
 build/
 dist/
 out/
+
+/src/generated/prisma
