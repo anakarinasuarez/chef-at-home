@@ -188,6 +188,18 @@ export default function SignupPage() {
                 cancel
               </Button>
             </div>
+
+            {/* Link para login */}
+            <div className="pt-4">
+              <span className="text-gray-300">Already have an account? </span>
+              <a
+                href="/auth/login"
+                className="ml-2 text-green-400 hover:text-green-300 underline cursor-pointer"
+                style={{ color: colors.brand.primary[500] }}
+              >
+                Login here
+              </a>
+            </div>
           </form>
         </div>
 

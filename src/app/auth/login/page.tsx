@@ -6,6 +6,7 @@ import { colors, typography, spacingSystem } from "@/design-system";
 import Button from "@/components/Button";
 import Nav from "@/components/Nav";
 import Image from "next/image";
+import plateImage from "@/assets/images/plate.png"; // Import the image
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -65,15 +66,15 @@ export default function LoginPage() {
       <main className="flex min-h-[calc(100vh-120px)] pt-8">
         {/* Columna Izquierda - Formulario de Login */}
         <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 pt-8">
-          {/* Título Principal */}
+          {/* Headline Principal */}
           <h1
             className="mb-8 text-center lg:text-left leading-tight"
             style={{
-              fontSize: typography.styles["display"].fontSize,
-              fontWeight: typography.styles["display"].fontWeight,
-              lineHeight: typography.styles["display"].lineHeight,
-              letterSpacing: typography.styles["display"].letterSpacing,
-              fontFamily: typography.styles["display"].fontFamily.join(", "),
+              fontSize: typography.styles["title-1"].fontSize,
+              fontWeight: typography.styles["title-1"].fontWeight,
+              lineHeight: typography.styles["title-1"].lineHeight,
+              letterSpacing: typography.styles["title-1"].letterSpacing,
+              fontFamily: typography.styles["title-1"].fontFamily.join(", "),
               marginBottom: spacingSystem.base[8],
               color: colors.interface.text.primary,
             }}
@@ -150,34 +151,26 @@ export default function LoginPage() {
 
             {/* Botones de Acción */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 px-8 py-3 rounded-xl text-lg font-semibold transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: colors.brand.primary[500],
-                  color: colors.interface.background.primary,
-                }}
-              >
+              <Button type="submit" variant="primary" disabled={isLoading}>
                 {isLoading ? "Iniciando sesión..." : "Login"}
-              </button>
+              </Button>
               <Button href="/" variant="secondary">
                 cancel
               </Button>
             </div>
 
             {/* Link para registro */}
-            <div className="text-center pt-4">
+            <div className="pt-4">
               <span className="text-gray-300">
-                Don&apos;t have an account?{" "}
+                Don&apos;t have an account?
               </span>
-              <Button
+              <a
                 href="/auth/signup"
-                variant="secondary"
-                className="text-sm"
+                className="ml-2 text-green-400 hover:text-green-300 underline cursor-pointer"
+                style={{ color: colors.brand.primary[500] }}
               >
                 Sign up here
-              </Button>
+              </a>
             </div>
           </form>
         </div>
@@ -192,7 +185,7 @@ export default function LoginPage() {
             }}
           >
             <Image
-              src="/images/plate.png"
+              src={plateImage}
               alt="Gourmet dish with steak and vegetables"
               fill
               className="object-cover rounded-2xl"
