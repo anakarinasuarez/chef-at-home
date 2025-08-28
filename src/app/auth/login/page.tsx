@@ -161,9 +161,7 @@ export default function LoginPage() {
 
             {/* Link para registro */}
             <div className="pt-4">
-              <span className="text-gray-300">
-                Don&apos;t have an account?
-              </span>
+              <span className="text-gray-300">Don&apos;t have an account?</span>
               <a
                 href="/auth/signup"
                 className="ml-2 text-green-400 hover:text-green-300 underline cursor-pointer"
