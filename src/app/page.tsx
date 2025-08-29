@@ -100,7 +100,7 @@ export default function HomePage() {
       className="min-h-screen text-white"
       style={{ backgroundColor: colors.interface.background.primary }}
     >
-      <Nav showMenu={true} />
+      <Nav showMenu={true} userName={userName} />
       <main className="flex min-h-[calc(100vh-120px)] pt-4">
         {/* Columna Izquierda - Interfaz de Creación de Recetas */}
         <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 pt-4">
