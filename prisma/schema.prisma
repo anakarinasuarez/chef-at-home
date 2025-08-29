@@ -1,16 +1,12 @@
-// 🗄️ Esquema de Prisma para Chef at Home
-// Base de datos PostgreSQL para producción
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-// 👤 Modelo de Usuario
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -18,27 +14,22 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Relación: Un usuario puede tener muchas recetas
-  recipes Recipe[]
+  recipes   Recipe[]
 }
 
-// 🍳 Modelo de Receta
 model Recipe {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  ingredients String   // JSON string de ingredientes
-  instructions String  // JSON string de instrucciones
-  cookingTime Int?     // en minutos
-  difficulty  String?  // "Easy", "Medium", "Hard"
-  servings    Int?     // número de porciones
-  imageUrl    String?
-  isPublic    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relación: Una receta pertenece a un usuario
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  ingredients  String
+  instructions String
+  cookingTime  Int?
+  difficulty   String?
+  servings     Int?
+  imageUrl     String?
+  isPublic     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

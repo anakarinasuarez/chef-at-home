@@ -1,27 +1,149 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { colors, typography, spacingSystem } from "@/design-system";
 import Button from "@/components/Button";
 import Nav from "@/components/Nav";
 import Image from "next/image";
 import plateImage from "@/assets/images/plate.png";
-
-interface Ingredient {
-  id: string;
-  name: string;
-}
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function HomePage() {
-  const [ingredients, setIngredients] = useState<Ingredient[]>([
-    { id: "1", name: "Fresh basil" },
-    { id: "2", name: "Olive oil" },
-    { id: "3", name: "Pine nuts" },
-    { id: "4", name: "Garlic" },
-  ]);
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  // Mostrar spinner de carga mientras se verifica la autenticación
+  if (isLoading) {
+    return (
+      <div
+        className="min-h-screen text-white flex items-center justify-center"
+        style={{ backgroundColor: colors.interface.background.primary }}
+      >
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si el usuario está logueado, mostrar la interfaz de crear recetas
+  if (user) {
+    return <CreateRecipePage userName={user.name} />;
+  }
+
+  // Si no está logueado, mostrar la página de landing
+  return <LandingPage />;
+}
+
+// Componente para la página de landing (cuando no está logueado)
+function LandingPage() {
+  const router = useRouter();
+
+  return (
+    <div
+      className="min-h-screen text-white"
+      style={{ backgroundColor: colors.interface.background.primary }}
+    >
+      {/* Nav sin menú para usuarios no logueados */}
+      <Nav showMenu={false} />
+
+      <main className="flex min-h-[calc(100vh-120px)] pt-4">
+        {/* Columna Izquierda - Contenido de Landing */}
+        <div className="flex-1 flex flex-col justify-center px-8 lg:px-16 pt-4">
+          {/* Título Principal */}
+          <h1
+            className="mb-6 text-center lg:text-left leading-tight"
+            style={{
+              fontSize: typography.styles["title-1"].fontSize,
+              fontWeight: typography.styles["title-1"].fontWeight,
+              lineHeight: typography.styles["title-1"].lineHeight,
+              letterSpacing: typography.styles["title-1"].letterSpacing,
+              color: colors.interface.text.primary,
+            }}
+          >
+            Turn your everyday ingredients
+            <br />
+            into gourmet masterpieces with
+            <br />
+            AI driven recipes
+          </h1>
+
+          {/* Lista de características */}
+          <div className="mb-8 space-y-4">
+            <div
+              className="flex items-start space-x-3"
+              style={{
+                fontSize: typography.styles["body-large"].fontSize,
+                fontWeight: typography.styles["body-large"].fontWeight,
+                color: colors.interface.text.primary,
+              }}
+            >
+              <span className="text-primary-500 text-xl">•</span>
+              <span>
+                Reduce waste, save money, and
+                <br />
+                cook like a pro
+              </span>
+            </div>
+            <div
+              className="flex items-start space-x-3"
+              style={{
+                fontSize: typography.styles["body-large"].fontSize,
+                fontWeight: typography.styles["body-large"].fontWeight,
+                color: colors.interface.text.primary,
+              }}
+            >
+              <span className="text-primary-500 text-xl">•</span>
+              <span>
+                Unleash your inner chef and create
+                <br />
+                magic in the kitchen!
+              </span>
+            </div>
+          </div>
+
+          {/* Botones de acción */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button
+              variant="primary"
+              onClick={() => router.push("/auth/signup")}
+            >
+              Sign up free
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => router.push("/auth/login")}
+            >
+              Login
+            </Button>
+          </div>
+        </div>
+
+        {/* Columna Derecha - Imagen */}
+        <div className="flex-1 flex items-center justify-center px-8 lg:px-16">
+          <div className="relative w-full max-w-lg">
+            <Image
+              src={plateImage}
+              alt="Gourmet dish"
+              className="w-full h-auto rounded-lg shadow-2xl"
+              priority
+            />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// Componente para la página de crear recetas (cuando está logueado)
+function CreateRecipePage({ userName }: { userName: string }) {
+  const [ingredients, setIngredients] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
   const [newIngredient, setNewIngredient] = useState("");
-  const [selectedServings, setSelectedServings] = useState<number | null>(4);
-  const [userName, setUserName] = useState("Anna");
+  const [selectedServings, setSelectedServings] = useState<number | null>(null);
 
   // Nuevo estado para comensales personalizados
   const [customServings, setCustomServings] = useState<number[]>([]);
@@ -30,7 +152,7 @@ export default function HomePage() {
 
   const handleAddIngredient = () => {
     if (newIngredient.trim()) {
-      const newIngredientObj: Ingredient = {
+      const newIngredientObj = {
         id: Date.now().toString(),
         name: newIngredient.trim(),
       };
@@ -44,15 +166,11 @@ export default function HomePage() {
   };
 
   const handleCreateRecipe = () => {
-    // Obtener todos los comensales (selección simple + personalizados)
     const allServings =
       customServings.length > 0 ? customServings : [selectedServings || 4];
-
     console.log("Creating recipe with:", {
       ingredients,
       servings: allServings,
-      selectedSimpleServing: selectedServings,
-      customServings: customServings,
     });
   };
 
@@ -69,7 +187,7 @@ export default function HomePage() {
       setCustomServings([...customServings, serving]);
       setNewCustomServing("");
       setShowCustomInput(false);
-      setSelectedServings(null); // Limpiar selección simple cuando se agregan personalizados
+      setSelectedServings(null);
     }
   };
 
@@ -85,14 +203,12 @@ export default function HomePage() {
 
   // Función para resetear todo el estado
   const handleCancel = () => {
-    console.log("handleCancel ejecutándose...");
-    setIngredients([]); // Eliminar todos los ingredientes
+    setIngredients([]);
     setNewIngredient("");
-    setSelectedServings(null); // No seleccionar ningún botón
+    setSelectedServings(null);
     setCustomServings([]);
     setShowCustomInput(false);
     setNewCustomServing("");
-    console.log("Estado reseteado completamente");
   };
 
   return (
@@ -100,7 +216,9 @@ export default function HomePage() {
       className="min-h-screen text-white"
       style={{ backgroundColor: colors.interface.background.primary }}
     >
+      {/* Nav con menú para usuarios logueados */}
       <Nav showMenu={true} userName={userName} />
+
       <main className="flex min-h-[calc(100vh-120px)] pt-4">
         {/* Columna Izquierda - Interfaz de Creación de Recetas */}
         <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 pt-4">
@@ -124,96 +242,61 @@ export default function HomePage() {
               fontWeight: typography.styles["title-1"].fontWeight,
               lineHeight: typography.styles["title-1"].lineHeight,
               letterSpacing: typography.styles["title-1"].letterSpacing,
-              fontFamily: typography.styles["title-1"].fontFamily.join(", "),
-              marginBottom: spacingSystem.base[6],
               color: colors.interface.text.primary,
             }}
           >
-            What ingredients do you have to create your recipe?
+            Create your perfect recipe
           </h1>
 
-          {/* Sección de Agregar Ingrediente */}
-          <div className="space-y-3 mb-6">
-            <label
-              className="block text-white font-medium"
+          {/* Sección de Ingredientes */}
+          <div className="mb-8">
+            <h3
+              className="mb-4"
               style={{
-                fontSize: typography.styles["body"].fontSize,
-                fontWeight: typography.styles["body"].fontWeight,
+                fontSize: typography.styles["title-3"].fontSize,
+                fontWeight: typography.styles["title-3"].fontWeight,
                 color: colors.interface.text.primary,
               }}
             >
-              Add Ingredient
-            </label>
-            <div className="flex gap-3">
+              Ingredients
+            </h3>
+
+            {/* Input para agregar ingredientes */}
+            <div className="flex gap-2 mb-4">
               <input
                 type="text"
                 value={newIngredient}
                 onChange={(e) => setNewIngredient(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Add Ingredient"
-                className="w-80 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="Add an ingredient..."
+                className="flex-1 px-4 py-3 bg-background-secondary border border-outline rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary-500"
                 style={{
                   fontSize: typography.styles["caption"].fontSize,
-                  fontFamily:
-                    typography.styles["caption"].fontFamily.join(", "),
-                  fontWeight: typography.styles["caption"].fontWeight,
-                  lineHeight: typography.styles["caption"].lineHeight,
-                  letterSpacing: typography.styles["caption"].letterSpacing,
                 }}
               />
-              <button
+              <Button
+                variant="secondary"
                 onClick={handleAddIngredient}
-                className="w-12 h-12 bg-transparent text-white rounded-lg flex items-center justify-center transition-colors border"
-                style={{
-                  borderColor: colors.brand.primary[500],
-                  color: colors.brand.primary[500],
-                }}
+                className="px-6"
               >
-                <span className="text-xl font-bold">+</span>
-              </button>
+                +
+              </Button>
             </div>
-          </div>
 
-          {/* Lista de Ingredientes */}
-          <div className="space-y-3 mb-6">
-            <label
-              className="block text-white font-medium"
-              style={{
-                fontSize: typography.styles["body"].fontSize,
-                fontWeight: typography.styles["body"].fontWeight,
-                color: colors.interface.text.primary,
-              }}
-            >
-              Ingredients
-            </label>
+            {/* Lista de ingredientes */}
             <div className="flex flex-wrap gap-2">
               {ingredients.map((ingredient) => (
                 <div
                   key={ingredient.id}
-                  className="relative px-4 py-2 bg-transparent text-white rounded-lg flex items-center justify-center border group"
+                  className="relative bg-background-secondary border border-primary-500 rounded-lg px-3 py-2 text-primary-500 flex items-center"
                   style={{
-                    borderColor: colors.brand.primary[500],
-                    color: colors.brand.primary[500],
+                    fontSize: typography.styles["body"].fontSize,
                   }}
                 >
-                  <span
-                    className="text-center"
-                    style={{
-                      fontSize: typography.styles["caption"].fontSize,
-                      fontFamily:
-                        typography.styles["caption"].fontFamily.join(", "),
-                    }}
-                  >
-                    {ingredient.name}
-                  </span>
+                  <span>{ingredient.name}</span>
                   <button
                     onClick={() => handleRemoveIngredient(ingredient.id)}
-                    className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-5 h-5 flex items-center justify-center rounded-sm z-10"
-                    style={{
-                      color: colors.brand.primary[500],
-                      backgroundColor: colors.interface.background.primary,
-                      border: `2px solid ${colors.brand.primary[500]}`,
-                    }}
+                    className="ml-2 w-5 h-5 bg-primary-500 text-background-primary rounded-full flex items-center justify-center text-sm hover:bg-primary-600 transition-colors absolute -top-2 -right-2 z-10"
                   >
                     ×
                   </button>
@@ -222,170 +305,113 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Sección de Cantidad de Porciones */}
-          <div className="space-y-3 mb-6">
-            <label
-              className="block text-white font-medium"
+          {/* Sección de Comensales */}
+          <div className="mb-8">
+            <h3
+              className="mb-4"
               style={{
-                fontSize: typography.styles["body"].fontSize,
-                fontWeight: typography.styles["body"].fontWeight,
+                fontSize: typography.styles["title-3"].fontSize,
+                fontWeight: typography.styles["title-3"].fontWeight,
                 color: colors.interface.text.primary,
               }}
             >
-              Serving amount
-            </label>
+              Servings
+            </h3>
 
-            {/* Selección simple de comensales (solo visible cuando no hay input personalizado) */}
+            {/* Selección simple */}
             {!showCustomInput && (
-              <div className="flex gap-3">
-                {[2, 4, 6].map((serving) => (
+              <div className="flex gap-2 mb-4">
+                {[2, 4, 6, 8].map((serving) => (
                   <button
                     key={serving}
                     onClick={() => setSelectedServings(serving)}
-                    className={`w-12 h-12 rounded-lg transition-colors border-2 flex items-center justify-center ${
+                    className={`w-12 h-12 rounded-lg border-2 transition-colors ${
                       selectedServings === serving
-                        ? "bg-white"
-                        : "bg-transparent"
+                        ? "bg-secondary-500 border-secondary-500 text-background-primary"
+                        : "border-outline text-white hover:border-primary-500"
                     }`}
                     style={{
-                      borderColor: colors.brand.primary[500],
-                      color:
-                        selectedServings === serving
-                          ? colors.interface.background.primary
-                          : colors.brand.primary[500],
+                      fontSize: typography.styles["body"].fontSize,
                     }}
                   >
                     {serving}
                   </button>
                 ))}
                 <button
-                  onClick={() => {
-                    setShowCustomInput(true);
-                    setSelectedServings(null); // Limpiar selección simple cuando se muestra input personalizado
-                  }}
-                  className="w-12 h-12 bg-transparent text-white rounded-lg flex items-center justify-center transition-colors"
-                  style={{
-                    color: colors.brand.primary[500],
-                  }}
+                  onClick={() => setShowCustomInput(true)}
+                  className="w-12 h-12 border-2 border-primary-500 text-primary-500 rounded-lg hover:bg-primary-500 hover:text-background-primary transition-colors flex items-center justify-center"
                 >
-                  <span className="text-xl font-bold">+</span>
+                  +
                 </button>
               </div>
             )}
 
-            {/* Input personalizado para comensales */}
+            {/* Input personalizado */}
             {showCustomInput && (
-              <div className="space-y-3">
-                <div className="flex gap-3">
-                  <input
-                    type="number"
-                    value={newCustomServing}
-                    onChange={(e) => setNewCustomServing(e.target.value)}
-                    onKeyPress={handleCustomServingKeyPress}
-                    placeholder="Add number"
-                    className="w-32 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
-                    style={{
-                      fontSize: typography.styles["caption"].fontSize,
-                      fontFamily:
-                        typography.styles["caption"].fontFamily.join(", "),
-                      fontWeight: typography.styles["caption"].fontWeight,
-                      lineHeight: typography.styles["caption"].lineHeight,
-                      letterSpacing: typography.styles["caption"].letterSpacing,
-                    }}
-                  />
-                  <button
-                    onClick={handleAddCustomServing}
-                    className="w-12 h-12 bg-transparent text-white rounded-lg flex items-center justify-center transition-colors border"
-                    style={{
-                      borderColor: colors.brand.primary[500],
-                      color: colors.brand.primary[500],
-                    }}
-                  >
-                    <span className="text-xl font-bold">+</span>
-                  </button>
-                  <button
-                    onClick={() => setShowCustomInput(false)}
-                    className="w-12 h-12 bg-transparent text-white rounded-lg flex items-center justify-center transition-colors border"
-                    style={{
-                      borderColor: colors.brand.primary[500],
-                      color: colors.brand.primary[500],
-                    }}
-                  >
-                    <span className="text-xl font-bold">×</span>
-                  </button>
-                </div>
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="number"
+                  value={newCustomServing}
+                  onChange={(e) => setNewCustomServing(e.target.value)}
+                  onKeyPress={handleCustomServingKeyPress}
+                  placeholder="Custom servings..."
+                  className="flex-1 px-4 py-3 bg-background-secondary border border-outline rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary-500"
+                  style={{
+                    fontSize: typography.styles["caption"].fontSize,
+                  }}
+                />
+                <Button
+                  variant="secondary"
+                  onClick={handleAddCustomServing}
+                  className="px-6"
+                >
+                  +
+                </Button>
               </div>
             )}
 
-            {/* Lista de comensales personalizados */}
+            {/* Comensales personalizados */}
             {customServings.length > 0 && (
-              <div className="space-y-2">
-                <label className="block text-white font-medium text-sm">
-                  Custom servings:
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {customServings.map((serving) => (
-                    <div
-                      key={serving}
-                      className="relative px-4 py-2 bg-transparent text-white rounded-lg flex items-center justify-center border group"
-                      style={{
-                        borderColor: colors.brand.primary[500],
-                        color: colors.brand.primary[500],
-                      }}
+              <div className="flex flex-wrap gap-2">
+                {customServings.map((serving) => (
+                  <div
+                    key={serving}
+                    className="bg-background-secondary border border-primary-500 rounded-lg px-3 py-2 text-primary-500 flex items-center"
+                    style={{
+                      fontSize: typography.styles["body"].fontSize,
+                    }}
+                  >
+                    <span>{serving} servings</span>
+                    <button
+                      onClick={() => handleRemoveCustomServing(serving)}
+                      className="ml-2 w-5 h-5 bg-primary-500 text-background-primary rounded-full flex items-center justify-center text-sm hover:bg-primary-600 transition-colors"
                     >
-                      <span className="text-center">{serving}</span>
-                      <button
-                        onClick={() => handleRemoveCustomServing(serving)}
-                        className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-5 h-5 flex items-center justify-center rounded-sm z-10"
-                        style={{
-                          color: colors.brand.primary[500],
-                          backgroundColor: colors.interface.background.primary,
-                          border: `2px solid ${colors.brand.primary[500]}`,
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                      ×
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Botones de Acción */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-2">
-            <Button onClick={handleCreateRecipe} variant="primary">
+          {/* Botones de acción */}
+          <div className="flex gap-4">
+            <Button variant="primary" onClick={handleCreateRecipe}>
               Create recipe
             </Button>
-            <Button
-              onClick={() => {
-                console.log("Botón cancel clickeado");
-                handleCancel();
-              }}
-              variant="secondary"
-            >
-              cancel
+            <Button variant="secondary" onClick={handleCancel}>
+              Cancel
             </Button>
           </div>
         </div>
 
-        {/* Columna Derecha - Imagen Gourmet */}
-        <div className="flex-1 flex items-start justify-center p-4 sm:p-6 lg:p-8">
-          <div
-            className="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] md:w-[500px] md:h-[500px] lg:w-[600px] lg:h-[600px] xl:w-[700px] xl:h-[700px]"
-            style={{
-              width: "480px",
-              height: "480px",
-            }}
-          >
+        {/* Columna Derecha - Imagen */}
+        <div className="flex-1 flex items-center justify-center px-8 lg:px-16">
+          <div className="relative w-full max-w-lg">
             <Image
               src={plateImage}
-              alt="Gourmet dish with steak and vegetables"
-              fill
-              className="object-cover rounded-2xl"
-              style={{
-                borderRadius: spacingSystem.components.card.borderRadius,
-              }}
+              alt="Gourmet dish"
+              className="w-full h-auto rounded-lg shadow-2xl"
               priority
             />
           </div>

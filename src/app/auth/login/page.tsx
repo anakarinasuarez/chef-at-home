@@ -7,6 +7,7 @@ import Button from "@/components/Button";
 import Nav from "@/components/Nav";
 import Image from "next/image";
 import plateImage from "@/assets/images/plate.png"; // Import the image
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -30,25 +32,17 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      // Usar el hook useAuth en lugar de fetch directo
+      const success = await login(formData.email, formData.password);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error en el login");
+      if (success) {
+        // Login exitoso
+        router.push("/"); // Redirigir a la página principal (create recipes)
+      } else {
+        setError("Credenciales inválidas");
       }
-
-      // Login exitoso
-      alert("¡Login exitoso!");
-      router.push("/dashboard"); // Redirigir al dashboard
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Error en el login");
+    } catch {
+      setError("Error en el login");
     } finally {
       setIsLoading(false);
     }

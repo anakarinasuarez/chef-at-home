@@ -1,6 +1,6 @@
 "use client";
 
-import { colors } from "@/design-system";
+import { useState } from "react";
 import { PiChefHatLight } from "react-icons/pi";
 import { MdOutlineMenu } from "react-icons/md";
 import { MdClose } from "react-icons/md";
@@ -8,7 +8,9 @@ import { IoRestaurantOutline } from "react-icons/io5";
 import { BiSolidGrid } from "react-icons/bi";
 import { FiLogOut } from "react-icons/fi";
 import Link from "next/link";
-import { useState } from "react";
+import { colors, typography } from "@/design-system";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface NavProps {
   showMenu?: boolean;
@@ -17,6 +19,8 @@ interface NavProps {
 
 export default function Nav({ showMenu = false, userName = "Anna" }: NavProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { logout } = useAuth();
+  const router = useRouter();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -24,6 +28,12 @@ export default function Nav({ showMenu = false, userName = "Anna" }: NavProps) {
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    closeMenu();
+    router.push("/auth/login"); // Redirigir al login después del logout
   };
 
   return (
@@ -184,7 +194,7 @@ export default function Nav({ showMenu = false, userName = "Anna" }: NavProps) {
             </button>
 
             <button
-              onClick={closeMenu}
+              onClick={handleLogout}
               className="w-full px-8 py-3 text-left transition-colors flex items-center gap-3"
               style={{
                 color: colors.interface.text.primary,

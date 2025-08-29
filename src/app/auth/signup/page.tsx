@@ -6,6 +6,8 @@ import { colors, typography, spacingSystem } from "@/design-system";
 import Button from "@/components/Button";
 import Nav from "@/components/Nav";
 import Image from "next/image";
+import plateImage from "@/assets/images/plate.png";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -16,6 +18,7 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { register } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({

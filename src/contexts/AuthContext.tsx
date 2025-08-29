@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { UserResponse } from "@/types";
 
-interface UseAuthReturn {
+interface AuthContextType {
   user: UserResponse | null;
   isLoading: boolean;
   error: string | null;
@@ -12,31 +18,34 @@ interface UseAuthReturn {
   logout: () => void;
 }
 
-export const useAuth = (): UseAuthReturn => {
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<UserResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Verificar si hay un usuario logueado al cargar la página
+  // Verificar autenticación al cargar
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Aquí podrías verificar un token en localStorage o hacer una llamada a /api/auth/me
-        const token = localStorage.getItem("auth-token");
-        if (token) {
-          // Verificar token con el backend
-          const response = await fetch("/api/auth/me", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData.user);
-          } else {
-            localStorage.removeItem("auth-token");
-          }
+        // Por ahora, no hay token JWT, así que solo verificamos localStorage
+        // En el futuro, aquí verificaremos el token con la API
+        const savedUser = localStorage.getItem("user");
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
         }
       } catch {
         console.error("Error checking auth");
@@ -68,10 +77,9 @@ export const useAuth = (): UseAuthReturn => {
         return false;
       }
 
-      // Guardar token (cuando implementemos JWT)
-      // localStorage.setItem('auth-token', data.token);
-
+      // Guardar usuario en estado y localStorage
       setUser(data.user);
+      localStorage.setItem("user", JSON.stringify(data.user));
       return true;
     } catch {
       setError("An unexpected error occurred");
@@ -106,7 +114,6 @@ export const useAuth = (): UseAuthReturn => {
       }
 
       // No logueamos automáticamente después del registro
-      // El usuario debe hacer login
       return true;
     } catch {
       setError("An unexpected error occurred");
@@ -118,10 +125,10 @@ export const useAuth = (): UseAuthReturn => {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("auth-token");
+    localStorage.removeItem("user");
   };
 
-  return {
+  const value: AuthContextType = {
     user,
     isLoading,
     error,
@@ -129,4 +136,6 @@ export const useAuth = (): UseAuthReturn => {
     register,
     logout,
   };
-};
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
