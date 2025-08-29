@@ -150,8 +150,50 @@ function CreateRecipePage({ userName }: { userName: string }) {
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [newCustomServing, setNewCustomServing] = useState("");
 
+  // Nuevo estado para loading
+  const [isCreating, setIsCreating] = useState(false);
+
+  // Nuevo estado para notificaciones
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "success" | "error" | "info";
+    show: boolean;
+  } | null>(null);
+
+  // Función helper para mostrar notificaciones
+  const showNotification = (
+    message: string,
+    type: "success" | "error" | "info" = "info"
+  ) => {
+    setNotification({ message, type, show: true });
+    // Auto-hide después de 3 segundos
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
+
+  // Función para normalizar texto (remover acentos y convertir a minúsculas)
+  const normalizeText = (text: string): string => {
+    return text
+      .normalize("NFD") // Descompone los caracteres acentuados
+      .replace(/[\u0300-\u036f]/g, "") // Remueve los diacríticos (acentos)
+      .toLowerCase() // Convierte a minúsculas
+      .trim(); // Remueve espacios en blanco
+  };
+
   const handleAddIngredient = () => {
     if (newIngredient.trim()) {
+      // Verificar si el ingrediente ya existe (normalizando acentos y case)
+      const normalizedNewIngredient = normalizeText(newIngredient);
+      const ingredientExists = ingredients.some(
+        (ing) => normalizeText(ing.name) === normalizedNewIngredient
+      );
+
+      if (ingredientExists) {
+        showNotification("This ingredient is already in your list!", "error");
+        return;
+      }
+
       const newIngredientObj = {
         id: Date.now().toString(),
         name: newIngredient.trim(),
@@ -165,13 +207,42 @@ function CreateRecipePage({ userName }: { userName: string }) {
     setIngredients(ingredients.filter((ing) => ing.id !== id));
   };
 
-  const handleCreateRecipe = () => {
+  const handleCreateRecipe = async () => {
+    // Validar que haya ingredientes
+    if (ingredients.length === 0) {
+      showNotification("Please add at least one ingredient", "error");
+      return;
+    }
+
+    // Validar que haya comensales seleccionados
     const allServings =
       customServings.length > 0 ? customServings : [selectedServings || 4];
-    console.log("Creating recipe with:", {
-      ingredients,
-      servings: allServings,
-    });
+    if (!selectedServings && customServings.length === 0) {
+      showNotification("Please select the number of servings", "error");
+      return;
+    }
+
+    // Activar loading
+    setIsCreating(true);
+
+    try {
+      // Simular proceso de creación (aquí irá la llamada a la API)
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 segundos de simulación
+
+      console.log("Creating recipe with:", {
+        ingredients,
+        servings: allServings,
+      });
+
+      // Aquí irá la lógica para guardar la receta
+      showNotification("Recipe created successfully!", "success");
+    } catch (error) {
+      console.error("Error creating recipe:", error);
+      showNotification("Error creating recipe. Please try again.", "error");
+    } finally {
+      // Desactivar loading
+      setIsCreating(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -188,6 +259,8 @@ function CreateRecipePage({ userName }: { userName: string }) {
       setNewCustomServing("");
       setShowCustomInput(false);
       setSelectedServings(null);
+    } else if (serving > 0 && customServings.includes(serving)) {
+      showNotification("This serving amount is already selected!", "error");
     }
   };
 
@@ -211,6 +284,70 @@ function CreateRecipePage({ userName }: { userName: string }) {
     setNewCustomServing("");
   };
 
+  // Si está creando la receta, mostrar loading
+  if (isCreating) {
+    return (
+      <div
+        className="min-h-screen text-white"
+        style={{ backgroundColor: colors.interface.background.primary }}
+      >
+        {/* Nav con menú para usuarios logueados */}
+        <Nav showMenu={true} userName={userName} />
+
+        <main className="flex min-h-[calc(100vh-120px)] pt-4">
+          {/* Columna Izquierda - Loading */}
+          <div className="flex-1 flex flex-col items-center justify-center px-8 lg:px-16 pt-4">
+            {/* Loading Spinner */}
+            <div className="mb-6">
+              <div
+                className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin"
+                style={{
+                  borderColor: `${colors.brand.primary[500]} transparent ${colors.brand.primary[500]} ${colors.brand.primary[500]}`,
+                }}
+              ></div>
+            </div>
+
+            {/* Mensaje de Loading */}
+            <h2
+              className="text-center"
+              style={{
+                fontSize: typography.styles["title-2"].fontSize,
+                fontWeight: typography.styles["title-2"].fontWeight,
+                color: colors.interface.text.primary,
+              }}
+            >
+              Creating flavor...
+            </h2>
+
+            {/* Mensaje adicional */}
+            <p
+              className="text-center mt-4 opacity-80"
+              style={{
+                fontSize: typography.styles["body"].fontSize,
+                color: colors.interface.text.secondary,
+              }}
+            >
+              Please wait while we craft your perfect recipe
+            </p>
+          </div>
+
+          {/* Columna Derecha - Imagen (mantener igual) */}
+          <div className="flex-1 flex items-center justify-center px-8 lg:px-16">
+            <div className="relative w-full max-w-lg">
+              <Image
+                src={plateImage}
+                alt="Gourmet dish"
+                className="w-full h-auto rounded-lg shadow-2xl"
+                priority
+              />
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Renderizado normal cuando no está creando
   return (
     <div
       className="min-h-screen text-white"
@@ -218,6 +355,37 @@ function CreateRecipePage({ userName }: { userName: string }) {
     >
       {/* Nav con menú para usuarios logueados */}
       <Nav showMenu={true} userName={userName} />
+
+      {/* Notificación */}
+      {notification && (
+        <div
+          className={`fixed top-20 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 ${
+            notification.type === "error"
+              ? "bg-red-500 text-white"
+              : notification.type === "success"
+              ? "bg-green-500 text-white"
+              : "bg-blue-500 text-white"
+          }`}
+          style={{
+            backgroundColor:
+              notification.type === "error"
+                ? "#EF4444"
+                : notification.type === "success"
+                ? "#10B981"
+                : "#3B82F6",
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">{notification.message}</span>
+            <button
+              onClick={() => setNotification(null)}
+              className="ml-2 text-white hover:text-gray-200 transition-colors"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       <main className="flex min-h-[calc(100vh-120px)] pt-4">
         {/* Columna Izquierda - Interfaz de Creación de Recetas */}
@@ -325,13 +493,21 @@ function CreateRecipePage({ userName }: { userName: string }) {
                   <button
                     key={serving}
                     onClick={() => setSelectedServings(serving)}
-                    className={`w-12 h-12 rounded-lg border-2 transition-colors ${
-                      selectedServings === serving
-                        ? "bg-secondary-500 border-secondary-500 text-background-primary"
-                        : "border-outline text-white hover:border-primary-500"
-                    }`}
+                    className="w-12 h-12 rounded-lg border-2 transition-colors"
                     style={{
                       fontSize: typography.styles["body"].fontSize,
+                      backgroundColor:
+                        selectedServings === serving
+                          ? colors.app.button.secondary.hover
+                          : "transparent",
+                      borderColor:
+                        selectedServings === serving
+                          ? colors.app.button.secondary.hover
+                          : colors.interface.border.light,
+                      color:
+                        selectedServings === serving
+                          ? colors.interface.background.primary
+                          : colors.interface.text.primary,
                     }}
                   >
                     {serving}
@@ -339,7 +515,21 @@ function CreateRecipePage({ userName }: { userName: string }) {
                 ))}
                 <button
                   onClick={() => setShowCustomInput(true)}
-                  className="w-12 h-12 border-2 border-primary-500 text-primary-500 rounded-lg hover:bg-primary-500 hover:text-background-primary transition-colors flex items-center justify-center"
+                  className="w-12 h-12 border-2 rounded-lg transition-colors flex items-center justify-center"
+                  style={{
+                    borderColor: colors.brand.primary[500],
+                    color: colors.brand.primary[500],
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor =
+                      colors.brand.primary[500];
+                    e.currentTarget.style.color =
+                      colors.interface.background.primary;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                    e.currentTarget.style.color = colors.brand.primary[500];
+                  }}
                 >
                   +
                 </button>
@@ -366,6 +556,16 @@ function CreateRecipePage({ userName }: { userName: string }) {
                   className="px-6"
                 >
                   +
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setShowCustomInput(false);
+                    setNewCustomServing("");
+                  }}
+                  className="px-6"
+                >
+                  ×
                 </Button>
               </div>
             )}
