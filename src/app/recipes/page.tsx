@@ -30,6 +30,7 @@ export default function RecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   // Generate recipes with AI when component mounts
   useEffect(() => {
@@ -149,6 +150,60 @@ export default function RecipesPage() {
     router.push("/");
   };
 
+  const scrollToRecipe = (index: number) => {
+    const container = document.querySelector(".overflow-x-auto") as HTMLElement;
+    if (container) {
+      const recipeCard = container.children[index] as HTMLElement;
+      if (recipeCard) {
+        recipeCard.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "start",
+        });
+        setActiveIndex(index);
+      }
+    }
+  };
+
+  // Detectar scroll automáticamente para actualizar el punto activo
+  useEffect(() => {
+    const container = document.querySelector(".overflow-x-auto") as HTMLElement;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const containerRect = container.getBoundingClientRect();
+      const containerLeft = containerRect.left;
+
+      // Encontrar qué receta está más visible
+      let mostVisibleIndex = 0;
+      let maxVisibility = 0;
+
+      Array.from(container.children).forEach((child, index) => {
+        const childRect = child.getBoundingClientRect();
+        const childLeft = childRect.left;
+        const childRight = childRect.right;
+
+        // Calcular qué tan visible está la receta
+        const visibleLeft = Math.max(containerLeft, childLeft);
+        const visibleRight = Math.min(
+          containerLeft + container.offsetWidth,
+          childRight
+        );
+        const visibility = Math.max(0, visibleRight - visibleLeft);
+
+        if (visibility > maxVisibility) {
+          maxVisibility = visibility;
+          mostVisibleIndex = index;
+        }
+      });
+
+      setActiveIndex(mostVisibleIndex);
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [recipes.length]);
+
   if (!user) {
     router.push("/auth/login");
     return null;
@@ -224,12 +279,38 @@ export default function RecipesPage() {
           </div>
         )}
 
-        {/* Recipes Grid */}
+        {/* Recipes Horizontal Scroll */}
         {!isLoading && recipes.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {recipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
-            ))}
+          <div className="relative">
+            {/* Scroll Container */}
+            <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
+              {recipes.map((recipe) => (
+                <div key={recipe.id} className="flex-shrink-0 w-80">
+                  <RecipeCard recipe={recipe} />
+                </div>
+              ))}
+            </div>
+
+            {/* Scroll Indicator - Clickable Navigation */}
+            <div className="flex justify-center mt-4">
+              <div className="flex gap-2">
+                {recipes.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => scrollToRecipe(index)}
+                    className="w-3 h-3 rounded-full transition-all duration-300 hover:scale-110 cursor-pointer"
+                    style={{
+                      backgroundColor:
+                        index === activeIndex
+                          ? colors.brand.primary[500]
+                          : colors.interface.background.tertiary,
+                      opacity: index === activeIndex ? 1 : 0.5,
+                    }}
+                    title={`Go to recipe ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         )}
 

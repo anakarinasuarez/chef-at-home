@@ -45,3 +45,27 @@ body {
 .font-alegreya {
   font-family: var(--font-alegreya), serif;
 }
+
+/* Scroll horizontal personalizado */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+/* Smooth scroll para el contenedor horizontal */
+.overflow-x-auto {
+  scroll-behavior: smooth;
+}
+
+/* Estilos para el indicador de scroll */
+.scroll-indicator {
+  transition: opacity 0.3s ease;
+}
+
+.scroll-indicator.active {
+  opacity: 1;
+}
