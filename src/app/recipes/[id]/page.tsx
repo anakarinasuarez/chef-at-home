@@ -2,16 +2,11 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import {
-  BiArrowBack,
-  BiPlus,
-  BiShareAlt,
-  BiTime,
-  BiUser,
-  BiStar,
-} from "react-icons/bi";
+import { BiPlus, BiShareAlt, BiTime, BiUser } from "react-icons/bi";
+import { IoIosArrowBack } from "react-icons/io";
 import Nav from "@/components/Nav";
 import { colors } from "@/design-system";
+import { typography } from "@/design-system";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface Recipe {
@@ -43,7 +38,6 @@ export default function RecipeDetailPage() {
       try {
         setLoading(true);
 
-        // Intentar cargar la receta desde localStorage
         const savedRecipe = localStorage.getItem(`recipe-${params.id}`);
 
         if (savedRecipe) {
@@ -53,7 +47,6 @@ export default function RecipeDetailPage() {
           setRecipe(recipeData);
         } else {
           console.log("No recipe found in localStorage for ID:", params.id);
-          // Redirigir de vuelta si no hay receta
           router.push("/recipes");
           return;
         }
@@ -140,58 +133,48 @@ export default function RecipeDetailPage() {
     >
       <Nav showMenu={true} userName={user?.name || "User"} />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Back Button */}
-        <div className="mb-6">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
-            style={{
-              backgroundColor: colors.interface.background.secondary,
-              color: colors.interface.text.secondary,
-              border: `1px solid ${colors.interface.border.light}`,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                colors.interface.state.hover;
-              e.currentTarget.style.color = colors.interface.text.primary;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor =
-                colors.interface.background.secondary;
-              e.currentTarget.style.color = colors.interface.text.secondary;
-            }}
-          >
-            <BiArrowBack className="text-xl" />
-            <span>Back to recipes</span>
-          </button>
-        </div>
-
+      <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Recipe Header */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div>
-              <h1
-                className="text-4xl font-bold mb-4"
-                style={{ color: colors.interface.text.primary }}
+            <div className="flex items-start gap-4">
+              <button
+                onClick={() => router.back()}
+                className="p-2 rounded-lg transition-colors mt-1"
+                style={{
+                  backgroundColor: colors.interface.background.tertiary,
+                  color: colors.base.white,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    colors.interface.background.secondary;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    colors.interface.background.tertiary;
+                }}
               >
-                {recipe.title}
-              </h1>
-              <div
-                className="flex items-center gap-6"
-                style={{ color: colors.interface.text.secondary }}
-              >
-                <div className="flex items-center gap-2">
-                  <BiUser style={{ color: colors.brand.primary[500] }} />
-                  <span>for {recipe.servings} people</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <BiTime style={{ color: colors.brand.primary[500] }} />
-                  <span>duration {recipe.cookingTime}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <BiStar style={{ color: colors.brand.primary[500] }} />
-                  <span>{recipe.difficulty}</span>
+                <IoIosArrowBack className="text-xl" />
+              </button>
+              <div>
+                <h1
+                  className="text-4xl font-bold mb-4"
+                  style={{ color: colors.interface.text.primary }}
+                >
+                  {recipe.title}
+                </h1>
+                <div
+                  className="flex items-center gap-6"
+                  style={{ color: colors.interface.text.secondary }}
+                >
+                  <div className="flex items-center gap-2">
+                    <BiUser style={{ color: colors.brand.primary[500] }} />
+                    <span>for {recipe.servings} people</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <BiTime style={{ color: colors.brand.primary[500] }} />
+                    <span>duration {recipe.cookingTime}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -200,42 +183,36 @@ export default function RecipeDetailPage() {
               <button
                 className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium"
                 style={{
-                  backgroundColor: colors.app.button.primary.background,
-                  color: colors.app.button.primary.text,
+                  backgroundColor: colors.brand.primary[500],
+                  color: colors.base.white,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor =
-                    colors.app.button.primary.hover;
-                  e.currentTarget.style.color =
-                    colors.app.button.primary.hoverText;
+                    colors.brand.primary[600];
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor =
-                    colors.app.button.primary.background;
-                  e.currentTarget.style.color = colors.app.button.primary.text;
+                    colors.brand.primary[500];
                 }}
               >
                 <BiPlus className="text-lg" />
-                Save Recipe
+                Save
               </button>
               <button
                 className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium border"
                 style={{
-                  backgroundColor: colors.app.button.secondary.background,
-                  color: colors.app.button.secondary.text,
-                  borderColor: colors.app.button.secondary.border,
+                  backgroundColor: "transparent",
+                  color: colors.brand.primary[500],
+                  borderColor: colors.brand.primary[500],
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor =
-                    colors.app.button.secondary.hover;
-                  e.currentTarget.style.color =
-                    colors.app.button.secondary.hoverText;
+                    colors.brand.primary[500];
+                  e.currentTarget.style.color = colors.base.white;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    colors.app.button.secondary.background;
-                  e.currentTarget.style.color =
-                    colors.app.button.secondary.text;
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = colors.brand.primary[500];
                 }}
               >
                 <BiShareAlt className="text-lg" />
@@ -246,80 +223,10 @@ export default function RecipeDetailPage() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
-          {/* Ingredients */}
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2
-                className="text-2xl font-bold"
-                style={{ color: colors.interface.text.primary }}
-              >
-                Ingredients
-              </h2>
-              <div
-                className="px-4 py-2 rounded-full flex items-center gap-2"
-                style={{ backgroundColor: colors.brand.primary[500] }}
-              >
-                <span
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold"
-                  style={{
-                    backgroundColor: colors.base.white,
-                    color: colors.brand.primary[500],
-                  }}
-                >
-                  {recipe.servings}
-                </span>
-                <span
-                  className="text-sm font-medium"
-                  style={{ color: colors.base.white }}
-                >
-                  Serving amount
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {recipe.ingredients && recipe.ingredients.length > 0 ? (
-                recipe.ingredients.map((ingredient, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between py-2"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: colors.brand.primary[500] }}
-                      ></div>
-                      <span
-                        className="text-lg"
-                        style={{ color: colors.interface.text.primary }}
-                      >
-                        {ingredient.name}
-                      </span>
-                    </div>
-                    <span
-                      className="font-medium"
-                      style={{ color: colors.interface.text.secondary }}
-                    >
-                      {ingredient.quantity}
-                      {ingredient.unit}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <p
-                  className="text-gray-400"
-                  style={{ color: colors.interface.text.secondary }}
-                >
-                  No ingredients available
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Recipe Image */}
-          <div>
-            <div className="relative rounded-2xl overflow-hidden h-96">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+          {/* Recipe Image - LEFT COLUMN (2/3 del ancho - más grande) */}
+          <div className="lg:col-span-2">
+            <div className="relative rounded-2xl overflow-hidden h-[500px] w-full">
               {recipe.image ? (
                 <img
                   src={recipe.image}
@@ -344,6 +251,90 @@ export default function RecipeDetailPage() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Ingredients - RIGHT COLUMN (al lado de la imagen) */}
+          <div className="lg:col-span-1">
+            <div
+              className="rounded-xl pt-12 pb-6 px-6 shadow-lg w-full h-[500px] min-w-96"
+              style={{ backgroundColor: colors.interface.background.secondary }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2
+                  className="text-2xl font-bold"
+                  style={{ color: colors.interface.text.primary }}
+                >
+                  Ingredients
+                </h2>
+                <div
+                  className="px-4 py-2 rounded-full flex items-center gap-2 ml-8"
+                  style={{
+                    backgroundColor: colors.interface.background.tertiary,
+                    border: "none",
+                    color: colors.interface.text.primary,
+                  }}
+                >
+                  <span
+                    className="w-6 h-6 rounded-lg flex items-center justify-center text-sm font-bold"
+                    style={{
+                      backgroundColor: colors.interface.background.secondary,
+                      color: colors.interface.text.primary,
+                    }}
+                  >
+                    {recipe.servings}
+                  </span>
+                  <span
+                    className="text-sm font-medium whitespace-nowrap"
+                    style={{ color: colors.interface.text.primary }}
+                  >
+                    Serving amount
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {recipe.ingredients && recipe.ingredients.length > 0 ? (
+                  recipe.ingredients.map((ingredient, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between py-2"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: colors.brand.primary[500] }}
+                        ></div>
+                        <span
+                          className="text-lg"
+                          style={{
+                            color: colors.interface.text.primary,
+                            fontSize: typography.styles["body"].fontSize,
+                            fontWeight: typography.styles["body"].fontWeight,
+                            lineHeight: typography.styles["body"].lineHeight,
+                          }}
+                        >
+                          {ingredient.name}
+                        </span>
+                      </div>
+                      <span
+                        className="font-medium"
+                        style={{ color: colors.interface.text.secondary }}
+                      >
+                        {ingredient.quantity}
+                        {ingredient.unit}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p
+                    className="text-gray-400"
+                    style={{ color: colors.interface.text.secondary }}
+                  >
+                    No ingredients available
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -394,30 +385,6 @@ export default function RecipeDetailPage() {
                 No instructions available
               </p>
             )}
-          </div>
-        </div>
-
-        {/* Recipe Info */}
-        <div className="mt-12 text-center">
-          <div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full"
-            style={{ backgroundColor: colors.brand.primary[500] }}
-          >
-            <span
-              className="text-sm font-medium"
-              style={{ color: colors.base.white }}
-            >
-              Recipe generated with
-            </span>
-            <span
-              className="text-sm font-bold px-2 py-1 rounded"
-              style={{
-                backgroundColor: colors.brand.primary[600],
-                color: colors.base.white,
-              }}
-            >
-              {recipe.source}
-            </span>
           </div>
         </div>
       </div>

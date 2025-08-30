@@ -475,15 +475,28 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
               {ingredients.map((ingredient) => (
                 <div
                   key={ingredient.id}
-                  className="relative bg-background-secondary border border-primary-500 rounded-lg px-3 py-2 text-primary-500 flex items-center"
+                  className="relative bg-background-secondary rounded-lg px-3 py-2 text-primary-500 flex items-center group"
                   style={{
                     fontSize: typography.styles["body"].fontSize,
+                    backgroundColor: colors.interface.background.secondary,
+                    color: colors.brand.primary[500],
                   }}
                 >
                   <span>{ingredient.name}</span>
                   <button
                     onClick={() => handleRemoveIngredient(ingredient.id)}
-                    className="ml-2 w-5 h-5 bg-primary-500 text-background-primary rounded-full flex items-center justify-center text-sm hover:bg-primary-600 transition-colors absolute -top-2 -right-2 z-10"
+                    className="ml-2 w-5 h-5 rounded-lg flex items-center justify-center text-sm absolute -top-2 -right-2 z-10 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                    style={{
+                      backgroundColor: colors.base.white,
+                      color: colors.interface.text.secondary,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        colors.interface.background.tertiary;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = colors.base.white;
+                    }}
                   >
                     ×
                   </button>
