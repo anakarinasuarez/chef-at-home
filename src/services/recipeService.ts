@@ -4,8 +4,34 @@ import {
   RecipeResponse,
   RecipeServiceResponse,
 } from "@/types";
+import { colors } from "@/design-system";
+import GeminiService from "./geminiService";
+import { UnsplashService } from "./unsplashService";
 
-export class RecipeService {
+export interface Recipe {
+  id: string;
+  title: string;
+  servings: number;
+  duration: number;
+  imageUrl: string;
+  ingredients: string[];
+  instructions: string[];
+}
+
+export interface RecipeGenerationRequest {
+  ingredients: string[];
+  servings: number;
+  cuisine?: string;
+  difficulty?: "easy" | "medium" | "hard";
+}
+
+class RecipeService {
+  private geminiService: GeminiService;
+
+  constructor() {
+    this.geminiService = new GeminiService();
+  }
+
   /**
    * Convierte una receta de Prisma a RecipeResponse
    */
@@ -324,4 +350,198 @@ export class RecipeService {
       };
     }
   }
+
+  async generateRecipe(
+    ingredients: string[],
+    servings: number,
+    cuisine: string = "international",
+    difficulty: string = "medium"
+  ): Promise<any> {
+    try {
+      const recipe = await this.geminiService.generateRecipe(
+        ingredients,
+        servings,
+        cuisine,
+        difficulty
+      );
+      const image = await this.getRecipeImage(recipe.title, ingredients);
+
+      return {
+        ...recipe,
+        image,
+      };
+    } catch (error) {
+      console.error("Error generating recipe:", error);
+      // Fallback to template
+      return this.generateCustomRecipe(ingredients, servings);
+    }
+  }
+
+  async generateMultipleRecipes(
+    ingredients: string[],
+    servings: number,
+    count: number = 4
+  ): Promise<any[]> {
+    try {
+      const recipes = await this.geminiService.generateMultipleRecipes(
+        ingredients,
+        servings,
+        count
+      );
+
+      // Add images to each recipe
+      const recipesWithImages = await Promise.all(
+        recipes.map(async (recipe) => {
+          try {
+            const image = await this.getRecipeImage(recipe.title, ingredients);
+            return { ...recipe, image };
+          } catch (error) {
+            console.error("Error getting image for recipe:", error);
+            return { ...recipe, image: null };
+          }
+        })
+      );
+
+      return recipesWithImages;
+    } catch (error) {
+      console.error("Error generating multiple recipes:", error);
+      // Fallback to multiple templates
+      return this.generateMultipleCustomRecipes(ingredients, servings, count);
+    }
+  }
+
+  async getRecipeImage(
+    recipeTitle: string,
+    ingredients: string[]
+  ): Promise<string | null> {
+    try {
+      const image = await UnsplashService.getRandomFoodImage(recipeTitle);
+      return image;
+    } catch (error) {
+      console.error("Error getting recipe image:", error);
+      return null;
+    }
+  }
+
+  private generateCustomRecipe(ingredients: string[], servings: number): any {
+    const cuisines = [
+      "Italian",
+      "Mexican",
+      "Asian",
+      "Mediterranean",
+      "American",
+    ];
+    const randomCuisine = cuisines[Math.floor(Math.random() * cuisines.length)];
+
+    return {
+      title: `${randomCuisine} ${ingredients[0]} Special`,
+      ingredients: ingredients.map((ing) => ({
+        name: ing,
+        quantity: Math.ceil(servings / 2),
+        unit: "pieces",
+      })),
+      instructions: [
+        `Clean and prepare ${ingredients.join(" and ")}`,
+        "Cook with your favorite spices",
+        "Serve hot and enjoy!",
+      ],
+      cookingTime: "25 minutes",
+      difficulty: "Medium",
+      cuisine: randomCuisine,
+      servings: servings,
+      source: "template",
+    };
+  }
+
+  private generateMultipleCustomRecipes(
+    ingredients: string[],
+    servings: number,
+    count: number
+  ): any[] {
+    const recipes = [];
+    const cuisines = [
+      "Italian",
+      "Mexican",
+      "Asian",
+      "Mediterranean",
+      "American",
+      "French",
+      "Indian",
+      "Thai",
+    ];
+
+    for (let i = 0; i < count; i++) {
+      const randomCuisine =
+        cuisines[Math.floor(Math.random() * cuisines.length)];
+      const randomDifficulty = ["Easy", "Medium", "Hard"][
+        Math.floor(Math.random() * 3)
+      ];
+
+      recipes.push({
+        title: `${randomCuisine} ${ingredients[0]} ${i + 1}`,
+        ingredients: ingredients.map((ing) => ({
+          name: ing,
+          quantity: Math.ceil(servings / 2) + i,
+          unit: "pieces",
+        })),
+        instructions: [
+          `Prepare ${ingredients.join(" and ")}`,
+          "Cook with authentic spices",
+          "Garnish and serve",
+        ],
+        cookingTime: `${20 + i * 5} minutes`,
+        difficulty: randomDifficulty,
+        cuisine: randomCuisine,
+        servings: servings,
+        source: "template",
+      });
+    }
+
+    return recipes;
+  }
+
+  /**
+   * Save recipe to user's collection
+   */
+  static async saveRecipe(userId: string, recipe: Recipe): Promise<void> {
+    try {
+      // Here you would save to your database
+      // For now, we'll just log it
+      console.log("Saving recipe:", { userId, recipe });
+
+      // TODO: Implement database save
+      // await prisma.savedRecipe.create({
+      //   data: {
+      //     userId,
+      //     recipeId: recipe.id,
+      //     title: recipe.title,
+      //     // ... other fields
+      //   }
+      // });
+    } catch (error) {
+      console.error("Error saving recipe:", error);
+      throw new Error("Failed to save recipe");
+    }
+  }
+
+  /**
+   * Get user's saved recipes
+   */
+  static async getSavedRecipes(userId: string): Promise<Recipe[]> {
+    try {
+      // TODO: Implement database query
+      // const savedRecipes = await prisma.savedRecipe.findMany({
+      //   where: { userId },
+      //   include: { recipe: true }
+      // });
+
+      // For now, return empty array
+      return [];
+    } catch (error) {
+      console.error("Error getting saved recipes:", error);
+      throw new Error("Failed to get saved recipes");
+    }
+  }
 }
+
+export default RecipeService;

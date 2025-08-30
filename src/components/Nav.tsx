@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { PiChefHatLight } from "react-icons/pi";
 import { MdOutlineMenu } from "react-icons/md";
 import { MdClose } from "react-icons/md";
@@ -10,7 +11,6 @@ import { FiLogOut } from "react-icons/fi";
 import Link from "next/link";
 import { colors, typography } from "@/design-system";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
 
 interface NavProps {
   showMenu?: boolean;
@@ -171,7 +171,10 @@ export default function Nav({ showMenu = false, userName = "Anna" }: NavProps) {
             </button>
 
             <button
-              onClick={closeMenu}
+              onClick={() => {
+                closeMenu();
+                router.push("/recipes");
+              }}
               className="w-full px-8 py-3 text-left transition-colors flex items-center gap-3"
               style={{
                 color: colors.interface.text.primary,
@@ -190,7 +193,7 @@ export default function Nav({ showMenu = false, userName = "Anna" }: NavProps) {
               }}
             >
               <BiSolidGrid className="text-xl" />
-              <span>My Recipes</span>
+              <span>Generated Recipes</span>
             </button>
 
             <button

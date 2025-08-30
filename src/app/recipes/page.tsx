@@ -1,0 +1,275 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import Nav from "@/components/Nav";
+import RecipeCard from "@/components/RecipeCard";
+import { FiArrowLeft } from "react-icons/fi";
+import { colors } from "@/design-system";
+
+interface Recipe {
+  id: string;
+  title: string;
+  servings: number;
+  cookingTime: string;
+  difficulty: string;
+  image?: string;
+  source: string;
+  ingredients: Array<{
+    name: string;
+    quantity: number;
+    unit: string;
+  }>;
+  instructions: string[];
+}
+
+export default function RecipesPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Generate recipes with AI when component mounts
+  useEffect(() => {
+    const generateRecipes = async () => {
+      try {
+        setIsLoading(true);
+
+        // Get ingredients from URL params or localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const ingredientsParam = urlParams.get("ingredients");
+        const servingsParam = urlParams.get("servings");
+
+        let ingredients = ["pasta", "basil", "olive oil", "garlic", "tomatoes"]; // fallback
+        let servings = 4; // fallback
+
+        if (ingredientsParam) {
+          try {
+            ingredients = JSON.parse(decodeURIComponent(ingredientsParam));
+          } catch (e) {
+            console.log("Could not parse ingredients from URL");
+          }
+        }
+
+        if (servingsParam) {
+          servings = parseInt(servingsParam) || 4;
+        }
+
+        // Generate recipes using our new API route
+        const response = await fetch("/api/recipes/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ingredients: ingredients,
+            servings: servings,
+            cuisine: "international",
+            difficulty: "medium",
+            count: 4,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to generate recipes");
+        }
+
+        const data = await response.json();
+        console.log("Recipes generated with:", data.source);
+
+        // Convert API response to Recipe format
+        const aiRecipes = data.recipes.map((aiRecipe: any, index: number) => ({
+          id:
+            Date.now().toString() +
+            Math.random().toString(36).substr(2, 9) +
+            index,
+          title: aiRecipe.title || `Recipe ${index + 1}`,
+          servings: aiRecipe.servings || servings,
+          cookingTime: aiRecipe.cookingTime || "30 minutes",
+          difficulty: aiRecipe.difficulty || "Medium",
+          image: aiRecipe.image || null,
+          source: aiRecipe.source || "gemini",
+          ingredients: aiRecipe.ingredients || [],
+          instructions: aiRecipe.instructions || [],
+        }));
+
+        setRecipes(aiRecipes);
+      } catch (error) {
+        console.error("Error generating recipes:", error);
+
+        // Fallback recipes if API fails
+        const fallbackRecipes = [
+          {
+            id: "fallback-1",
+            title: "Simple Pasta with Herbs",
+            servings: 4,
+            cookingTime: "20 minutes",
+            difficulty: "Easy",
+            image:
+              "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=400&h=300&fit=crop&auto=format&q=80",
+            source: "fallback",
+            ingredients: [
+              { name: "Pasta", quantity: 400, unit: "g" },
+              { name: "Olive Oil", quantity: 3, unit: "tbsp" },
+              { name: "Garlic", quantity: 3, unit: "cloves" },
+              { name: "Fresh Herbs", quantity: 1, unit: "cup" },
+            ],
+            instructions: [
+              "Cook pasta according to package instructions",
+              "Heat olive oil and sauté garlic",
+              "Add herbs and toss with pasta",
+              "Serve immediately",
+            ],
+          },
+        ];
+        setRecipes(fallbackRecipes);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    generateRecipes();
+  }, []);
+
+  const handleSaveRecipe = (recipeId: string) => {
+    setSavedRecipes((prev) => {
+      const newSaved = new Set(prev);
+      if (newSaved.has(recipeId)) {
+        newSaved.delete(recipeId);
+      } else {
+        newSaved.add(recipeId);
+      }
+      return newSaved;
+    });
+  };
+
+  const handleBackToHome = () => {
+    router.push("/");
+  };
+
+  if (!user) {
+    router.push("/auth/login");
+    return null;
+  }
+
+  return (
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: colors.interface.background.primary }}
+    >
+      <Nav showMenu={true} userName={user.name} />
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={handleBackToHome}
+            className="p-2 rounded-lg transition-colors"
+            style={{
+              backgroundColor: colors.interface.background.secondary,
+              color: colors.interface.text.secondary,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor =
+                colors.interface.state.hover;
+              e.currentTarget.style.color = colors.interface.text.primary;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor =
+                colors.interface.background.secondary;
+              e.currentTarget.style.color = colors.interface.text.secondary;
+            }}
+          >
+            <FiArrowLeft className="text-2xl" />
+          </button>
+          <div>
+            <h1
+              className="text-3xl font-bold"
+              style={{ color: colors.interface.text.primary }}
+            >
+              Generated Recipes
+            </h1>
+            <p
+              className="mt-1"
+              style={{ color: colors.interface.text.secondary }}
+            >
+              {recipes.length} recipes generated for you
+            </p>
+          </div>
+        </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div
+                className="animate-spin rounded-full h-16 w-16 border-b-2 mx-auto mb-4"
+                style={{ borderColor: colors.brand.primary[500] }}
+              ></div>
+              <p
+                className="text-lg"
+                style={{ color: colors.interface.text.primary }}
+              >
+                Generating delicious recipes...
+              </p>
+              <p
+                className="text-sm mt-2"
+                style={{ color: colors.interface.text.secondary }}
+              >
+                This may take a few moments
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Recipes Grid */}
+        {!isLoading && recipes.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {recipes.map((recipe) => (
+              <RecipeCard key={recipe.id} recipe={recipe} />
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && recipes.length === 0 && (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">🍽️</div>
+            <h2
+              className="text-2xl font-bold mb-2"
+              style={{ color: colors.interface.text.primary }}
+            >
+              No recipes found
+            </h2>
+            <p
+              className="mb-6"
+              style={{ color: colors.interface.text.secondary }}
+            >
+              We couldn't generate recipes at the moment. Please try again.
+            </p>
+            <button
+              onClick={handleBackToHome}
+              className="px-6 py-3 rounded-lg transition-colors"
+              style={{
+                backgroundColor: colors.brand.primary[500],
+                color: colors.base.white,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  colors.brand.primary[600];
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  colors.brand.primary[500];
+              }}
+            >
+              Back to Home
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

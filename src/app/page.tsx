@@ -30,7 +30,7 @@ export default function HomePage() {
 
   // Si el usuario está logueado, mostrar la interfaz de crear recetas
   if (user) {
-    return <CreateRecipePage userName={user.name} />;
+    return <CreateRecipePage userName={user.name} user={user} />;
   }
 
   // Si no está logueado, mostrar la página de landing
@@ -138,7 +138,8 @@ function LandingPage() {
 }
 
 // Componente para la página de crear recetas (cuando está logueado)
-function CreateRecipePage({ userName }: { userName: string }) {
+function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
+  const router = useRouter();
   const [ingredients, setIngredients] = useState<
     Array<{ id: string; name: string }>
   >([]);
@@ -226,16 +227,41 @@ function CreateRecipePage({ userName }: { userName: string }) {
     setIsCreating(true);
 
     try {
-      // Simular proceso de creación (aquí irá la llamada a la API)
-      await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 segundos de simulación
-
-      console.log("Creating recipe with:", {
-        ingredients,
-        servings: allServings,
+      // Crear la receta usando la nueva API route
+      const response = await fetch("/api/recipes/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ingredients: ingredients.map((ing) => ing.name),
+          servings: allServings[0], // Usar el primer valor de servings
+          cuisine: "international",
+          difficulty: "medium",
+          count: 1,
+        }),
       });
 
-      // Aquí irá la lógica para guardar la receta
+      if (!response.ok) {
+        throw new Error("Failed to generate recipe");
+      }
+
+      const data = await response.json();
+      console.log("Recipe generated with:", data.source);
+
       showNotification("Recipe created successfully!", "success");
+
+      // Redirigir a la página de recetas generadas con los ingredientes
+      const ingredientsParam = encodeURIComponent(
+        JSON.stringify(ingredients.map((ing) => ing.name))
+      );
+      const servingsParam = allServings[0];
+
+      setTimeout(() => {
+        router.push(
+          `/recipes?ingredients=${ingredientsParam}&servings=${servingsParam}`
+        );
+      }, 1500);
     } catch (error) {
       console.error("Error creating recipe:", error);
       showNotification("Error creating recipe. Please try again.", "error");
