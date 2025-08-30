@@ -49,12 +49,12 @@ function LandingPage() {
       {/* Nav sin menú para usuarios no logueados */}
       <Nav showMenu={false} />
 
-      <main className="flex min-h-[calc(100vh-120px)] pt-4">
+      <main className="flex min-h-[calc(100vh-120px)] pt-0">
         {/* Columna Izquierda - Contenido de Landing */}
-        <div className="flex-1 flex flex-col justify-center px-8 lg:px-16 pt-4">
+        <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 pt-20">
           {/* Título Principal */}
           <h1
-            className="mb-6 text-center lg:text-left leading-tight"
+            className="mb-8 text-center lg:text-left leading-tight"
             style={{
               fontSize: typography.styles["title-1"].fontSize,
               fontWeight: typography.styles["title-1"].fontWeight,
@@ -105,7 +105,7 @@ function LandingPage() {
           </div>
 
           {/* Botones de acción */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 mt-8">
             <Button
               variant="primary"
               onClick={() => router.push("/auth/signup")}
@@ -145,16 +145,10 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
   >([]);
   const [newIngredient, setNewIngredient] = useState("");
   const [selectedServings, setSelectedServings] = useState<number | null>(null);
-
-  // Nuevo estado para comensales personalizados
   const [customServings, setCustomServings] = useState<number[]>([]);
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [newCustomServing, setNewCustomServing] = useState("");
-
-  // Nuevo estado para loading
   const [isCreating, setIsCreating] = useState(false);
-
-  // Nuevo estado para notificaciones
   const [notification, setNotification] = useState<{
     message: string;
     type: "success" | "error" | "info";
@@ -277,7 +271,6 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
     }
   };
 
-  // Funciones para manejar comensales personalizados
   const handleAddCustomServing = () => {
     const serving = parseInt(newCustomServing);
     if (serving > 0 && !customServings.includes(serving)) {
@@ -463,9 +456,9 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
                 onChange={(e) => setNewIngredient(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Add an ingredient..."
-                className="flex-1 px-4 py-3 bg-background-secondary border border-outline rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary-500"
+                className="w-80 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
                 style={{
-                  fontSize: typography.styles["caption"].fontSize,
+                  fontSize: typography.styles["body"].fontSize,
                 }}
               />
               <Button
@@ -525,15 +518,15 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
                       backgroundColor:
                         selectedServings === serving
                           ? colors.app.button.secondary.hover
-                          : "transparent",
+                          : colors.app.button.secondary.background,
                       borderColor:
                         selectedServings === serving
                           ? colors.app.button.secondary.hover
-                          : colors.interface.border.light,
+                          : colors.app.button.secondary.border,
                       color:
                         selectedServings === serving
-                          ? colors.interface.background.primary
-                          : colors.interface.text.primary,
+                          ? colors.app.button.secondary.hoverText
+                          : colors.app.button.secondary.text,
                     }}
                   >
                     {serving}
@@ -541,20 +534,23 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
                 ))}
                 <button
                   onClick={() => setShowCustomInput(true)}
-                  className="w-12 h-12 border-2 rounded-lg transition-colors flex items-center justify-center"
+                  className="w-12 h-12 rounded-lg transition-colors flex items-center justify-center"
                   style={{
-                    borderColor: colors.brand.primary[500],
-                    color: colors.brand.primary[500],
+                    backgroundColor: colors.app.button.tertiary.background,
+                    color: colors.app.button.tertiary.text,
+                    border: `2px solid ${colors.app.button.tertiary.border}`,
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor =
-                      colors.brand.primary[500];
+                      colors.app.button.tertiary.hover;
                     e.currentTarget.style.color =
-                      colors.interface.background.primary;
+                      colors.app.button.tertiary.hoverText;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                    e.currentTarget.style.color = colors.brand.primary[500];
+                    e.currentTarget.style.backgroundColor =
+                      colors.app.button.tertiary.background;
+                    e.currentTarget.style.color =
+                      colors.app.button.tertiary.text;
                   }}
                 >
                   +
@@ -571,9 +567,9 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
                   onChange={(e) => setNewCustomServing(e.target.value)}
                   onKeyPress={handleCustomServingKeyPress}
                   placeholder="Custom servings..."
-                  className="flex-1 px-4 py-3 bg-background-secondary border border-outline rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary-500"
+                  className="w-32 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
                   style={{
-                    fontSize: typography.styles["caption"].fontSize,
+                    fontSize: typography.styles["body"].fontSize,
                   }}
                 />
                 <Button

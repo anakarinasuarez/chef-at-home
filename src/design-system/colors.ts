@@ -153,6 +153,13 @@ export const appColors = {
       hover: "#E8F0DB", // Tu color secondary en hover
       hoverText: "#131313", // Texto oscuro en hover para contraste
     },
+    tertiary: {
+      background: "transparent",
+      text: "#96B462", // Tu color primary como texto
+      border: "transparent", // Sin borde
+      hover: "#E8F0DB", // Sin cambio en hover
+      hoverText: "#131313", // Mantiene el color primary
+    },
   },
 
   // Tarjetas de recetas
