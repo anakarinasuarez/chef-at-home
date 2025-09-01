@@ -4,11 +4,16 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { BiPlus, BiShareAlt, BiTime, BiUser } from "react-icons/bi";
 import { IoIosArrowBack } from "react-icons/io";
+import { FaPencil } from "react-icons/fa6";
+import { MdDelete } from "react-icons/md";
+import { IoShareSocialSharp } from "react-icons/io5";
 import Nav from "@/components/Nav";
 import IngredientsCard from "@/components/IngredientsCard";
 import { colors } from "@/design-system";
 import { typography } from "@/design-system";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSavedRecipes } from "@/hooks";
+import { useNotification } from "@/contexts/NotificationContext";
 
 interface Recipe {
   id: string;
@@ -31,13 +36,33 @@ export default function RecipeDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { isRecipeSaved, removeRecipe, toggleSaveRecipe } = useSavedRecipes();
+  const { showNotification } = useNotification();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFromMyRecipes, setIsFromMyRecipes] = useState(false);
+  const [isRecipeSavedState, setIsRecipeSavedState] = useState(false);
 
   useEffect(() => {
     const loadRecipe = () => {
       try {
         setLoading(true);
+
+        // Verificar si viene desde My Recipes
+        const urlParams = new URLSearchParams(window.location.search);
+        const isFromMyRecipesParam = urlParams.get("from") === "my-recipes";
+        const referrer = document.referrer;
+        const isFromMyRecipesReferrer = referrer.includes("/my-recipes");
+
+        const isFromMyRecipesPage =
+          isFromMyRecipesParam || isFromMyRecipesReferrer;
+        setIsFromMyRecipes(isFromMyRecipesPage);
+
+        console.log("Current URL:", window.location.href);
+        console.log("URL params:", urlParams.toString());
+        console.log("From My Recipes param:", isFromMyRecipesParam);
+        console.log("From My Recipes referrer:", isFromMyRecipesReferrer);
+        console.log("From My Recipes final:", isFromMyRecipesPage);
 
         const savedRecipe = localStorage.getItem(`recipe-${params.id}`);
 
@@ -46,6 +71,19 @@ export default function RecipeDetailPage() {
           console.log("Loaded recipe from localStorage:", recipeData);
 
           setRecipe(recipeData);
+
+          // Verificar si la receta está guardada
+          if (user) {
+            const isSaved = isRecipeSaved(recipeData.id);
+            // Si viene de My Recipes, forzar que se considere como guardada
+            const finalSavedState = isFromMyRecipesPage || isSaved;
+            setIsRecipeSavedState(finalSavedState);
+            console.log("Recipe saved status on load:", isSaved);
+            console.log(
+              "Final saved state (with My Recipes override):",
+              finalSavedState
+            );
+          }
         } else {
           console.log("No recipe found in localStorage for ID:", params.id);
           router.push("/recipes");
@@ -62,6 +100,88 @@ export default function RecipeDetailPage() {
 
     loadRecipe();
   }, [params.id, router]);
+
+  // Debug useEffect para monitorear cambios
+  useEffect(() => {
+    console.log(
+      "Button condition - isFromMyRecipes:",
+      isFromMyRecipes,
+      "isRecipeSavedState:",
+      isRecipeSavedState,
+      "Final condition:",
+      isFromMyRecipes || isRecipeSavedState
+    );
+  }, [isFromMyRecipes, isRecipeSavedState]);
+
+  const handleSaveRecipe = () => {
+    if (!recipe) {
+      console.log("No recipe available");
+      return;
+    }
+
+    if (!user) {
+      console.log("No user available");
+      showNotification("Please log in to save recipes", "error");
+      return;
+    }
+
+    console.log("Saving recipe:", recipe.title, "with ID:", recipe.id);
+
+    try {
+      const success = toggleSaveRecipe(recipe);
+      console.log("Toggle save result:", success);
+
+      if (success) {
+        // Actualizar el estado local
+        const newSavedState = !isRecipeSavedState;
+        setIsRecipeSavedState(newSavedState);
+
+        const message = newSavedState
+          ? "Recipe saved to favorites!"
+          : "Recipe removed from favorites!";
+        showNotification(message, newSavedState ? "success" : "info");
+
+        console.log("Recipe saved status updated:", newSavedState);
+      } else {
+        showNotification("Error saving recipe", "error");
+      }
+    } catch (error) {
+      console.error("Error saving recipe:", error);
+      showNotification("Error saving recipe", "error");
+    }
+  };
+
+  const handleEditRecipe = () => {
+    // Por ahora, mostrar mensaje de funcionalidad en desarrollo
+    alert("Edit functionality coming soon!");
+  };
+
+  const handleDeleteRecipe = () => {
+    if (!recipe) return;
+
+    // Confirmar antes de eliminar
+    if (window.confirm("Are you sure you want to delete this recipe?")) {
+      removeRecipe(recipe.id);
+      router.push("/my-recipes");
+    }
+  };
+
+  const handleShareRecipe = () => {
+    if (!recipe) return;
+
+    // Implementar funcionalidad de compartir
+    if (navigator.share) {
+      navigator.share({
+        title: recipe.title,
+        text: `Check out this recipe: ${recipe.title}`,
+        url: window.location.href,
+      });
+    } else {
+      // Fallback: copiar al clipboard
+      navigator.clipboard.writeText(window.location.href);
+      alert("Recipe link copied to clipboard!");
+    }
+  };
 
   if (loading) {
     return (
@@ -181,44 +301,148 @@ export default function RecipeDetailPage() {
             </div>
 
             <div className="flex gap-3">
-              <button
-                className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium"
-                style={{
-                  backgroundColor: colors.brand.primary[500],
-                  color: colors.base.white,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    colors.brand.primary[600];
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    colors.brand.primary[500];
-                }}
-              >
-                <BiPlus className="text-lg" />
-                Save
-              </button>
-              <button
-                className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium border"
-                style={{
-                  backgroundColor: "transparent",
-                  color: colors.brand.primary[500],
-                  borderColor: colors.brand.primary[500],
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    colors.brand.primary[500];
-                  e.currentTarget.style.color = colors.base.white;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = colors.brand.primary[500];
-                }}
-              >
-                <BiShareAlt className="text-lg" />
-                Share
-              </button>
+              {/* Forzar botones de receta guardada si viene de My Recipes */}
+              {isFromMyRecipes || isRecipeSavedState ? (
+                // Si la receta está guardada, mostrar Edit/Delete/Share
+                <>
+                  <button
+                    onClick={() => handleEditRecipe()}
+                    className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium border"
+                    style={{
+                      backgroundColor: "transparent",
+                      color: colors.brand.primary[500],
+                      borderColor: colors.brand.primary[500],
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        colors.brand.primary[500];
+                      e.currentTarget.style.color = colors.base.white;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = colors.brand.primary[500];
+                    }}
+                  >
+                    <FaPencil
+                      className="text-lg"
+                      style={{ color: colors.brand.primary[500] }}
+                    />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteRecipe()}
+                    className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium border"
+                    style={{
+                      backgroundColor: "transparent",
+                      color: colors.interface.text.secondary,
+                      borderColor: colors.interface.text.secondary,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#EF4444";
+                      e.currentTarget.style.color = colors.base.white;
+                      e.currentTarget.style.borderColor = "#EF4444";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color =
+                        colors.interface.text.secondary;
+                      e.currentTarget.style.borderColor =
+                        colors.interface.text.secondary;
+                    }}
+                  >
+                    <MdDelete
+                      className="text-lg"
+                      style={{ color: colors.brand.primary[500] }}
+                    />
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => handleShareRecipe()}
+                    className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium border"
+                    style={{
+                      backgroundColor: "transparent",
+                      color: colors.interface.text.secondary,
+                      borderColor: colors.interface.text.secondary,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        colors.interface.background.tertiary;
+                      e.currentTarget.style.color =
+                        colors.interface.text.primary;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color =
+                        colors.interface.text.secondary;
+                    }}
+                  >
+                    <IoShareSocialSharp
+                      className="text-lg"
+                      style={{ color: colors.brand.primary[500] }}
+                    />
+                    Share
+                  </button>
+                </>
+              ) : (
+                // Si la receta NO está guardada, mostrar Save/Share
+                <>
+                  <button
+                    onClick={() => handleSaveRecipe()}
+                    className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium"
+                    style={{
+                      backgroundColor: isRecipeSavedState
+                        ? colors.interface.background.tertiary
+                        : colors.brand.primary[500],
+                      color: isRecipeSavedState
+                        ? colors.brand.primary[500]
+                        : colors.base.white,
+                      border: isRecipeSavedState
+                        ? `2px solid ${colors.brand.primary[500]}`
+                        : "none",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isRecipeSavedState) {
+                        e.currentTarget.style.backgroundColor =
+                          colors.brand.primary[600];
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isRecipeSavedState) {
+                        e.currentTarget.style.backgroundColor =
+                          colors.brand.primary[500];
+                      }
+                    }}
+                  >
+                    {isRecipeSavedState ? (
+                      <span className="text-lg">✓</span>
+                    ) : (
+                      <BiPlus className="text-lg" />
+                    )}
+                    {isRecipeSavedState ? "Saved" : "Save"}
+                  </button>
+                  <button
+                    onClick={() => handleShareRecipe()}
+                    className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium border"
+                    style={{
+                      backgroundColor: "transparent",
+                      color: colors.brand.primary[500],
+                      borderColor: colors.brand.primary[500],
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        colors.brand.primary[500];
+                      e.currentTarget.style.color = colors.base.white;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = colors.brand.primary[500];
+                    }}
+                  >
+                    <BiShareAlt className="text-lg" />
+                    Share
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

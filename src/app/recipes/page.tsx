@@ -283,7 +283,7 @@ export default function RecipesPage() {
         {!isLoading && recipes.length > 0 && (
           <div className="relative">
             {/* Scroll Container */}
-            <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
+            <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide h-[500px] items-center">
               {recipes.map((recipe) => (
                 <div key={recipe.id} className="flex-shrink-0 w-80">
                   <RecipeCard recipe={recipe} />

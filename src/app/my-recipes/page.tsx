@@ -1,17 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { colors, typography } from "@/design-system";
+import { IoIosArrowBack } from "react-icons/io";
 import Nav from "@/components/Nav";
+import { colors, typography } from "@/design-system";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSavedRecipes } from "@/hooks";
-import { MdFavorite, MdDelete, MdVisibility } from "react-icons/md";
+import RecipeCard from "@/components/RecipeCard";
 
 export default function MyRecipesPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const { savedRecipes, loading, removeRecipe } = useSavedRecipes();
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Detectar scroll automáticamente para actualizar el punto activo
+  useEffect(() => {
+    if (savedRecipes.length === 0) return;
+
+    const container = document.querySelector(".overflow-x-auto") as HTMLElement;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const containerRect = container.getBoundingClientRect();
+      const containerLeft = containerRect.left;
+
+      // Encontrar qué receta está más visible
+      let mostVisibleIndex = 0;
+      let maxVisibility = 0;
+
+      Array.from(container.children).forEach((child, index) => {
+        const childRect = child.getBoundingClientRect();
+        const childLeft = childRect.left;
+        const childRight = childRect.right;
+
+        // Calcular qué tan visible está la receta
+        const visibleLeft = Math.max(containerLeft, childLeft);
+        const visibleRight = Math.min(
+          containerLeft + container.offsetWidth,
+          childRight
+        );
+        const visibility = Math.max(0, visibleRight - visibleLeft);
+
+        if (visibility > maxVisibility) {
+          maxVisibility = visibility;
+          mostVisibleIndex = index;
+        }
+      });
+
+      setActiveIndex(mostVisibleIndex);
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [savedRecipes.length]);
 
   // Mostrar spinner de carga mientras se verifica la autenticación
   if (isLoading) {
@@ -34,15 +77,22 @@ export default function MyRecipesPage() {
     return null;
   }
 
-  const handleViewRecipe = (recipe: any) => {
-    // Navegar a la página de detalle de la receta
-    router.push(`/recipes/${recipe.id}`);
+  const handleBackToHome = () => {
+    router.push("/");
   };
 
-  const handleDeleteRecipe = (recipeId: string) => {
-    // Confirmar antes de eliminar
-    if (window.confirm("Are you sure you want to delete this recipe?")) {
-      removeRecipe(recipeId);
+  const scrollToRecipe = (index: number) => {
+    const container = document.querySelector(".overflow-x-auto") as HTMLElement;
+    if (container) {
+      const recipeCard = container.children[index] as HTMLElement;
+      if (recipeCard) {
+        recipeCard.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "start",
+        });
+        setActiveIndex(index);
+      }
     }
   };
 
@@ -70,63 +120,67 @@ export default function MyRecipesPage() {
     >
       <Nav showMenu={true} userName={user.name} currentPage="my-recipes" />
 
-      <main className="px-8 lg:px-16 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1
-            className="mb-4"
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={handleBackToHome}
+            className="p-2 rounded-lg transition-colors"
             style={{
-              fontSize: typography.styles["title-1"].fontSize,
-              fontWeight: typography.styles["title-1"].fontWeight,
-              color: colors.interface.text.primary,
-            }}
-          >
-            My Saved Recipes
-          </h1>
-          <p
-            style={{
-              fontSize: typography.styles["body-large"].fontSize,
+              backgroundColor: colors.interface.background.secondary,
               color: colors.interface.text.secondary,
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor =
+                colors.interface.state.hover;
+              e.currentTarget.style.color = colors.interface.text.primary;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor =
+                colors.interface.background.secondary;
+              e.currentTarget.style.color = colors.interface.text.secondary;
+            }}
           >
-            Your collection of favorite recipes
-          </p>
+            <IoIosArrowBack className="text-2xl" />
+          </button>
+          <div>
+            <h1
+              className="text-3xl font-bold"
+              style={{ color: colors.interface.text.primary }}
+            >
+              My Saved Recipes
+            </h1>
+            <p
+              className="mt-1"
+              style={{ color: colors.interface.text.secondary }}
+            >
+              {savedRecipes.length} recipes saved by you
+            </p>
+          </div>
         </div>
 
         {/* Contenido */}
         {savedRecipes.length === 0 ? (
-          <div className="text-center py-16">
-            <MdFavorite
-              className="mx-auto mb-4 text-6xl opacity-50"
-              style={{ color: colors.brand.primary[500] }}
-            />
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">🍽️</div>
             <h2
-              className="mb-4"
-              style={{
-                fontSize: typography.styles["title-2"].fontSize,
-                fontWeight: typography.styles["title-2"].fontWeight,
-                color: colors.interface.text.primary,
-              }}
+              className="text-2xl font-bold mb-2"
+              style={{ color: colors.interface.text.primary }}
             >
               No saved recipes yet
             </h2>
             <p
-              className="mb-8"
-              style={{
-                fontSize: typography.styles["body"].fontSize,
-                color: colors.interface.text.secondary,
-              }}
+              className="mb-6"
+              style={{ color: colors.interface.text.secondary }}
             >
               Start creating recipes and save your favorites to see them here
             </p>
             <button
-              onClick={() => router.push("/")}
+              onClick={handleBackToHome}
               className="px-6 py-3 rounded-lg transition-colors"
               style={{
                 backgroundColor: colors.brand.primary[500],
-                color: colors.interface.background.primary,
-                fontSize: typography.styles["body"].fontSize,
-                fontWeight: 600,
+                color: colors.base.white,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor =
@@ -137,121 +191,74 @@ export default function MyRecipesPage() {
                   colors.brand.primary[500];
               }}
             >
-              Create Your First Recipe
+              Back to Home
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {savedRecipes.map((recipe) => (
-              <div
-                key={recipe.id}
-                className="bg-background-secondary rounded-lg p-6 transition-all duration-200 hover:shadow-lg"
-                style={{
-                  backgroundColor: colors.interface.background.secondary,
-                }}
-              >
-                {/* Imagen de la receta */}
-                {recipe.image && (
-                  <div className="mb-4">
-                    <img
-                      src={recipe.image}
-                      alt={recipe.title}
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                  </div>
-                )}
-
-                {/* Información de la receta */}
-                <div className="mb-4">
-                  <h3
-                    className="mb-2"
-                    style={{
-                      fontSize: typography.styles["title-3"].fontSize,
-                      fontWeight: typography.styles["title-3"].fontWeight,
-                      color: colors.interface.text.primary,
+          <div className="relative">
+            {/* Scroll Container */}
+            <div className="flex gap-6 overflow-x-auto overflow-y-hidden pb-6 scrollbar-hide h-[460px]">
+              {savedRecipes.map((recipe) => (
+                <div key={recipe.id} className="flex-shrink-0 w-80">
+                  <RecipeCard
+                    recipe={recipe}
+                    variant="my-recipes"
+                    onEdit={(recipe) => {
+                      const recipeId = recipe.id || Date.now().toString();
+                      router.push(`/recipes/${recipeId}`);
                     }}
-                  >
-                    {recipe.title}
-                  </h3>
-                  <p
-                    className="mb-3 line-clamp-3"
-                    style={{
-                      fontSize: typography.styles["body"].fontSize,
-                      color: colors.interface.text.secondary,
+                    onDelete={(recipeId) => {
+                      if (
+                        window.confirm(
+                          "Are you sure you want to delete this recipe?"
+                        )
+                      ) {
+                        const success = removeRecipe(recipeId);
+                        if (success) {
+                          // La notificación se maneja en el hook
+                        }
+                      }
                     }}
-                  >
-                    {recipe.description}
-                  </p>
-
-                  {/* Metadatos */}
-                  <div className="flex items-center gap-4 text-sm">
-                    <span
-                      style={{
-                        color: colors.interface.text.secondary,
-                      }}
-                    >
-                      ⏱️ {recipe.cookTime} min
-                    </span>
-                    <span
-                      style={{
-                        color: colors.interface.text.secondary,
-                      }}
-                    >
-                      👥 {recipe.servings} servings
-                    </span>
-                  </div>
+                    onShare={(recipe) => {
+                      if (navigator.share) {
+                        navigator.share({
+                          title: recipe.title,
+                          text: `Check out this recipe: ${recipe.title}`,
+                          url: window.location.href,
+                        });
+                      } else {
+                        navigator.clipboard.writeText(window.location.href);
+                        alert("Recipe link copied to clipboard!");
+                      }
+                    }}
+                  />
                 </div>
+              ))}
+            </div>
 
-                {/* Botones de acción */}
-                <div className="flex gap-2">
+            {/* Scroll Indicator - Clickable Navigation */}
+            <div className="flex justify-center mt-4">
+              <div className="flex gap-2">
+                {savedRecipes.map((_, index) => (
                   <button
-                    onClick={() => handleViewRecipe(recipe)}
-                    className="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg transition-colors"
+                    key={index}
+                    onClick={() => scrollToRecipe(index)}
+                    className="w-3 h-3 rounded-full transition-all duration-300 hover:scale-110 cursor-pointer"
                     style={{
-                      backgroundColor: colors.brand.primary[500],
-                      color: colors.interface.background.primary,
-                      fontSize: typography.styles["body"].fontSize,
+                      backgroundColor:
+                        index === activeIndex
+                          ? colors.brand.primary[500]
+                          : colors.interface.background.tertiary,
+                      opacity: index === activeIndex ? 1 : 0.5,
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        colors.brand.primary[600];
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        colors.brand.primary[500];
-                    }}
-                  >
-                    <MdVisibility className="text-lg" />
-                    View
-                  </button>
-                  <button
-                    onClick={() => handleDeleteRecipe(recipe.id)}
-                    className="flex items-center justify-center gap-2 py-2 px-4 rounded-lg transition-colors"
-                    style={{
-                      backgroundColor: colors.interface.background.tertiary,
-                      color: colors.interface.text.secondary,
-                      fontSize: typography.styles["body"].fontSize,
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#EF4444";
-                      e.currentTarget.style.color =
-                        colors.interface.background.primary;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        colors.interface.background.tertiary;
-                      e.currentTarget.style.color =
-                        colors.interface.text.secondary;
-                    }}
-                  >
-                    <MdDelete className="text-lg" />
-                  </button>
-                </div>
+                    title={`Go to recipe ${index + 1}`}
+                  />
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

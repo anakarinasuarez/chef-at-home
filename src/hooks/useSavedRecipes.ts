@@ -65,6 +65,13 @@ export const useSavedRecipes = () => {
         `savedRecipes_${user.id}`,
         JSON.stringify(updatedRecipes)
       );
+
+      // También guardar en localStorage para que la página de detalle pueda acceder
+      localStorage.setItem(
+        `recipe-${recipeToSave.id}`,
+        JSON.stringify(recipeToSave)
+      );
+
       return true;
     } catch (error) {
       console.error("Error saving recipe:", error);
