@@ -115,6 +115,48 @@ export const useSavedRecipes = () => {
     }
   };
 
+  // Actualizar una receta existente
+  const updateRecipe = (
+    recipeId: string,
+    updatedData: Partial<FrontendRecipe>
+  ): boolean => {
+    if (!user) return false;
+
+    try {
+      const recipeIndex = savedRecipes.findIndex(
+        (recipe) => recipe.id === recipeId
+      );
+
+      if (recipeIndex === -1) {
+        console.error("Recipe not found for update:", recipeId);
+        return false;
+      }
+
+      const updatedRecipe = {
+        ...savedRecipes[recipeIndex],
+        ...updatedData,
+        id: recipeId, // Mantener el ID original
+      };
+
+      const updatedRecipes = [...savedRecipes];
+      updatedRecipes[recipeIndex] = updatedRecipe;
+
+      setSavedRecipes(updatedRecipes);
+      localStorage.setItem(
+        `savedRecipes_${user.id}`,
+        JSON.stringify(updatedRecipes)
+      );
+
+      // También actualizar en localStorage para que la página de detalle pueda acceder
+      localStorage.setItem(`recipe-${recipeId}`, JSON.stringify(updatedRecipe));
+
+      return true;
+    } catch (error) {
+      console.error("Error updating recipe:", error);
+      return false;
+    }
+  };
+
   // Cargar recetas al montar el componente
   useEffect(() => {
     loadSavedRecipes();
@@ -127,6 +169,7 @@ export const useSavedRecipes = () => {
     removeRecipe,
     isRecipeSaved,
     toggleSaveRecipe,
+    updateRecipe,
     loadSavedRecipes,
   };
 };

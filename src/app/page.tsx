@@ -8,6 +8,7 @@ import Nav from "@/components/Nav";
 import Image from "next/image";
 import plateImage from "@/assets/images/plate.png";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSavedRecipes } from "@/hooks";
 
 export default function HomePage() {
   const { user, isLoading } = useAuth();
@@ -135,6 +136,7 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
   const [newCustomServing, setNewCustomServing] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
+  const { updateRecipe } = useSavedRecipes();
 
   // Cargar datos de edición si existe
   useEffect(() => {
@@ -245,12 +247,27 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
     try {
       if (isEditing && editingRecipeId) {
         // Modo edición - actualizar receta existente
-        showNotification("Recipe updated successfully!", "success");
+        const updateData = {
+          ingredients: ingredients.map((ing) => ({
+            name: ing.name,
+            quantity: 1,
+            unit: "piece",
+          })),
+          servings: allServings[0],
+        };
 
-        // Redirigir a la página de My Recipes después de actualizar
-        setTimeout(() => {
-          router.push("/my-recipes");
-        }, 1500);
+        const success = updateRecipe(editingRecipeId, updateData);
+
+        if (success) {
+          showNotification("Recipe updated successfully!", "success");
+
+          // Redirigir a la página de My Recipes después de actualizar
+          setTimeout(() => {
+            router.push("/my-recipes");
+          }, 1500);
+        } else {
+          showNotification("Error updating recipe. Please try again.", "error");
+        }
       } else {
         // Modo creación - generar nueva receta
         const response = await fetch("/api/recipes/generate", {
