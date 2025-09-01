@@ -311,7 +311,7 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
         style={{ backgroundColor: colors.interface.background.primary }}
       >
         {/* Nav con menú para usuarios logueados */}
-        <Nav showMenu={true} userName={userName} />
+        <Nav showMenu={true} userName={userName} currentPage="create" />
 
         <main className="flex min-h-[calc(100vh-120px)] pt-4">
           {/* Columna Izquierda - Loading */}
@@ -373,7 +373,7 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
       style={{ backgroundColor: colors.interface.background.primary }}
     >
       {/* Nav con menú para usuarios logueados */}
-      <Nav showMenu={true} userName={userName} />
+      <Nav showMenu={true} userName={userName} currentPage="create" />
 
       {/* Notificación */}
       {notification && (

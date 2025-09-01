@@ -214,7 +214,7 @@ export default function RecipesPage() {
       className="min-h-screen"
       style={{ backgroundColor: colors.interface.background.primary }}
     >
-      <Nav showMenu={true} userName={user.name} />
+      <Nav showMenu={true} userName={user.name} currentPage="generated" />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}

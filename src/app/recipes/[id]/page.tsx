@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { BiPlus, BiShareAlt, BiTime, BiUser } from "react-icons/bi";
 import { IoIosArrowBack } from "react-icons/io";
 import Nav from "@/components/Nav";
+import IngredientsCard from "@/components/IngredientsCard";
 import { colors } from "@/design-system";
 import { typography } from "@/design-system";
 import { useAuth } from "@/contexts/AuthContext";
@@ -256,86 +257,11 @@ export default function RecipeDetailPage() {
 
           {/* Ingredients - RIGHT COLUMN (al lado de la imagen) */}
           <div className="lg:col-span-1">
-            <div
-              className="rounded-xl pt-12 pb-6 px-6 shadow-lg w-full h-[500px] min-w-96"
-              style={{ backgroundColor: colors.interface.background.secondary }}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2
-                  className="text-2xl font-bold"
-                  style={{ color: colors.interface.text.primary }}
-                >
-                  Ingredients
-                </h2>
-                <div
-                  className="px-4 py-2 rounded-full flex items-center gap-2 ml-8"
-                  style={{
-                    backgroundColor: colors.interface.background.tertiary,
-                    border: "none",
-                    color: colors.interface.text.primary,
-                  }}
-                >
-                  <span
-                    className="w-6 h-6 rounded-lg flex items-center justify-center text-sm font-bold"
-                    style={{
-                      backgroundColor: colors.interface.background.secondary,
-                      color: colors.interface.text.primary,
-                    }}
-                  >
-                    {recipe.servings}
-                  </span>
-                  <span
-                    className="text-sm font-medium whitespace-nowrap"
-                    style={{ color: colors.interface.text.primary }}
-                  >
-                    Serving amount
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {recipe.ingredients && recipe.ingredients.length > 0 ? (
-                  recipe.ingredients.map((ingredient, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between py-2"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: colors.brand.primary[500] }}
-                        ></div>
-                        <span
-                          className="text-lg"
-                          style={{
-                            color: colors.interface.text.primary,
-                            fontSize: typography.styles["body"].fontSize,
-                            fontWeight: typography.styles["body"].fontWeight,
-                            lineHeight: typography.styles["body"].lineHeight,
-                          }}
-                        >
-                          {ingredient.name}
-                        </span>
-                      </div>
-                      <span
-                        className="font-medium"
-                        style={{ color: colors.interface.text.secondary }}
-                      >
-                        {ingredient.quantity}
-                        {ingredient.unit}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p
-                    className="text-gray-400"
-                    style={{ color: colors.interface.text.secondary }}
-                  >
-                    No ingredients available
-                  </p>
-                )}
-              </div>
-            </div>
+            <IngredientsCard
+              ingredients={recipe.ingredients || []}
+              servings={recipe.servings}
+              imageHeight={500}
+            />
           </div>
         </div>
 

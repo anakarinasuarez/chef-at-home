@@ -8,6 +8,7 @@ import { MdClose } from "react-icons/md";
 import { IoRestaurantOutline } from "react-icons/io5";
 import { BiSolidGrid } from "react-icons/bi";
 import { FiLogOut } from "react-icons/fi";
+import { MdFavorite } from "react-icons/md";
 import Link from "next/link";
 import { colors, typography } from "@/design-system";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,9 +16,14 @@ import { useAuth } from "@/contexts/AuthContext";
 interface NavProps {
   showMenu?: boolean;
   userName?: string;
+  currentPage?: "create" | "generated" | "my-recipes";
 }
 
-export default function Nav({ showMenu = false, userName = "Anna" }: NavProps) {
+export default function Nav({
+  showMenu = false,
+  userName = "Anna",
+  currentPage = "create",
+}: NavProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { logout } = useAuth();
   const router = useRouter();
@@ -34,6 +40,23 @@ export default function Nav({ showMenu = false, userName = "Anna" }: NavProps) {
     logout();
     closeMenu();
     router.push("/auth/login"); // Redirigir al login después del logout
+  };
+
+  const handleNavigation = (page: string) => {
+    closeMenu();
+    switch (page) {
+      case "create":
+        router.push("/");
+        break;
+      case "generated":
+        router.push("/recipes");
+        break;
+      case "my-recipes":
+        router.push("/my-recipes");
+        break;
+      default:
+        break;
+    }
   };
 
   return (
@@ -146,56 +169,109 @@ export default function Nav({ showMenu = false, userName = "Anna" }: NavProps) {
 
           {/* Opciones del menú */}
           <div className="py-0">
+            {/* Create Recipe */}
             <button
-              onClick={closeMenu}
+              onClick={() => handleNavigation("create")}
               className="w-full px-8 py-3 text-left transition-colors flex items-center gap-3"
               style={{
-                backgroundColor: colors.brand.primary[500],
-                color: colors.interface.background.primary,
+                backgroundColor:
+                  currentPage === "create"
+                    ? colors.brand.primary[500]
+                    : colors.interface.background.secondary,
+                color:
+                  currentPage === "create"
+                    ? colors.interface.background.primary
+                    : colors.interface.text.primary,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[500];
-                e.currentTarget.style.color =
-                  colors.interface.background.primary;
+                if (currentPage !== "create") {
+                  e.currentTarget.style.backgroundColor =
+                    colors.brand.primary[500];
+                  e.currentTarget.style.color =
+                    colors.interface.background.primary;
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[500];
-                e.currentTarget.style.color =
-                  colors.interface.background.primary;
+                if (currentPage !== "create") {
+                  e.currentTarget.style.backgroundColor =
+                    colors.interface.background.secondary;
+                  e.currentTarget.style.color = colors.interface.text.primary;
+                }
               }}
             >
               <IoRestaurantOutline className="text-xl" />
               <span>Create Recipe</span>
             </button>
 
+            {/* Generated Recipes */}
             <button
-              onClick={() => {
-                closeMenu();
-                router.push("/recipes");
-              }}
+              onClick={() => handleNavigation("generated")}
               className="w-full px-8 py-3 text-left transition-colors flex items-center gap-3"
               style={{
-                color: colors.interface.text.primary,
-                backgroundColor: colors.interface.background.secondary,
+                backgroundColor:
+                  currentPage === "generated"
+                    ? colors.brand.primary[500]
+                    : colors.interface.background.secondary,
+                color:
+                  currentPage === "generated"
+                    ? colors.interface.background.primary
+                    : colors.interface.text.primary,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[500];
-                e.currentTarget.style.color =
-                  colors.interface.background.primary;
+                if (currentPage !== "generated") {
+                  e.currentTarget.style.backgroundColor =
+                    colors.brand.primary[500];
+                  e.currentTarget.style.color =
+                    colors.interface.background.primary;
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  colors.interface.background.secondary;
-                e.currentTarget.style.color = colors.interface.text.primary;
+                if (currentPage !== "generated") {
+                  e.currentTarget.style.backgroundColor =
+                    colors.interface.background.secondary;
+                  e.currentTarget.style.color = colors.interface.text.primary;
+                }
               }}
             >
               <BiSolidGrid className="text-xl" />
               <span>Generated Recipes</span>
             </button>
 
+            {/* My Recipes */}
+            <button
+              onClick={() => handleNavigation("my-recipes")}
+              className="w-full px-8 py-3 text-left transition-colors flex items-center gap-3"
+              style={{
+                backgroundColor:
+                  currentPage === "my-recipes"
+                    ? colors.brand.primary[500]
+                    : colors.interface.background.secondary,
+                color:
+                  currentPage === "my-recipes"
+                    ? colors.interface.background.primary
+                    : colors.interface.text.primary,
+              }}
+              onMouseEnter={(e) => {
+                if (currentPage !== "my-recipes") {
+                  e.currentTarget.style.backgroundColor =
+                    colors.brand.primary[500];
+                  e.currentTarget.style.color =
+                    colors.interface.background.primary;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentPage !== "my-recipes") {
+                  e.currentTarget.style.backgroundColor =
+                    colors.interface.background.secondary;
+                  e.currentTarget.style.color = colors.interface.text.primary;
+                }
+              }}
+            >
+              <MdFavorite className="text-xl" />
+              <span>My Recipes</span>
+            </button>
+
+            {/* Log Out */}
             <button
               onClick={handleLogout}
               className="w-full px-8 py-3 text-left transition-colors flex items-center gap-3"
