@@ -153,8 +153,23 @@ export default function RecipeDetailPage() {
   };
 
   const handleEditRecipe = () => {
-    // Por ahora, mostrar mensaje de funcionalidad en desarrollo
-    alert("Edit functionality coming soon!");
+    if (!recipe) return;
+
+    // Guardar los datos de la receta en localStorage para editarlos
+    const editData = {
+      title: recipe.title,
+      ingredients: recipe.ingredients || [],
+      servings: recipe.servings,
+      cookingTime: recipe.cookingTime,
+      difficulty: recipe.difficulty || "medium",
+      cuisine: "international",
+      instructions: recipe.instructions || [],
+      isEditing: true,
+      originalId: recipe.id,
+    };
+
+    localStorage.setItem("editRecipeData", JSON.stringify(editData));
+    router.push("/?edit=true");
   };
 
   const handleDeleteRecipe = () => {

@@ -133,6 +133,46 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
   const [customServings, setCustomServings] = useState<number[]>([]);
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [newCustomServing, setNewCustomServing] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
+
+  // Cargar datos de edición si existe
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isEditMode = urlParams.get("edit") === "true";
+
+    if (isEditMode) {
+      const editData = localStorage.getItem("editRecipeData");
+      if (editData) {
+        try {
+          const parsedData = JSON.parse(editData);
+          setIsEditing(true);
+          setEditingRecipeId(parsedData.originalId);
+
+          // Cargar ingredientes
+          if (parsedData.ingredients && parsedData.ingredients.length > 0) {
+            const formattedIngredients = parsedData.ingredients.map(
+              (ing: any) => ({
+                id: Date.now().toString() + Math.random(),
+                name: ing.name || ing,
+              })
+            );
+            setIngredients(formattedIngredients);
+          }
+
+          // Cargar servings
+          if (parsedData.servings) {
+            setSelectedServings(parsedData.servings);
+          }
+
+          // Limpiar localStorage después de cargar
+          localStorage.removeItem("editRecipeData");
+        } catch (error) {
+          console.error("Error loading edit data:", error);
+        }
+      }
+    }
+  }, []);
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -203,37 +243,47 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
     }
 
     try {
-      // Crear la receta usando la nueva API route
-      const response = await fetch("/api/recipes/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ingredients: ingredients.map((ing) => ing.name),
-          servings: allServings[0], // Usar el primer valor de servings
-          cuisine: "international",
-          difficulty: "medium",
-          count: 1,
-        }),
-      });
+      if (isEditing && editingRecipeId) {
+        // Modo edición - actualizar receta existente
+        showNotification("Recipe updated successfully!", "success");
 
-      if (!response.ok) {
-        throw new Error("Failed to generate recipe");
+        // Redirigir a la página de My Recipes después de actualizar
+        setTimeout(() => {
+          router.push("/my-recipes");
+        }, 1500);
+      } else {
+        // Modo creación - generar nueva receta
+        const response = await fetch("/api/recipes/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ingredients: ingredients.map((ing) => ing.name),
+            servings: allServings[0], // Usar el primer valor de servings
+            cuisine: "international",
+            difficulty: "medium",
+            count: 1,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to generate recipe");
+        }
+
+        const data = await response.json();
+        console.log("Recipe generated with:", data.source);
+
+        // Redirigir a la página de recetas generadas con los ingredientes
+        const ingredientsParam = encodeURIComponent(
+          JSON.stringify(ingredients.map((ing) => ing.name))
+        );
+        const servingsParam = allServings[0];
+
+        router.push(
+          `/recipes?ingredients=${ingredientsParam}&servings=${servingsParam}`
+        );
       }
-
-      const data = await response.json();
-      console.log("Recipe generated with:", data.source);
-
-      // Redirigir a la página de recetas generadas con los ingredientes
-      const ingredientsParam = encodeURIComponent(
-        JSON.stringify(ingredients.map((ing) => ing.name))
-      );
-      const servingsParam = allServings[0];
-
-      router.push(
-        `/recipes?ingredients=${ingredientsParam}&servings=${servingsParam}`
-      );
     } catch (error) {
       console.error("Error creating recipe:", error);
       showNotification("Error creating recipe. Please try again.", "error");
@@ -344,7 +394,7 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
               color: colors.interface.text.primary,
             }}
           >
-            Create your perfect recipe
+            {isEditing ? "Edit your recipe" : "Create your perfect recipe"}
           </h1>
 
           {/* Sección de Ingredientes */}
@@ -544,7 +594,7 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
           {/* Botones de acción */}
           <div className="flex gap-4">
             <Button variant="primary" onClick={handleCreateRecipe}>
-              Create recipe
+              {isEditing ? "Update recipe" : "Create recipe"}
             </Button>
             <Button variant="secondary" onClick={handleCancel}>
               Cancel
