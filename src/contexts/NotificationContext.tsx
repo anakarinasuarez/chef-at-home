@@ -68,8 +68,8 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   return (
     <NotificationContext.Provider value={value}>
       {children}
-      {/* Render notifications */}
-      <div className="fixed top-20 right-4 z-50 space-y-2">
+      {/* Render notifications - DISABLED */}
+      {/* <div className="fixed top-20 right-4 z-50 space-y-2">
         {notifications.map((notification) => (
           <NotificationItem
             key={notification.id}
@@ -77,7 +77,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
             onRemove={removeNotification}
           />
         ))}
-      </div>
+      </div> */}
     </NotificationContext.Provider>
   );
 }

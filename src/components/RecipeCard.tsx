@@ -256,8 +256,8 @@ export default function RecipeCard({
               className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg transition-colors border"
               style={{
                 backgroundColor: "transparent",
-                color: colors.interface.text.secondary,
-                borderColor: colors.interface.text.secondary,
+                color: colors.brand.primary[500],
+                borderColor: colors.brand.primary[500],
                 fontSize: typography.styles["button"].fontSize,
                 fontWeight: typography.styles["button"].fontWeight,
               }}
@@ -269,9 +269,8 @@ export default function RecipeCard({
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = colors.interface.text.secondary;
-                e.currentTarget.style.borderColor =
-                  colors.interface.text.secondary;
+                e.currentTarget.style.color = colors.brand.primary[500];
+                e.currentTarget.style.borderColor = colors.brand.primary[500];
               }}
             >
               <MdDelete
@@ -287,8 +286,8 @@ export default function RecipeCard({
               className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg transition-colors border"
               style={{
                 backgroundColor: "transparent",
-                color: colors.interface.text.secondary,
-                borderColor: colors.interface.text.secondary,
+                color: colors.brand.primary[500],
+                borderColor: colors.brand.primary[500],
                 fontSize: typography.styles["button"].fontSize,
                 fontWeight: typography.styles["button"].fontWeight,
               }}
@@ -299,7 +298,7 @@ export default function RecipeCard({
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = colors.interface.text.secondary;
+                e.currentTarget.style.color = colors.brand.primary[500];
               }}
             >
               <IoShareSocialSharp

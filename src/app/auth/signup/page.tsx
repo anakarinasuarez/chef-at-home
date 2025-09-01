@@ -8,6 +8,7 @@ import Nav from "@/components/Nav";
 import Image from "next/image";
 import plateImage from "@/assets/images/plate.png";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNotification } from "@/contexts/NotificationContext";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({

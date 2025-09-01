@@ -29,15 +29,13 @@ export default function RecipesPage() {
   const router = useRouter();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set());
-  const [isLoading, setIsLoading] = useState(true);
+
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Generate recipes with AI when component mounts
   useEffect(() => {
     const generateRecipes = async () => {
       try {
-        setIsLoading(true);
-
         // Get ingredients from URL params or localStorage
         const urlParams = new URLSearchParams(window.location.search);
         const ingredientsParam = urlParams.get("ingredients");
@@ -126,8 +124,6 @@ export default function RecipesPage() {
           },
         ];
         setRecipes(fallbackRecipes);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -211,30 +207,29 @@ export default function RecipesPage() {
 
   return (
     <div
-      className="min-h-screen"
+      className="min-h-screen overflow-y-hidden"
       style={{ backgroundColor: colors.interface.background.primary }}
     >
       <Nav showMenu={true} userName={user.name} currentPage="generated" />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 overflow-y-hidden">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={handleBackToHome}
-            className="p-2 rounded-lg transition-colors"
+            className="p-2 rounded-lg transition-colors border"
             style={{
-              backgroundColor: colors.interface.background.secondary,
-              color: colors.interface.text.secondary,
+              backgroundColor: "transparent",
+              color: colors.brand.primary[500],
+              borderColor: colors.brand.primary[500],
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                colors.interface.state.hover;
-              e.currentTarget.style.color = colors.interface.text.primary;
+              e.currentTarget.style.backgroundColor = colors.brand.primary[500];
+              e.currentTarget.style.color = colors.base.white;
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor =
-                colors.interface.background.secondary;
-              e.currentTarget.style.color = colors.interface.text.secondary;
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = colors.brand.primary[500];
             }}
           >
             <FiArrowLeft className="text-2xl" />
@@ -255,32 +250,8 @@ export default function RecipesPage() {
           </div>
         </div>
 
-        {/* Loading State */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div
-                className="animate-spin rounded-full h-16 w-16 border-b-2 mx-auto mb-4"
-                style={{ borderColor: colors.brand.primary[500] }}
-              ></div>
-              <p
-                className="text-lg"
-                style={{ color: colors.interface.text.primary }}
-              >
-                Generating delicious recipes...
-              </p>
-              <p
-                className="text-sm mt-2"
-                style={{ color: colors.interface.text.secondary }}
-              >
-                This may take a few moments
-              </p>
-            </div>
-          </div>
-        )}
-
         {/* Recipes Horizontal Scroll */}
-        {!isLoading && recipes.length > 0 && (
+        {recipes.length > 0 && (
           <div className="relative">
             {/* Scroll Container */}
             <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide h-[500px] items-center">
@@ -315,7 +286,7 @@ export default function RecipesPage() {
         )}
 
         {/* Empty State */}
-        {!isLoading && recipes.length === 0 && (
+        {recipes.length === 0 && (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">🍽️</div>
             <h2
@@ -332,18 +303,20 @@ export default function RecipesPage() {
             </p>
             <button
               onClick={handleBackToHome}
-              className="px-6 py-3 rounded-lg transition-colors"
+              className="px-6 py-3 rounded-lg transition-colors border"
               style={{
-                backgroundColor: colors.brand.primary[500],
-                color: colors.base.white,
+                backgroundColor: "transparent",
+                color: colors.brand.primary[500],
+                borderColor: colors.brand.primary[500],
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[600];
+                  colors.brand.primary[500];
+                e.currentTarget.style.color = colors.base.white;
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[500];
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = colors.brand.primary[500];
               }}
             >
               Back to Home

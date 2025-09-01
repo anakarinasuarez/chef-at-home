@@ -334,8 +334,8 @@ export default function RecipeDetailPage() {
                     className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium border"
                     style={{
                       backgroundColor: "transparent",
-                      color: colors.interface.text.secondary,
-                      borderColor: colors.interface.text.secondary,
+                      color: colors.brand.primary[500],
+                      borderColor: colors.brand.primary[500],
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = "#EF4444";
@@ -344,10 +344,9 @@ export default function RecipeDetailPage() {
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color =
-                        colors.interface.text.secondary;
+                      e.currentTarget.style.color = colors.brand.primary[500];
                       e.currentTarget.style.borderColor =
-                        colors.interface.text.secondary;
+                        colors.brand.primary[500];
                     }}
                   >
                     <MdDelete
@@ -361,8 +360,8 @@ export default function RecipeDetailPage() {
                     className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium border"
                     style={{
                       backgroundColor: "transparent",
-                      color: colors.interface.text.secondary,
-                      borderColor: colors.interface.text.secondary,
+                      color: colors.brand.primary[500],
+                      borderColor: colors.brand.primary[500],
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor =
@@ -372,8 +371,7 @@ export default function RecipeDetailPage() {
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color =
-                        colors.interface.text.secondary;
+                      e.currentTarget.style.color = colors.brand.primary[500];
                     }}
                   >
                     <IoShareSocialSharp

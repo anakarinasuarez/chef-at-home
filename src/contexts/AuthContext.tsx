@@ -49,9 +49,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       } catch {
         console.error("Error checking auth");
-      } finally {
-        setIsLoading(false);
       }
+      // Sin loading, verificación instantánea
+      setIsLoading(false);
     };
 
     checkAuth();

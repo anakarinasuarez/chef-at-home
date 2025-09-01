@@ -56,21 +56,6 @@ export default function MyRecipesPage() {
     return () => container.removeEventListener("scroll", handleScroll);
   }, [savedRecipes.length]);
 
-  // Mostrar spinner de carga mientras se verifica la autenticación
-  if (isLoading) {
-    return (
-      <div
-        className="min-h-screen text-white flex items-center justify-center"
-        style={{ backgroundColor: colors.interface.background.primary }}
-      >
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Si no está logueado, redirigir al login
   if (!user) {
     router.push("/auth/login");
@@ -125,20 +110,19 @@ export default function MyRecipesPage() {
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={handleBackToHome}
-            className="p-2 rounded-lg transition-colors"
+            className="p-2 rounded-lg transition-colors border"
             style={{
-              backgroundColor: colors.interface.background.secondary,
-              color: colors.interface.text.secondary,
+              backgroundColor: "transparent",
+              color: colors.brand.primary[500],
+              borderColor: colors.brand.primary[500],
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                colors.interface.state.hover;
-              e.currentTarget.style.color = colors.interface.text.primary;
+              e.currentTarget.style.backgroundColor = colors.brand.primary[500];
+              e.currentTarget.style.color = colors.base.white;
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor =
-                colors.interface.background.secondary;
-              e.currentTarget.style.color = colors.interface.text.secondary;
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = colors.brand.primary[500];
             }}
           >
             <IoIosArrowBack className="text-2xl" />
@@ -177,18 +161,20 @@ export default function MyRecipesPage() {
             </p>
             <button
               onClick={handleBackToHome}
-              className="px-6 py-3 rounded-lg transition-colors"
+              className="px-6 py-3 rounded-lg transition-colors border"
               style={{
-                backgroundColor: colors.brand.primary[500],
-                color: colors.base.white,
+                backgroundColor: "transparent",
+                color: colors.brand.primary[500],
+                borderColor: colors.brand.primary[500],
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[600];
+                  colors.brand.primary[500];
+                e.currentTarget.style.color = colors.base.white;
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[500];
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = colors.brand.primary[500];
               }}
             >
               Back to Home

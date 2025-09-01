@@ -13,21 +13,6 @@ export default function HomePage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  // Mostrar spinner de carga mientras se verifica la autenticación
-  if (isLoading) {
-    return (
-      <div
-        className="min-h-screen text-white flex items-center justify-center"
-        style={{ backgroundColor: colors.interface.background.primary }}
-      >
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Si el usuario está logueado, mostrar la interfaz de crear recetas
   if (user) {
     return <CreateRecipePage userName={user.name} user={user} />;
@@ -148,7 +133,7 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
   const [customServings, setCustomServings] = useState<number[]>([]);
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [newCustomServing, setNewCustomServing] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
+
   const [notification, setNotification] = useState<{
     message: string;
     type: "success" | "error" | "info";
@@ -217,9 +202,6 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
       return;
     }
 
-    // Activar loading
-    setIsCreating(true);
-
     try {
       // Crear la receta usando la nueva API route
       const response = await fetch("/api/recipes/generate", {
@@ -243,25 +225,18 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
       const data = await response.json();
       console.log("Recipe generated with:", data.source);
 
-      showNotification("Recipe created successfully!", "success");
-
       // Redirigir a la página de recetas generadas con los ingredientes
       const ingredientsParam = encodeURIComponent(
         JSON.stringify(ingredients.map((ing) => ing.name))
       );
       const servingsParam = allServings[0];
 
-      setTimeout(() => {
-        router.push(
-          `/recipes?ingredients=${ingredientsParam}&servings=${servingsParam}`
-        );
-      }, 1500);
+      router.push(
+        `/recipes?ingredients=${ingredientsParam}&servings=${servingsParam}`
+      );
     } catch (error) {
       console.error("Error creating recipe:", error);
       showNotification("Error creating recipe. Please try again.", "error");
-    } finally {
-      // Desactivar loading
-      setIsCreating(false);
     }
   };
 
@@ -302,69 +277,6 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
     setShowCustomInput(false);
     setNewCustomServing("");
   };
-
-  // Si está creando la receta, mostrar loading
-  if (isCreating) {
-    return (
-      <div
-        className="min-h-screen text-white"
-        style={{ backgroundColor: colors.interface.background.primary }}
-      >
-        {/* Nav con menú para usuarios logueados */}
-        <Nav showMenu={true} userName={userName} currentPage="create" />
-
-        <main className="flex min-h-[calc(100vh-120px)] pt-4">
-          {/* Columna Izquierda - Loading */}
-          <div className="flex-1 flex flex-col items-center justify-center px-8 lg:px-16 pt-4">
-            {/* Loading Spinner */}
-            <div className="mb-6">
-              <div
-                className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin"
-                style={{
-                  borderColor: `${colors.brand.primary[500]} transparent ${colors.brand.primary[500]} ${colors.brand.primary[500]}`,
-                }}
-              ></div>
-            </div>
-
-            {/* Mensaje de Loading */}
-            <h2
-              className="text-center"
-              style={{
-                fontSize: typography.styles["title-2"].fontSize,
-                fontWeight: typography.styles["title-2"].fontWeight,
-                color: colors.interface.text.primary,
-              }}
-            >
-              Creating flavor...
-            </h2>
-
-            {/* Mensaje adicional */}
-            <p
-              className="text-center mt-4 opacity-80"
-              style={{
-                fontSize: typography.styles["body"].fontSize,
-                color: colors.interface.text.secondary,
-              }}
-            >
-              Please wait while we craft your perfect recipe
-            </p>
-          </div>
-
-          {/* Columna Derecha - Imagen (mantener igual) */}
-          <div className="flex-1 flex items-center justify-center px-8 lg:px-16">
-            <div className="relative w-full max-w-lg">
-              <Image
-                src={plateImage}
-                alt="Gourmet dish"
-                className="w-full h-auto rounded-lg shadow-2xl"
-                priority
-              />
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   // Renderizado normal cuando no está creando
   return (
