@@ -20,6 +20,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const router = useRouter();
   const { register } = useAuth();
+  const { showNotification } = useNotification();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -49,7 +50,7 @@ export default function SignupPage() {
       }
 
       // Registro exitoso
-      alert("¡Usuario registrado exitosamente!");
+      showNotification("¡Usuario registrado exitosamente!", "success");
       router.push("/auth/login"); // Redirigir al login
     } catch (error) {
       setError(error instanceof Error ? error.message : "Error en el registro");
@@ -67,7 +68,7 @@ export default function SignupPage() {
       <Nav showMenu={false} />
 
       {/* Contenido Principal - Layout de 2 columnas */}
-      <main className="flex min-h-[calc(100vh-120px)] pt-8">
+      <main className="flex min-h-[calc(100vh-120px)] pt-20">
         {/* Columna Izquierda - Formulario de Registro */}
         <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 pt-8">
           {/* Headline Principal */}

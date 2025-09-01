@@ -34,7 +34,7 @@ function LandingPage() {
       {/* Nav sin menú para usuarios no logueados */}
       <Nav showMenu={false} />
 
-      <main className="flex min-h-[calc(100vh-120px)] pt-0">
+      <main className="flex min-h-[calc(100vh-120px)] pt-20">
         {/* Columna Izquierda - Contenido de Landing */}
         <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 pt-20">
           {/* Título Principal */}
@@ -318,7 +318,7 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
         </div>
       )}
 
-      <main className="flex min-h-[calc(100vh-120px)] pt-4">
+      <main className="flex min-h-[calc(100vh-120px)] pt-20">
         {/* Columna Izquierda - Interfaz de Creación de Recetas */}
         <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 pt-4">
           {/* Mensaje de Bienvenida */}

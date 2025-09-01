@@ -61,7 +61,7 @@ export default function Nav({
 
   return (
     <nav
-      className="w-full px-8 py-4 flex items-center justify-between relative"
+      className="w-full px-8 py-4 flex items-center justify-between fixed top-0 left-0 z-50"
       style={{ backgroundColor: colors.interface.background.secondary }}
     >
       {/* Logo - Ahora es clickeable y navega a inicio */}

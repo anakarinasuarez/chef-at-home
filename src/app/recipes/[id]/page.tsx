@@ -42,6 +42,7 @@ export default function RecipeDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isFromMyRecipes, setIsFromMyRecipes] = useState(false);
   const [isRecipeSavedState, setIsRecipeSavedState] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const loadRecipe = () => {
@@ -158,12 +159,18 @@ export default function RecipeDetailPage() {
 
   const handleDeleteRecipe = () => {
     if (!recipe) return;
+    setShowDeleteModal(true);
+  };
 
-    // Confirmar antes de eliminar
-    if (window.confirm("Are you sure you want to delete this recipe?")) {
-      removeRecipe(recipe.id);
-      router.push("/my-recipes");
-    }
+  const confirmDelete = () => {
+    if (!recipe) return;
+    removeRecipe(recipe.id);
+    setShowDeleteModal(false);
+    router.push("/my-recipes");
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
   };
 
   const handleShareRecipe = () => {
@@ -254,7 +261,7 @@ export default function RecipeDetailPage() {
     >
       <Nav showMenu={true} userName={user?.name || "User"} />
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8 mt-20">
         {/* Recipe Header */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -321,6 +328,8 @@ export default function RecipeDetailPage() {
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "transparent";
                       e.currentTarget.style.color = colors.brand.primary[500];
+                      e.currentTarget.style.borderColor =
+                        colors.brand.primary[500];
                     }}
                   >
                     <FaPencil
@@ -536,6 +545,62 @@ export default function RecipeDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div
+            className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+            style={{ backgroundColor: colors.interface.background.secondary }}
+          >
+            <div className="text-center">
+              <h3
+                className="text-xl font-bold mb-4"
+                style={{ color: colors.interface.text.primary }}
+              >
+                Delete Recipe
+              </h3>
+              <p
+                className="mb-6"
+                style={{ color: colors.interface.text.secondary }}
+              >
+                Are you sure you want to delete the recipe?
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={cancelDelete}
+                  className="px-4 py-2 rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: "transparent",
+                    color: colors.brand.primary[500],
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="px-4 py-2 rounded-lg transition-colors border"
+                  style={{
+                    backgroundColor: "transparent",
+                    color: "#EF4444",
+                    borderColor: "#EF4444",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#EF4444";
+                    e.currentTarget.style.color = colors.base.white;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                    e.currentTarget.style.color = "#EF4444";
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

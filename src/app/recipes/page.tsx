@@ -207,12 +207,12 @@ export default function RecipesPage() {
 
   return (
     <div
-      className="min-h-screen overflow-y-hidden"
+      className="min-h-screen"
       style={{ backgroundColor: colors.interface.background.primary }}
     >
       <Nav showMenu={true} userName={user.name} currentPage="generated" />
 
-      <div className="max-w-7xl mx-auto px-4 py-8 overflow-y-hidden">
+      <div className="max-w-7xl mx-auto px-4 py-8 mt-20">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button

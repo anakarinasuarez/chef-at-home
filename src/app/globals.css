@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-html {
-  overflow-y: hidden;
-}
-
 :root {
   --background: #131313;
   --foreground: #ffffff;
@@ -35,7 +31,6 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-y: hidden;
 }
 
 /* Asegurar que las fuentes se carguen correctamente */

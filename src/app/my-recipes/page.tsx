@@ -7,12 +7,14 @@ import Nav from "@/components/Nav";
 import { colors, typography } from "@/design-system";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSavedRecipes } from "@/hooks";
+import { useNotification } from "@/contexts/NotificationContext";
 import RecipeCard from "@/components/RecipeCard";
 
 export default function MyRecipesPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const { savedRecipes, loading, removeRecipe } = useSavedRecipes();
+  const { showNotification } = useNotification();
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Detectar scroll automáticamente para actualizar el punto activo
@@ -105,7 +107,7 @@ export default function MyRecipesPage() {
     >
       <Nav showMenu={true} userName={user.name} currentPage="my-recipes" />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 mt-20">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
@@ -214,7 +216,10 @@ export default function MyRecipesPage() {
                         });
                       } else {
                         navigator.clipboard.writeText(window.location.href);
-                        alert("Recipe link copied to clipboard!");
+                        showNotification(
+                          "Recipe link copied to clipboard!",
+                          "success"
+                        );
                       }
                     }}
                   />

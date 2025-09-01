@@ -57,7 +57,7 @@ export default function LoginPage() {
       <Nav showMenu={false} />
 
       {/* Contenido Principal - Layout de 2 columnas */}
-      <main className="flex min-h-[calc(100vh-120px)] pt-8">
+      <main className="flex min-h-[calc(100vh-120px)] pt-20">
         {/* Columna Izquierda - Formulario de Login */}
         <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 pt-8">
           {/* Headline Principal */}
