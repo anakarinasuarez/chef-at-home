@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { BiTime, BiUser, BiStar, BiBookmark } from "react-icons/bi";
 import { FaPencil } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
-import { IoShareSocialSharp } from "react-icons/io5";
+import { BiShare } from "react-icons/bi";
 import { colors, typography } from "@/design-system";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSavedRecipes } from "@/hooks";
 import { useNotification } from "@/contexts/NotificationContext";
+import ImagePlaceholder from "./ImagePlaceholder";
 
 interface RecipeCardProps {
   recipe: {
@@ -39,6 +40,7 @@ export default function RecipeCard({
   const { isRecipeSaved, toggleSaveRecipe } = useSavedRecipes();
   const { showNotification } = useNotification();
   const [isSaving, setIsSaving] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const recipeId = recipe.id || Date.now().toString();
   const isSaved = isRecipeSaved(recipeId);
@@ -86,6 +88,11 @@ export default function RecipeCard({
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete?.(recipe.id || "");
   };
 
   return (
@@ -153,21 +160,24 @@ export default function RecipeCard({
       {/* Recipe Image - Below info with padding */}
       <div className="px-6">
         <div className="relative h-48 overflow-hidden rounded-lg">
-          {recipe.image ? (
+          {recipe.image && !imageError ? (
             <img
               src={recipe.image}
               alt={recipe.title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+              onError={() => setImageError(true)}
             />
           ) : (
-            <div
-              className="w-full h-full flex items-center justify-center"
-              style={{ backgroundColor: colors.interface.background.tertiary }}
-            >
-              <span style={{ color: colors.interface.text.secondary }}>
-                No image
-              </span>
-            </div>
+            <ImagePlaceholder
+              title={recipe.title}
+              cuisine={
+                recipe.source === "fallback-enhanced"
+                  ? "Italian"
+                  : "International"
+              }
+              className="h-48"
+              ingredients={[]}
+            />
           )}
         </div>
       </div>
@@ -249,10 +259,7 @@ export default function RecipeCard({
               Edit
             </button>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete?.(recipe.id || "");
-              }}
+              onClick={handleDeleteClick}
               className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg transition-colors border"
               style={{
                 backgroundColor: "transparent",
@@ -301,7 +308,7 @@ export default function RecipeCard({
                 e.currentTarget.style.color = colors.brand.primary[500];
               }}
             >
-              <IoShareSocialSharp
+              <BiShare
                 className="text-lg"
                 style={{ color: colors.brand.primary[500] }}
               />

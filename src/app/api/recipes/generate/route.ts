@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       recipes = [recipe];
     }
 
-    // Add images to recipes
+    // Add images to recipes with better error handling
     const recipesWithImages = await Promise.all(
       recipes.map(async (recipe) => {
         try {
@@ -65,7 +65,8 @@ export async function POST(request: NextRequest) {
           return { ...recipe, image };
         } catch (error) {
           console.error("Error getting image for recipe:", error);
-          return { ...recipe, image: null };
+          // Use fallback image instead of null
+          return { ...recipe, image: UnsplashService.getFallbackImage() };
         }
       })
     );
@@ -73,6 +74,11 @@ export async function POST(request: NextRequest) {
     console.log(
       `Recipes generated with: ${recipesWithImages[0]?.source || "gemini"}`
     );
+
+    // Validate that we have recipes before returning
+    if (!recipesWithImages || recipesWithImages.length === 0) {
+      throw new Error("No recipes were generated");
+    }
 
     return NextResponse.json({
       recipes: recipesWithImages,
@@ -84,15 +90,53 @@ export async function POST(request: NextRequest) {
 
     // Fallback to template generation
     try {
-      // Usar los parámetros originales en lugar de intentar leer el body de nuevo
+      console.log("Attempting fallback generation...");
       const fallbackRecipes = generateFallbackRecipes(
         ingredients,
         servings,
         count || 1
       );
+
+      // Add images based on ingredients
+      const fallbackRecipesWithImages = fallbackRecipes.map((recipe, index) => {
+        try {
+          // Intentar buscar una imagen específica basada en los ingredientes
+          const searchQuery =
+            UnsplashService.generateSearchQueryFromIngredients(ingredients);
+
+          // Usar imagen específica de la cocina detectada
+          const detectedCuisine =
+            UnsplashService.detectCuisineFromIngredients(ingredients);
+          const imageUrl = UnsplashService.getCuisineSpecificImage(
+            detectedCuisine,
+            ingredients,
+            index
+          );
+
+          return {
+            ...recipe,
+            image: imageUrl,
+          };
+        } catch (error) {
+          // Fallback a imagen específica de la cocina
+          return {
+            ...recipe,
+            image: UnsplashService.getCuisineSpecificImage(
+              recipe.cuisine,
+              ingredients,
+              index
+            ),
+          };
+        }
+      });
+
+      console.log(
+        `Fallback recipes generated: ${fallbackRecipesWithImages.length}`
+      );
+
       return NextResponse.json({
-        recipes: fallbackRecipes,
-        count: fallbackRecipes.length,
+        recipes: fallbackRecipesWithImages,
+        count: fallbackRecipesWithImages.length,
         source: "fallback",
       });
     } catch (fallbackError) {
@@ -111,40 +155,281 @@ function generateFallbackRecipes(
   count: number = 1
 ): any[] {
   const recipes = [];
-  const cuisines = [
-    "Italian",
-    "Mexican",
-    "Asian",
-    "Mediterranean",
-    "American",
-    "French",
-    "Indian",
-    "Thai",
-  ];
+
+  // Analizar los ingredientes para determinar el tipo de plato
+  const mainIngredient = ingredients[0]?.toLowerCase() || "chicken";
+  const secondaryIngredient = ingredients[1]?.toLowerCase() || "vegetables";
+
+  // Determinar el tipo de cocina basado en los ingredientes
+  const getCuisineFromIngredients = (ingredients: string[]): string => {
+    const ingredientStr = ingredients.join(" ").toLowerCase();
+
+    if (
+      ingredientStr.includes("pasta") ||
+      ingredientStr.includes("tomato") ||
+      ingredientStr.includes("basil")
+    ) {
+      return "Italian";
+    } else if (
+      ingredientStr.includes("rice") ||
+      ingredientStr.includes("soy") ||
+      ingredientStr.includes("ginger")
+    ) {
+      return "Asian";
+    } else if (
+      ingredientStr.includes("tortilla") ||
+      ingredientStr.includes("chili") ||
+      ingredientStr.includes("lime")
+    ) {
+      return "Mexican";
+    } else if (
+      ingredientStr.includes("curry") ||
+      ingredientStr.includes("coconut") ||
+      ingredientStr.includes("turmeric")
+    ) {
+      return "Indian";
+    } else if (
+      ingredientStr.includes("fish") ||
+      ingredientStr.includes("lemon") ||
+      ingredientStr.includes("olive")
+    ) {
+      return "Mediterranean";
+    } else if (
+      ingredientStr.includes("beef") ||
+      ingredientStr.includes("wine") ||
+      ingredientStr.includes("herbs")
+    ) {
+      return "French";
+    } else if (
+      ingredientStr.includes("lemongrass") ||
+      ingredientStr.includes("fish sauce") ||
+      ingredientStr.includes("lime")
+    ) {
+      return "Thai";
+    }
+
+    return "International";
+  };
+
+  // Cuisines con sus características específicas
+  const cuisineData: Record<
+    string,
+    {
+      regionalNames: string[];
+      methods: string[];
+      spices: string[];
+      baseIngredients: string[];
+    }
+  > = {
+    Italian: {
+      regionalNames: [
+        "Tuscan",
+        "Sicilian",
+        "Lombard",
+        "Piedmont",
+        "Venetian",
+        "Roman",
+        "Neapolitan",
+      ],
+      methods: ["Braised", "Sautéed", "Roasted", "Grilled", "Baked"],
+      spices: ["basil", "oregano", "rosemary", "thyme", "garlic", "olive oil"],
+      baseIngredients: [
+        "olive oil",
+        "garlic",
+        "onion",
+        "parmesan cheese",
+        "fresh herbs",
+      ],
+    },
+    Mexican: {
+      regionalNames: [
+        "Oaxacan",
+        "Yucatecan",
+        "Poblano",
+        "Veracruzano",
+        "Jalisciense",
+      ],
+      methods: ["Grilled", "Sautéed", "Braised", "Roasted", "Fried"],
+      spices: [
+        "cumin",
+        "chili powder",
+        "oregano",
+        "garlic",
+        "cilantro",
+        "lime",
+      ],
+      baseIngredients: [
+        "onion",
+        "garlic",
+        "lime",
+        "cilantro",
+        "jalapeño",
+        "tortillas",
+      ],
+    },
+    Asian: {
+      regionalNames: ["Cantonese", "Sichuan", "Hunan", "Shandong", "Fujian"],
+      methods: ["Stir-fried", "Steamed", "Braised", "Grilled", "Deep-fried"],
+      spices: ["ginger", "garlic", "soy sauce", "sesame oil", "star anise"],
+      baseIngredients: [
+        "ginger",
+        "garlic",
+        "soy sauce",
+        "sesame oil",
+        "green onions",
+      ],
+    },
+    Mediterranean: {
+      regionalNames: ["Provençal", "Andalusian", "Catalan", "Greek", "Turkish"],
+      methods: ["Grilled", "Roasted", "Sautéed", "Baked", "Braised"],
+      spices: ["oregano", "basil", "thyme", "rosemary", "garlic", "lemon"],
+      baseIngredients: ["olive oil", "garlic", "lemon", "herbs", "tomatoes"],
+    },
+    French: {
+      regionalNames: [
+        "Burgundian",
+        "Norman",
+        "Provençal",
+        "Languedoc",
+        "Alsacian",
+      ],
+      methods: ["Braised", "Sautéed", "Roasted", "Baked", "Grilled"],
+      spices: ["thyme", "rosemary", "tarragon", "bay leaves", "shallots"],
+      baseIngredients: [
+        "butter",
+        "shallots",
+        "white wine",
+        "herbs",
+        "dijon mustard",
+      ],
+    },
+    Indian: {
+      regionalNames: [
+        "Punjabi",
+        "Bengali",
+        "Gujarati",
+        "Maharashtrian",
+        "Tamil",
+      ],
+      methods: ["Curried", "Tandoori", "Sautéed", "Braised", "Steamed"],
+      spices: ["cumin", "coriander", "turmeric", "cardamom", "ginger"],
+      baseIngredients: [
+        "onion",
+        "garlic",
+        "ginger",
+        "tomatoes",
+        "coconut milk",
+      ],
+    },
+    Thai: {
+      regionalNames: ["Northern", "Central", "Southern", "Isaan", "Bangkok"],
+      methods: ["Stir-fried", "Curried", "Grilled", "Steamed", "Deep-fried"],
+      spices: ["lemongrass", "galangal", "fish sauce", "lime", "basil"],
+      baseIngredients: ["fish sauce", "lime", "basil", "mint", "coconut milk"],
+    },
+  };
 
   for (let i = 0; i < count; i++) {
-    const randomCuisine = cuisines[Math.floor(Math.random() * cuisines.length)];
-    const randomDifficulty = ["Easy", "Medium", "Hard"][
-      Math.floor(Math.random() * 3)
+    // Determinar la cocina basada en los ingredientes reales
+    const detectedCuisine = getCuisineFromIngredients(ingredients);
+    const cuisine = cuisineData[detectedCuisine] || cuisineData["Italian"];
+
+    // Generar variedad en dificultad, método y región
+    const difficulties = ["Easy", "Medium", "Hard"];
+    const randomDifficulty = difficulties[i % difficulties.length];
+
+    const methods = cuisine.methods;
+    const randomMethod = methods[i % methods.length];
+
+    const regions = cuisine.regionalNames;
+    const randomRegion = regions[i % regions.length];
+
+    // Usar los ingredientes reales proporcionados con variación
+    const mainIngredient =
+      ingredients[i % ingredients.length] || ingredients[0] || "Chicken";
+    const secondaryIngredient =
+      ingredients[(i + 1) % ingredients.length] ||
+      ingredients[1] ||
+      "Vegetables";
+
+    // Generar ingredientes más realistas con variedad
+    const recipeIngredients = [
+      ...ingredients.map((ing, index) => ({
+        name: ing,
+        quantity: Math.ceil(servings / 2) + i * 2 + index,
+        unit: index % 2 === 0 ? "pieces" : "grams",
+      })),
+      // Agregar ingredientes base de la cocina con rotación
+      ...cuisine.baseIngredients
+        .slice(
+          i % cuisine.baseIngredients.length,
+          (i % cuisine.baseIngredients.length) + 3
+        )
+        .map((ing: string, index: number) => ({
+          name: ing,
+          quantity: (index + i + 1).toString(),
+          unit: ing.includes("oil")
+            ? "tbsp"
+            : ing.includes("sauce")
+            ? "tbsp"
+            : "pieces",
+        })),
     ];
 
-    recipes.push({
-      title: `${randomCuisine} ${ingredients[0]} Delight ${i + 1}`,
-      ingredients: ingredients.map((ing) => ({
-        name: ing,
-        quantity: Math.ceil(servings / 2) + i,
-        unit: "pieces",
-      })),
-      instructions: [
-        `Prepare ${ingredients.join(" and ")}`,
-        "Cook with authentic spices",
-        "Garnish and serve hot",
+    // Generar instrucciones más detalladas con variedad
+    const instructionTemplates = [
+      [
+        `Prepare and clean ${ingredients.join(", ")} thoroughly`,
+        `Heat oil in a large pan and ${randomMethod.toLowerCase()} the ${mainIngredient} until golden brown`,
+        `Add ${secondaryIngredient} and ${cuisine.spices
+          .slice(0, 2)
+          .join(", ")}`,
+        `Cook for 8-10 minutes until all ingredients are well combined`,
+        `Season with ${cuisine.spices.slice(2, 4).join(" and ")} to taste`,
+        `Garnish with fresh herbs and serve hot with ${cuisine.baseIngredients[0]}`,
       ],
-      cookingTime: `${25 + i * 5} minutes`,
+      [
+        `Wash and prepare ${ingredients.join(", ")} for cooking`,
+        `In a heated pan, ${randomMethod.toLowerCase()} ${mainIngredient} with aromatic spices`,
+        `Incorporate ${secondaryIngredient} and add ${cuisine.spices
+          .slice(1, 3)
+          .join(", ")}`,
+        `Simmer for 10-12 minutes until flavors meld together`,
+        `Adjust seasoning with ${cuisine.spices.slice(3, 5).join(" and ")}`,
+        `Finish with a drizzle of ${cuisine.baseIngredients[1]} and serve immediately`,
+      ],
+      [
+        `Begin by preparing ${ingredients.join(", ")} as specified`,
+        `Heat a skillet and ${randomMethod.toLowerCase()} ${mainIngredient} to perfection`,
+        `Combine ${secondaryIngredient} with ${cuisine.spices
+          .slice(2, 4)
+          .join(", ")}`,
+        `Allow to cook for 6-8 minutes until well integrated`,
+        `Enhance with ${cuisine.spices.slice(4, 6).join(" and ")} for depth`,
+        `Present beautifully garnished with ${cuisine.baseIngredients[2]}`,
+      ],
+    ];
+
+    const instructions = instructionTemplates[i % instructionTemplates.length];
+
+    const cookingTime = 20 + i * 5 + Math.floor(Math.random() * 10);
+    const prepTime = 10 + i * 3 + Math.floor(Math.random() * 8);
+    const totalTime = cookingTime + prepTime;
+
+    recipes.push({
+      title: `${randomRegion} ${randomMethod} ${mainIngredient} ${detectedCuisine} Style`,
+      description: `A flavorful ${detectedCuisine.toLowerCase()} dish featuring ${mainIngredient} with authentic ${cuisine.spices
+        .slice(0, 2)
+        .join(" and ")} flavors`,
+      ingredients: recipeIngredients,
+      instructions: instructions,
+      cookingTime: `${cookingTime} minutes`,
+      prepTime: `${prepTime} minutes`,
+      totalTime: `${totalTime} minutes`,
       difficulty: randomDifficulty,
-      cuisine: randomCuisine,
+      cuisine: detectedCuisine,
       servings: servings,
-      source: "fallback",
+      source: "fallback-enhanced",
     });
   }
 

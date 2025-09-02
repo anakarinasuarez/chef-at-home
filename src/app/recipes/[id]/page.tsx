@@ -6,7 +6,7 @@ import { BiPlus, BiShareAlt, BiTime, BiUser } from "react-icons/bi";
 import { IoIosArrowBack } from "react-icons/io";
 import { FaPencil } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
-import { IoShareSocialSharp } from "react-icons/io5";
+import { BiShare } from "react-icons/bi";
 import Nav from "@/components/Nav";
 import IngredientsCard from "@/components/IngredientsCard";
 import { colors } from "@/design-system";
@@ -14,6 +14,8 @@ import { typography } from "@/design-system";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSavedRecipes } from "@/hooks";
 import { useNotification } from "@/contexts/NotificationContext";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
+import ImagePlaceholder from "@/components/ImagePlaceholder";
 
 interface Recipe {
   id: string;
@@ -43,6 +45,7 @@ export default function RecipeDetailPage() {
   const [isFromMyRecipes, setIsFromMyRecipes] = useState(false);
   const [isRecipeSavedState, setIsRecipeSavedState] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const loadRecipe = () => {
@@ -398,7 +401,7 @@ export default function RecipeDetailPage() {
                       e.currentTarget.style.color = colors.brand.primary[500];
                     }}
                   >
-                    <IoShareSocialSharp
+                    <BiShare
                       className="text-lg"
                       style={{ color: colors.brand.primary[500] }}
                     />
@@ -474,29 +477,20 @@ export default function RecipeDetailPage() {
           {/* Recipe Image - LEFT COLUMN (2/3 del ancho - más grande) */}
           <div className="lg:col-span-2">
             <div className="relative rounded-2xl overflow-hidden h-[500px] w-full">
-              {recipe.image ? (
+              {recipe.image && !imageError ? (
                 <img
                   src={recipe.image}
                   alt={recipe.title}
                   className="w-full h-full object-cover"
+                  onError={() => setImageError(true)}
                 />
               ) : (
-                <div
-                  className="w-full h-full flex items-center justify-center"
-                  style={{
-                    backgroundColor: colors.interface.background.secondary,
-                  }}
-                >
-                  <div className="text-center">
-                    <div className="text-6xl mb-4">🍽️</div>
-                    <p
-                      className="text-gray-400"
-                      style={{ color: colors.interface.text.secondary }}
-                    >
-                      No image available
-                    </p>
-                  </div>
-                </div>
+                <ImagePlaceholder
+                  title={recipe.title}
+                  cuisine={recipe.cuisine || "International"}
+                  className="h-[500px] w-full"
+                  ingredients={recipe.ingredients.map((ing) => ing.name)}
+                />
               )}
             </div>
           </div>
@@ -562,60 +556,12 @@ export default function RecipeDetailPage() {
       </div>
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div
-            className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
-            style={{ backgroundColor: colors.interface.background.secondary }}
-          >
-            <div className="text-center">
-              <h3
-                className="text-xl font-bold mb-4"
-                style={{ color: colors.interface.text.primary }}
-              >
-                Delete Recipe
-              </h3>
-              <p
-                className="mb-6"
-                style={{ color: colors.interface.text.secondary }}
-              >
-                Are you sure you want to delete the recipe?
-              </p>
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={cancelDelete}
-                  className="px-4 py-2 rounded-lg transition-colors"
-                  style={{
-                    backgroundColor: "transparent",
-                    color: colors.brand.primary[500],
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDelete}
-                  className="px-4 py-2 rounded-lg transition-colors border"
-                  style={{
-                    backgroundColor: "transparent",
-                    color: "#EF4444",
-                    borderColor: "#EF4444",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#EF4444";
-                    e.currentTarget.style.color = colors.base.white;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                    e.currentTarget.style.color = "#EF4444";
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        title={recipe?.title || ""}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSavedRecipes } from "@/hooks";
 import { useNotification } from "@/contexts/NotificationContext";
 import RecipeCard from "@/components/RecipeCard";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 
 export default function MyRecipesPage() {
   const { user, isLoading } = useAuth();
@@ -16,6 +17,8 @@ export default function MyRecipesPage() {
   const { savedRecipes, loading, removeRecipe } = useSavedRecipes();
   const { showNotification } = useNotification();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [recipeToDelete, setRecipeToDelete] = useState<any>(null);
 
   // Detectar scroll automáticamente para actualizar el punto activo
   useEffect(() => {
@@ -66,6 +69,27 @@ export default function MyRecipesPage() {
 
   const handleBackToHome = () => {
     router.push("/");
+  };
+
+  const handleDeleteClick = (recipe: any) => {
+    setRecipeToDelete(recipe);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    if (recipeToDelete) {
+      const success = removeRecipe(recipeToDelete.id);
+      if (success) {
+        showNotification("Recipe deleted successfully!", "success");
+      }
+    }
+    setShowDeleteModal(false);
+    setRecipeToDelete(null);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setRecipeToDelete(null);
   };
 
   const scrollToRecipe = (index: number) => {
@@ -196,15 +220,11 @@ export default function MyRecipesPage() {
                       router.push(`/recipes/${recipeId}`);
                     }}
                     onDelete={(recipeId) => {
-                      if (
-                        window.confirm(
-                          "Are you sure you want to delete this recipe?"
-                        )
-                      ) {
-                        const success = removeRecipe(recipeId);
-                        if (success) {
-                          // La notificación se maneja en el hook
-                        }
+                      const recipe = savedRecipes.find(
+                        (r) => r.id === recipeId
+                      );
+                      if (recipe) {
+                        handleDeleteClick(recipe);
                       }
                     }}
                     onShare={(recipe) => {
@@ -249,6 +269,14 @@ export default function MyRecipesPage() {
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          title={recipeToDelete?.title || ""}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
       </div>
     </div>
   );
