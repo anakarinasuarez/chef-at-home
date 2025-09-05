@@ -21,7 +21,7 @@ export default function IngredientsCard({
 }: IngredientsCardProps) {
   return (
     <div
-      className="rounded-xl pb-6 px-6 shadow-lg w-full min-w-96 overflow-hidden"
+      className="rounded-2xl pb-6 px-6 shadow-lg w-full overflow-hidden"
       style={{
         backgroundColor: colors.interface.background.secondary,
         minHeight: `${imageHeight}px`, // Altura mínima igual a la imagen
@@ -37,7 +37,7 @@ export default function IngredientsCard({
           Ingredients
         </h2>
         <div
-          className="px-4 py-2 rounded-full flex items-center gap-2 ml-8"
+          className="px-3 py-1.5 rounded-full flex items-center gap-1.5 ml-4"
           style={{
             backgroundColor: colors.interface.background.tertiary,
             border: "none",
@@ -45,7 +45,7 @@ export default function IngredientsCard({
           }}
         >
           <span
-            className="w-6 h-6 rounded-lg flex items-center justify-center text-sm font-bold"
+            className="w-5 h-5 rounded-lg flex items-center justify-center text-xs font-bold"
             style={{
               backgroundColor: colors.interface.background.secondary,
               color: colors.interface.text.primary,
@@ -54,7 +54,7 @@ export default function IngredientsCard({
             {servings}
           </span>
           <span
-            className="text-sm font-medium whitespace-nowrap"
+            className="text-xs font-medium whitespace-nowrap"
             style={{ color: colors.interface.text.primary }}
           >
             Serving amount

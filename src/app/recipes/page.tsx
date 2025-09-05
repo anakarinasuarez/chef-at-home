@@ -29,12 +29,17 @@ export default function RecipesPage() {
   const router = useRouter();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Generate recipes with AI when component mounts
   useEffect(() => {
     const generateRecipes = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
         // Get ingredients from URL params or localStorage
         const urlParams = new URLSearchParams(window.location.search);
@@ -56,6 +61,13 @@ export default function RecipesPage() {
           servings = parseInt(servingsParam) || 4;
         }
 
+        console.log(
+          "Generating recipes with ingredients:",
+          ingredients,
+          "servings:",
+          servings
+        );
+
         // Generate recipes using our new API route
         const response = await fetch("/api/recipes/generate", {
           method: "POST",
@@ -72,11 +84,13 @@ export default function RecipesPage() {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to generate recipes");
+          throw new Error(
+            `Failed to generate recipes: ${response.status} ${response.statusText}`
+          );
         }
 
         const data = await response.json();
-        console.log("Recipes generated with:", data.source);
+        console.log("Recipes generated successfully:", data);
 
         // Convert API response to Recipe format
         const aiRecipes = data.recipes.map((aiRecipe: any, index: number) => ({
@@ -94,9 +108,11 @@ export default function RecipesPage() {
           instructions: aiRecipe.instructions || [],
         }));
 
+        console.log("Processed recipes:", aiRecipes);
         setRecipes(aiRecipes);
       } catch (error) {
         console.error("Error generating recipes:", error);
+        setError("Failed to generate recipes. Please try again.");
 
         // Fallback recipes if API fails
         const fallbackRecipes = [
@@ -124,6 +140,8 @@ export default function RecipesPage() {
           },
         ];
         setRecipes(fallbackRecipes);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -205,34 +223,56 @@ export default function RecipesPage() {
     return null;
   }
 
+  // Loading state
+  if (loading) {
+    return (
+      <div
+        className="h-screen overflow-hidden text-white"
+        style={{ backgroundColor: colors.interface.background.primary }}
+      >
+        <Nav showMenu={true} userName={user.name} currentPage="generated" />
+        <div className="flex items-center justify-center h-[calc(100vh-120px)]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <p>Generating your recipes...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
-      className="min-h-screen"
+      className="h-screen overflow-hidden"
       style={{ backgroundColor: colors.interface.background.primary }}
     >
       <Nav showMenu={true} userName={user.name} currentPage="generated" />
 
-      <div className="max-w-7xl mx-auto px-4 py-8 mt-20">
+      <div className="max-w-7xl mx-auto px-4 py-8 mt-20 h-[calc(100vh-120px)] flex flex-col">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-start gap-4 mb-8">
           <button
             onClick={handleBackToHome}
-            className="p-2 rounded-lg transition-colors border"
+            className="w-12 h-12 rounded-2xl transition-colors border-2 flex items-center justify-center"
             style={{
-              backgroundColor: "transparent",
-              color: colors.brand.primary[500],
-              borderColor: colors.brand.primary[500],
+              backgroundColor: colors.interface.background.secondary,
+              color: colors.base.white,
+              borderColor: colors.interface.background.secondary,
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = colors.brand.primary[500];
-              e.currentTarget.style.color = colors.base.white;
+              e.currentTarget.style.backgroundColor =
+                colors.interface.background.tertiary;
+              e.currentTarget.style.borderColor =
+                colors.interface.background.tertiary;
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.color = colors.brand.primary[500];
+              e.currentTarget.style.backgroundColor =
+                colors.interface.background.secondary;
+              e.currentTarget.style.borderColor =
+                colors.interface.background.secondary;
             }}
           >
-            <FiArrowLeft className="text-2xl" />
+            <FiArrowLeft className="text-xl" />
           </button>
           <div>
             <h1
@@ -252,9 +292,9 @@ export default function RecipesPage() {
 
         {/* Recipes Horizontal Scroll */}
         {recipes.length > 0 && (
-          <div className="relative">
+          <div className="relative flex-1 flex flex-col">
             {/* Scroll Container */}
-            <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide h-[500px] items-center">
+            <div className="flex gap-6 overflow-x-auto scrollbar-hide items-center flex-1 pt-3 pb-1.5">
               {recipes.map((recipe) => (
                 <div key={recipe.id} className="flex-shrink-0 w-80">
                   <RecipeCard recipe={recipe} />
@@ -263,7 +303,7 @@ export default function RecipesPage() {
             </div>
 
             {/* Scroll Indicator - Clickable Navigation */}
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-2">
               <div className="flex gap-2">
                 {recipes.map((_, index) => (
                   <button
@@ -286,20 +326,21 @@ export default function RecipesPage() {
         )}
 
         {/* Empty State */}
-        {recipes.length === 0 && (
+        {recipes.length === 0 && !loading && (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">🍽️</div>
             <h2
               className="text-2xl font-bold mb-2"
               style={{ color: colors.interface.text.primary }}
             >
-              No recipes found
+              {error ? "Error generating recipes" : "No recipes found"}
             </h2>
             <p
               className="mb-6"
               style={{ color: colors.interface.text.secondary }}
             >
-              We couldn't generate recipes at the moment. Please try again.
+              {error ||
+                "We couldn't generate recipes at the moment. Please try again."}
             </p>
             <button
               onClick={handleBackToHome}

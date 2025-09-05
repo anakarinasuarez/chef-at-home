@@ -171,28 +171,63 @@ class GeminiService {
     const spices = this.getSpicesForCuisine(cuisine);
     const randomSpices = spices.slice(0, 2 + Math.floor(Math.random() * 2));
 
-    return `Create a simple recipe using ${ingredients.join(" and ")}.
+    // Generar ingredientes adicionales apropiados para la cocina
+    const additionalIngredients = this.getAdditionalIngredientsForCuisine(
+      cuisine,
+      ingredients
+    );
 
-Return this exact JSON:
+    // Generar instrucciones detalladas y variadas
+    const detailedInstructions = this.generateDetailedInstructions(
+      ingredients,
+      cuisine,
+      randomMethod
+    );
+
+    return `You are a professional ${cuisine} chef. Create a unique, authentic ${cuisine} recipe using these main ingredients: ${ingredients.join(
+      ", "
+    )}.
+
+IMPORTANT REQUIREMENTS:
+- Create a COMPLETELY UNIQUE recipe with creative variations
+- Use authentic ${cuisine} cooking techniques and flavors
+- Include additional ingredients that complement the main ingredients
+- Provide detailed, step-by-step instructions
+- Make it appropriate for ${difficulty} difficulty level
+- Serve ${servings} people
+- Use realistic cooking times and quantities
+
+RECIPE STRUCTURE:
+- Title: Creative, descriptive name with ${cuisine} flair
+- Description: Detailed explanation of the dish
+- Ingredients: Include main ingredients + complementary ingredients + spices
+- Instructions: Detailed, numbered steps with specific techniques
+- Cooking times: Realistic prep, cooking, and total times
+- Difficulty: ${difficulty}
+- Cuisine: ${cuisine}
+
+ADDITIONAL INGREDIENTS TO CONSIDER: ${additionalIngredients.join(", ")}
+
+COOKING TECHNIQUE: ${randomMethod}
+
+Return ONLY valid JSON in this exact format:
 {
-  "title": "${randomRegion} ${randomMethod} ${ingredients[0]}",
-  "description": "A simple recipe",
+  "title": "Creative ${cuisine} Recipe Name",
+  "description": "Detailed description of this unique dish",
   "ingredients": [
-    {"name": "${ingredients[0]}", "quantity": "2", "unit": "pieces"},
-    {"name": "${ingredients[1] || "oil"}", "quantity": "1", "unit": "tbsp"}
+    {"name": "ingredient name", "quantity": "amount", "unit": "measurement unit"}
   ],
   "instructions": [
-    "Prepare ingredients",
-    "Cook ${ingredients[0]}",
-    "Add ${ingredients[1] || "seasoning"}",
-    "Serve hot"
+    "Detailed step 1",
+    "Detailed step 2",
+    "Detailed step 3"
   ],
-  "cookingTime": "20 minutes",
+  "cookingTime": "XX minutes",
   "difficulty": "${difficulty}",
   "cuisine": "${cuisine}",
   "servings": ${servings},
-  "prepTime": "5 minutes",
-  "totalTime": "25 minutes"
+  "prepTime": "XX minutes",
+  "totalTime": "XX minutes"
 }`;
   }
 
@@ -637,6 +672,187 @@ Return this exact JSON:
     };
 
     return spices[cuisine] || spices["American"];
+  }
+
+  private getAdditionalIngredientsForCuisine(
+    cuisine: string,
+    mainIngredients: string[]
+  ): string[] {
+    const additionalIngredients: Record<string, string[]> = {
+      Italian: [
+        "extra virgin olive oil",
+        "balsamic vinegar",
+        "parmesan cheese",
+        "mozzarella",
+        "prosciutto",
+        "sun-dried tomatoes",
+        "artichoke hearts",
+        "capers",
+        "anchovies",
+        "white wine",
+        "fresh herbs",
+        "lemon zest",
+      ],
+      Mexican: [
+        "corn tortillas",
+        "black beans",
+        "refried beans",
+        "queso fresco",
+        "cotija cheese",
+        "avocado",
+        "lime juice",
+        "sour cream",
+        "tomatillos",
+        "poblano peppers",
+        "epazote",
+        "achiote",
+      ],
+      Asian: [
+        "soy sauce",
+        "fish sauce",
+        "oyster sauce",
+        "hoisin sauce",
+        "sesame oil",
+        "rice vinegar",
+        "mirin",
+        "sake",
+        "bamboo shoots",
+        "water chestnuts",
+        "bok choy",
+        "napa cabbage",
+      ],
+      Mediterranean: [
+        "feta cheese",
+        "kalamata olives",
+        "roasted red peppers",
+        "hummus",
+        "tahini",
+        "pomegranate molasses",
+        "sumac",
+        "za'atar",
+        "preserved lemons",
+        "chickpeas",
+        "bulgur wheat",
+        "couscous",
+      ],
+      American: [
+        "cheddar cheese",
+        "bacon",
+        "maple syrup",
+        "barbecue sauce",
+        "hot sauce",
+        "ranch dressing",
+        "blue cheese",
+        "pecans",
+        "corn",
+        "black beans",
+        "sweet potatoes",
+        "collard greens",
+      ],
+      French: [
+        "dijon mustard",
+        "shallots",
+        "white wine",
+        "red wine",
+        "butter",
+        "cream",
+        "gruyere cheese",
+        "brie",
+        "truffle oil",
+        "herbes de provence",
+        "escarole",
+        "endive",
+      ],
+      Indian: [
+        "basmati rice",
+        "naan bread",
+        "yogurt",
+        "coconut milk",
+        "tamarind paste",
+        "mango chutney",
+        "raita",
+        "papadum",
+        "paneer",
+        "lentils",
+        "spinach",
+        "fenugreek",
+      ],
+      Thai: [
+        "coconut milk",
+        "fish sauce",
+        "palm sugar",
+        "tamarind paste",
+        "kaffir lime leaves",
+        "galangal",
+        "bird's eye chili",
+        "Thai basil",
+        "mint",
+        "cucumber",
+        "bean sprouts",
+        "peanuts",
+      ],
+    };
+
+    // Filtrar ingredientes que no están en los ingredientes principales
+    const baseIngredients =
+      additionalIngredients[cuisine] || additionalIngredients["American"];
+    return baseIngredients.filter(
+      (ing) =>
+        !mainIngredients.some(
+          (main) =>
+            main.toLowerCase().includes(ing.toLowerCase()) ||
+            ing.toLowerCase().includes(main.toLowerCase())
+        )
+    );
+  }
+
+  private generateDetailedInstructions(
+    ingredients: string[],
+    cuisine: string,
+    cookingMethod: string
+  ): string[] {
+    const baseInstructions = [
+      `Prepare and clean all ${ingredients.join(", ")}`,
+      `Heat oil in a large pan over medium heat`,
+      `Add ${ingredients[0]} and cook until golden brown`,
+      `Add remaining ingredients and continue cooking`,
+      `Season with ${cuisine.toLowerCase()} spices and herbs`,
+      "Serve hot with garnish and enjoy!",
+    ];
+
+    // Personalizar instrucciones según la cocina
+    const cuisineSpecificInstructions: Record<string, string[]> = {
+      Italian: [
+        "Heat extra virgin olive oil in a large skillet",
+        `Sauté ${ingredients[0]} until golden and fragrant`,
+        "Add garlic and herbs, cook for 1 minute",
+        "Deglaze with white wine if using",
+        "Finish with fresh herbs and parmesan cheese",
+      ],
+      Mexican: [
+        "Heat oil in a comal or large skillet",
+        `Cook ${ingredients[0]} until well browned`,
+        "Add onions and peppers, cook until softened",
+        "Season with Mexican spices and lime juice",
+        "Garnish with fresh cilantro and serve with tortillas",
+      ],
+      Asian: [
+        "Heat wok or large skillet over high heat",
+        `Stir-fry ${ingredients[0]} until seared`,
+        "Add aromatics (ginger, garlic) and cook briefly",
+        "Add sauce and remaining ingredients",
+        "Finish with sesame oil and green onions",
+      ],
+      Mediterranean: [
+        "Heat olive oil in a large pan",
+        `Cook ${ingredients[0]} until golden`,
+        "Add Mediterranean vegetables and herbs",
+        "Simmer with wine or broth if needed",
+        "Finish with lemon juice and fresh herbs",
+      ],
+    };
+
+    return cuisineSpecificInstructions[cuisine] || baseInstructions;
   }
 }
 

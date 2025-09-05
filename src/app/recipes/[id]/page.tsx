@@ -282,8 +282,8 @@ export default function RecipeDetailPage() {
       <div className="max-w-6xl mx-auto px-4 py-8 mt-20">
         {/* Recipe Header */}
         <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="flex items-start gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+            <div className="flex items-start gap-4 flex-1">
               <button
                 onClick={() => router.back()}
                 className="p-2 rounded-lg transition-colors mt-1"
@@ -302,7 +302,7 @@ export default function RecipeDetailPage() {
               >
                 <IoIosArrowBack className="text-xl" />
               </button>
-              <div>
+              <div className="flex-1">
                 <h1
                   className="text-4xl font-bold mb-4"
                   style={{ color: colors.interface.text.primary }}
@@ -325,7 +325,7 @@ export default function RecipeDetailPage() {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-shrink-0">
               {/* Forzar botones de receta guardada si viene de My Recipes */}
               {isFromMyRecipes || isRecipeSavedState ? (
                 // Si la receta está guardada, mostrar Edit/Delete/Share
@@ -473,7 +473,7 @@ export default function RecipeDetailPage() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 overflow-hidden">
           {/* Recipe Image - LEFT COLUMN (2/3 del ancho - más grande) */}
           <div className="lg:col-span-2">
             <div className="relative rounded-2xl overflow-hidden h-[500px] w-full">
@@ -496,7 +496,7 @@ export default function RecipeDetailPage() {
           </div>
 
           {/* Ingredients - RIGHT COLUMN (al lado de la imagen) */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 min-w-0">
             <IngredientsCard
               ingredients={recipe.ingredients || []}
               servings={recipe.servings}

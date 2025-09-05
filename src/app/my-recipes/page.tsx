@@ -110,11 +110,11 @@ export default function MyRecipesPage() {
   if (loading) {
     return (
       <div
-        className="min-h-screen text-white"
+        className="h-screen overflow-hidden text-white"
         style={{ backgroundColor: colors.interface.background.primary }}
       >
         <Nav showMenu={true} userName={user.name} currentPage="my-recipes" />
-        <div className="flex items-center justify-center min-h-[calc(100vh-120px)]">
+        <div className="flex items-center justify-center h-[calc(100vh-120px)]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
             <p>Loading your recipes...</p>
@@ -126,32 +126,36 @@ export default function MyRecipesPage() {
 
   return (
     <div
-      className="min-h-screen text-white"
+      className="h-screen overflow-hidden text-white"
       style={{ backgroundColor: colors.interface.background.primary }}
     >
       <Nav showMenu={true} userName={user.name} currentPage="my-recipes" />
 
-      <div className="max-w-7xl mx-auto px-4 py-8 mt-20">
+      <div className="max-w-7xl mx-auto px-4 py-8 mt-20 h-[calc(100vh-120px)] flex flex-col">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-start gap-4 mb-8">
           <button
             onClick={handleBackToHome}
-            className="p-2 rounded-lg transition-colors border"
+            className="w-12 h-12 rounded-2xl transition-colors border-2 flex items-center justify-center"
             style={{
-              backgroundColor: "transparent",
-              color: colors.brand.primary[500],
-              borderColor: colors.brand.primary[500],
+              backgroundColor: colors.interface.background.secondary,
+              color: colors.base.white,
+              borderColor: colors.interface.background.secondary,
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = colors.brand.primary[500];
-              e.currentTarget.style.color = colors.base.white;
+              e.currentTarget.style.backgroundColor =
+                colors.interface.background.tertiary;
+              e.currentTarget.style.borderColor =
+                colors.interface.background.tertiary;
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.color = colors.brand.primary[500];
+              e.currentTarget.style.backgroundColor =
+                colors.interface.background.secondary;
+              e.currentTarget.style.borderColor =
+                colors.interface.background.secondary;
             }}
           >
-            <IoIosArrowBack className="text-2xl" />
+            <IoIosArrowBack className="text-xl" />
           </button>
           <div>
             <h1
@@ -207,9 +211,9 @@ export default function MyRecipesPage() {
             </button>
           </div>
         ) : (
-          <div className="relative">
+          <div className="relative flex-1 flex flex-col">
             {/* Scroll Container */}
-            <div className="flex gap-6 overflow-x-auto overflow-y-hidden pb-6 scrollbar-hide h-[460px]">
+            <div className="flex gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide flex-1 items-center pt-3 pb-1.5">
               {savedRecipes.map((recipe) => (
                 <div key={recipe.id} className="flex-shrink-0 w-80">
                   <RecipeCard
@@ -248,7 +252,7 @@ export default function MyRecipesPage() {
             </div>
 
             {/* Scroll Indicator - Clickable Navigation */}
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-2">
               <div className="flex gap-2">
                 {savedRecipes.map((_, index) => (
                   <button

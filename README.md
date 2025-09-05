@@ -97,8 +97,34 @@ La aplicación utiliza un sistema de diseño consistente con:
    ```
 
 5. **Ejecutar en desarrollo**:
+
+   **Opción A: Desarrollo local**
+
    ```bash
    npm run dev
+   ```
+
+   **Opción B: Desarrollo con Docker (Recomendado)**
+
+   ```bash
+   # Usar el script automatizado
+   ./scripts/dev-docker.sh
+
+   # O manualmente
+   docker-compose -f docker-compose.dev.yml up --build
+   ```
+
+   **Ventajas de usar Docker:**
+
+   - ✅ Entorno aislado y consistente
+   - ✅ Sin conflictos de versiones
+   - ✅ Fácil configuración
+   - ✅ Reproducible en cualquier máquina
+   - ✅ Hot reload incluido
+     npm run dev
+
+   ```
+
    ```
 
 ## 🚀 Uso

@@ -106,7 +106,7 @@ export default function RecipeCard({
     >
       {/* Recipe Info - Above image */}
       <div className="p-6">
-        {/* Title - Subtitle size */}
+        {/* Title */}
         <h3
           className="mb-4 line-clamp-2"
           style={{
@@ -182,8 +182,8 @@ export default function RecipeCard({
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="p-6 flex gap-2">
+      {/* Action Buttons - Bottom right */}
+      <div className="p-6 flex justify-end">
         {variant === "save" ? (
           // Save Button for Generated Recipes
           <button
@@ -226,20 +226,18 @@ export default function RecipeCard({
             {isSaving ? "Saving..." : isSaved ? "Saved" : "Save"}
           </button>
         ) : (
-          // Edit, Delete, Share Buttons for My Recipes
-          <>
+          // Edit, Delete, Share Buttons for My Recipes (Icon only)
+          <div className="flex gap-2">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit?.(recipe);
               }}
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg transition-colors border"
+              className="p-3 rounded-lg transition-colors border flex items-center justify-center"
               style={{
                 backgroundColor: "transparent",
                 color: colors.brand.primary[500],
                 borderColor: colors.brand.primary[500],
-                fontSize: typography.styles["button"].fontSize,
-                fontWeight: typography.styles["button"].fontWeight,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor =
@@ -251,22 +249,20 @@ export default function RecipeCard({
                 e.currentTarget.style.backgroundColor = "transparent";
                 e.currentTarget.style.color = colors.brand.primary[500];
               }}
+              title="Edit recipe"
             >
               <FaPencil
                 className="text-lg"
                 style={{ color: colors.brand.primary[500] }}
               />
-              Edit
             </button>
             <button
               onClick={handleDeleteClick}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg transition-colors border"
+              className="p-3 rounded-lg transition-colors border flex items-center justify-center"
               style={{
                 backgroundColor: "transparent",
                 color: colors.brand.primary[500],
                 borderColor: colors.brand.primary[500],
-                fontSize: typography.styles["button"].fontSize,
-                fontWeight: typography.styles["button"].fontWeight,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = "#EF4444";
@@ -279,6 +275,7 @@ export default function RecipeCard({
                 e.currentTarget.style.color = colors.brand.primary[500];
                 e.currentTarget.style.borderColor = colors.brand.primary[500];
               }}
+              title="Delete recipe"
             >
               <MdDelete
                 className="text-lg"
@@ -290,13 +287,11 @@ export default function RecipeCard({
                 e.stopPropagation();
                 onShare?.(recipe);
               }}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg transition-colors border"
+              className="p-3 rounded-lg transition-colors border flex items-center justify-center"
               style={{
                 backgroundColor: "transparent",
                 color: colors.brand.primary[500],
                 borderColor: colors.brand.primary[500],
-                fontSize: typography.styles["button"].fontSize,
-                fontWeight: typography.styles["button"].fontWeight,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor =
@@ -307,13 +302,14 @@ export default function RecipeCard({
                 e.currentTarget.style.backgroundColor = "transparent";
                 e.currentTarget.style.color = colors.brand.primary[500];
               }}
+              title="Share recipe"
             >
               <BiShare
                 className="text-lg"
                 style={{ color: colors.brand.primary[500] }}
               />
             </button>
-          </>
+          </div>
         )}
       </div>
     </div>

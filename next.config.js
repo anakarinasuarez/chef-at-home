@@ -69,6 +69,18 @@ const nextConfig = {
 
   // 🔇 Suprimir warnings de hidratación en consola
   reactStrictMode: false,
+
+  // 🚀 Configuración específica para App Router
+  typescript: {
+    // Ignorar errores de TypeScript durante el build
+    ignoreBuildErrors: false,
+  },
+
+  // 🔧 Configuración de webpack
+  webpack: (config, { isServer }) => {
+    // Configuración adicional de webpack si es necesaria
+    return config;
+  },
 };
 
 module.exports = nextConfig;
