@@ -136,6 +136,7 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
   const [newCustomServing, setNewCustomServing] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const { updateRecipe } = useSavedRecipes();
 
   // Cargar datos de edición si existe
@@ -244,6 +245,9 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
       return;
     }
 
+    // Activar estado de loading inmediatamente
+    setIsCreating(true);
+
     try {
       if (isEditing && editingRecipeId) {
         // Modo edición - actualizar receta existente
@@ -268,6 +272,8 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
         } else {
           showNotification("Error updating recipe. Please try again.", "error");
         }
+        // Desactivar loading para modo edición
+        setIsCreating(false);
       } else {
         // Modo creación - generar nueva receta
         const response = await fetch("/api/recipes/generate", {
@@ -304,6 +310,9 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
     } catch (error) {
       console.error("Error creating recipe:", error);
       showNotification("Error creating recipe. Please try again.", "error");
+    } finally {
+      // Desactivar estado de loading
+      setIsCreating(false);
     }
   };
 
@@ -610,10 +619,28 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
 
           {/* Botones de acción */}
           <div className="flex gap-4">
-            <Button variant="primary" onClick={handleCreateRecipe}>
-              {isEditing ? "Update recipe" : "Create recipe"}
+            <Button
+              variant="primary"
+              onClick={handleCreateRecipe}
+              disabled={isCreating}
+              className="relative"
+            >
+              {isCreating ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Creating...</span>
+                </div>
+              ) : isEditing ? (
+                "Update recipe"
+              ) : (
+                "Create recipe"
+              )}
             </Button>
-            <Button variant="secondary" onClick={handleCancel}>
+            <Button
+              variant="secondary"
+              onClick={handleCancel}
+              disabled={isCreating}
+            >
               Cancel
             </Button>
           </div>

@@ -1,21 +1,19 @@
 /**
  * Universal Cache Manager
- * Automatically chooses the best caching strategy available
- * Priority: Next.js Cache > Enhanced localStorage > Basic localStorage
+ * Uses Enhanced localStorage for reliable client-side caching
  */
-import { SimpleCacheService } from "./simple-cache";
 import { LocalStorageCacheService } from "./localStorage-cache";
 
-export type CacheProvider = "nextjs" | "localStorage" | "fallback";
+export type CacheProvider = "localStorage";
 
 export class UniversalCacheManager {
-  private static provider: CacheProvider = "nextjs";
+  private static provider: CacheProvider = "localStorage";
 
   /**
    * Initialize cache manager
    */
   static async initialize(): Promise<void> {
-    // Use localStorage for now as it's more reliable for client-side operations
+    // Use localStorage for reliable client-side operations
     this.provider = "localStorage";
     console.log("🚀 Universal Cache initialized with Enhanced localStorage");
   }
@@ -29,16 +27,12 @@ export class UniversalCacheManager {
     recipes: any[],
     ttlSeconds?: number
   ): Promise<void> {
-    if (this.provider === "nextjs") {
-      await SimpleCacheService.cacheRecipes(ingredients, servings, recipes);
-    } else {
-      LocalStorageCacheService.cacheRecipes(
-        ingredients,
-        servings,
-        recipes,
-        ttlSeconds || 3600
-      );
-    }
+    LocalStorageCacheService.cacheRecipes(
+      ingredients,
+      servings,
+      recipes,
+      ttlSeconds || 3600
+    );
   }
 
   /**
@@ -48,11 +42,7 @@ export class UniversalCacheManager {
     ingredients: string[],
     servings: number
   ): Promise<any[] | null> {
-    if (this.provider === "nextjs") {
-      return await SimpleCacheService.getCachedRecipes(ingredients, servings);
-    } else {
-      return LocalStorageCacheService.getCachedRecipes(ingredients, servings);
-    }
+    return LocalStorageCacheService.getCachedRecipes(ingredients, servings);
   }
 
   /**
@@ -64,16 +54,12 @@ export class UniversalCacheManager {
     imageUrl: string,
     ttlSeconds?: number
   ): Promise<void> {
-    if (this.provider === "nextjs") {
-      await SimpleCacheService.cacheImage(recipeName, ingredients, imageUrl);
-    } else {
-      LocalStorageCacheService.cacheImage(
-        recipeName,
-        ingredients,
-        imageUrl,
-        ttlSeconds || 86400
-      );
-    }
+    LocalStorageCacheService.cacheImage(
+      recipeName,
+      ingredients,
+      imageUrl,
+      ttlSeconds || 86400
+    );
   }
 
   /**
@@ -83,44 +69,28 @@ export class UniversalCacheManager {
     recipeName: string,
     ingredients: string[]
   ): Promise<string | null> {
-    if (this.provider === "nextjs") {
-      return await SimpleCacheService.getCachedImage(recipeName, ingredients);
-    } else {
-      return LocalStorageCacheService.getCachedImage(recipeName, ingredients);
-    }
+    return LocalStorageCacheService.getCachedImage(recipeName, ingredients);
   }
 
   /**
    * Clear all cache
    */
   static async clearAllCache(): Promise<void> {
-    if (this.provider === "nextjs") {
-      await SimpleCacheService.clearCache();
-    } else {
-      LocalStorageCacheService.clearAllCache();
-    }
+    LocalStorageCacheService.clearAllCache();
   }
 
   /**
    * Clear recipes cache
    */
   static async clearRecipesCache(): Promise<void> {
-    if (this.provider === "nextjs") {
-      await SimpleCacheService.clearCache();
-    } else {
-      LocalStorageCacheService.clearRecipesCache();
-    }
+    LocalStorageCacheService.clearRecipesCache();
   }
 
   /**
    * Clear images cache
    */
   static async clearImagesCache(): Promise<void> {
-    if (this.provider === "nextjs") {
-      await SimpleCacheService.clearCache();
-    } else {
-      LocalStorageCacheService.clearImagesCache();
-    }
+    LocalStorageCacheService.clearImagesCache();
   }
 
   /**
@@ -132,27 +102,18 @@ export class UniversalCacheManager {
     features: string[];
     details?: any;
   }> {
-    if (this.provider === "nextjs") {
-      const stats = await SimpleCacheService.getCacheStats();
-      return {
-        provider: stats.provider,
-        status: stats.status,
-        features: stats.features,
-      };
-    } else {
-      const stats = LocalStorageCacheService.getCacheStats();
-      return {
-        provider: stats.provider,
-        status: "✅ Active",
-        features: [
-          "Client-side caching",
-          "TTL support",
-          "Automatic expiration",
-          "Memory management",
-        ],
-        details: stats,
-      };
-    }
+    const stats = LocalStorageCacheService.getCacheStats();
+    return {
+      provider: stats.provider,
+      status: "✅ Active",
+      features: [
+        "Client-side caching",
+        "TTL support",
+        "Automatic expiration",
+        "Memory management",
+      ],
+      details: stats,
+    };
   }
 
   /**
@@ -171,14 +132,9 @@ export class UniversalCacheManager {
   }
 
   /**
-   * Clean expired items (localStorage only)
+   * Clean expired items
    */
   static async cleanExpiredItems(): Promise<number> {
-    if (this.provider === "nextjs") {
-      console.log("🧹 Next.js Cache handles expiration automatically");
-      return 0;
-    } else {
-      return LocalStorageCacheService.cleanExpiredItems();
-    }
+    return LocalStorageCacheService.cleanExpiredItems();
   }
 }

@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { UniversalCacheManager } from "@/lib/universal-cache";
 
 export interface RecipeImageRequest {
   recipeName: string;
@@ -43,23 +44,16 @@ class OpenAIImageService {
         ","
       )}`;
 
-      // Check if image is already cached using Next.js Cache API
+      // Check if image is already cached using UniversalCacheManager
       try {
-        const cacheResponse = await fetch(
-          `/api/cache-universal?action=get&type=image&recipeName=${encodeURIComponent(
-            request.recipeName
-          )}&ingredients=${encodeURIComponent(
-            JSON.stringify(request.ingredients)
-          )}`,
-          { method: "GET" }
+        const cachedImage = await UniversalCacheManager.getCachedImage(
+          request.recipeName,
+          request.ingredients
         );
 
-        if (cacheResponse.ok) {
-          const cacheData = await cacheResponse.json();
-          if (cacheData.success && cacheData.imageUrl) {
-            console.log(`📦 Using cached image for: ${request.recipeName}`);
-            return cacheData.imageUrl;
-          }
+        if (cachedImage) {
+          console.log(`📦 Using cached image for: ${request.recipeName}`);
+          return cachedImage;
         }
       } catch (error) {
         console.log("No cached image found, generating new one");
@@ -85,31 +79,15 @@ class OpenAIImageService {
         console.log(`✅ DALL-E image generated for: ${request.recipeName}`);
         console.log(`🔗 Image URL: ${imageUrl}`);
 
-        // Cache the image URL using Next.js Cache API
+        // Cache the image URL using UniversalCacheManager
         if (imageUrl) {
           try {
-            const cacheResponse = await fetch("/api/cache-universal", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                action: "cache-image",
-                data: {
-                  recipeName: request.recipeName,
-                  ingredients: request.ingredients,
-                  imageUrl: imageUrl,
-                },
-              }),
-            });
-
-            if (cacheResponse.ok) {
-              console.log(`💾 Image cached for: ${request.recipeName}`);
-            } else {
-              console.warn(
-                `⚠️ Failed to cache image for: ${request.recipeName}`
-              );
-            }
+            await UniversalCacheManager.cacheImage(
+              request.recipeName,
+              request.ingredients,
+              imageUrl
+            );
+            console.log(`💾 Image cached for: ${request.recipeName}`);
           } catch (error) {
             console.error("Error caching image:", error);
           }
