@@ -34,6 +34,29 @@ export default function RecipesPage() {
 
   const [activeIndex, setActiveIndex] = useState(0);
 
+  // Function to clear cache and generate new recipes
+  const generateNewRecipes = async () => {
+    try {
+      // Clear cache using Next.js Cache API
+      const response = await fetch("/api/cache-universal?action=clear", {
+        method: "GET",
+      });
+
+      if (response.ok) {
+        console.log("🗑️ Cache cleared using Next.js Cache API");
+      } else {
+        console.warn("⚠️ Failed to clear cache, proceeding anyway");
+      }
+
+      // Reload the page to trigger new generation
+      window.location.reload();
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+      // Still reload the page
+      window.location.reload();
+    }
+  };
+
   // Generate recipes with AI when component mounts
   useEffect(() => {
     const generateRecipes = async () => {
@@ -48,6 +71,28 @@ export default function RecipesPage() {
 
         let ingredients = ["pasta", "basil", "olive oil", "garlic", "tomatoes"]; // fallback
         let servings = 4; // fallback
+
+        // Check if we have cached recipes using Next.js Cache API
+        try {
+          const cacheResponse = await fetch(
+            `/api/cache-universal?action=get&type=recipes&ingredients=${encodeURIComponent(
+              JSON.stringify(ingredients)
+            )}&servings=${servings}`,
+            { method: "GET" }
+          );
+
+          if (cacheResponse.ok) {
+            const cacheData = await cacheResponse.json();
+            if (cacheData.success && cacheData.recipes) {
+              console.log("📦 Using cached recipes from Next.js Cache API");
+              setRecipes(cacheData.recipes);
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (error) {
+          console.log("No cached recipes found, generating new ones");
+        }
 
         if (ingredientsParam) {
           try {
@@ -110,6 +155,32 @@ export default function RecipesPage() {
 
         console.log("Processed recipes:", aiRecipes);
         setRecipes(aiRecipes);
+
+        // Cache the recipes using Next.js Cache API
+        try {
+          const cacheResponse = await fetch("/api/cache-universal", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              action: "cache-recipes",
+              data: {
+                ingredients,
+                servings,
+                recipes: aiRecipes,
+              },
+            }),
+          });
+
+          if (cacheResponse.ok) {
+            console.log("💾 Recipes cached using Next.js Cache API");
+          } else {
+            console.warn("⚠️ Failed to cache recipes, but continuing");
+          }
+        } catch (error) {
+          console.error("Error caching recipes:", error);
+        }
       } catch (error) {
         console.error("Error generating recipes:", error);
         setError("Failed to generate recipes. Please try again.");
@@ -274,7 +345,7 @@ export default function RecipesPage() {
           >
             <FiArrowLeft className="text-xl" />
           </button>
-          <div>
+          <div className="flex-1">
             <h1
               className="text-3xl font-bold"
               style={{ color: colors.interface.text.primary }}
@@ -288,6 +359,31 @@ export default function RecipesPage() {
               {recipes.length} recipes generated for you
             </p>
           </div>
+
+          {/* Generate New Recipes Button */}
+          <button
+            onClick={generateNewRecipes}
+            className="px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105"
+            style={{
+              backgroundColor: colors.interface.accent.primary,
+              color: colors.interface.text.onAccent,
+              border: `1px solid ${colors.interface.accent.primary}`,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor =
+                colors.interface.accent.secondary;
+              e.currentTarget.style.borderColor =
+                colors.interface.accent.secondary;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor =
+                colors.interface.accent.primary;
+              e.currentTarget.style.borderColor =
+                colors.interface.accent.primary;
+            }}
+          >
+            Generate New Recipes
+          </button>
         </div>
 
         {/* Recipes Horizontal Scroll */}

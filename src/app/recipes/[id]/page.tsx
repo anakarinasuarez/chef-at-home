@@ -528,15 +528,9 @@ export default function RecipeDetailPage() {
                     {index + 1}
                   </div>
                   <div className="flex-1">
-                    <h3
-                      className="text-xl font-semibold mb-2"
-                      style={{ color: colors.interface.text.primary }}
-                    >
-                      Step {index + 1}
-                    </h3>
                     <p
-                      className="leading-relaxed"
-                      style={{ color: colors.interface.text.secondary }}
+                      className="leading-relaxed text-lg"
+                      style={{ color: colors.interface.text.primary }}
                     >
                       {instruction}
                     </p>

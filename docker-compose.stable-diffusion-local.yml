@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  stable-diffusion:
+    image: ghcr.io/automatic1111/stable-diffusion-webui:latest
+    container_name: chef-at-home-stable-diffusion
+    ports:
+      - "7860:7860"
+      - "7861:7861"
+    volumes:
+      - ./stable-diffusion/models:/app/models
+      - ./stable-diffusion/outputs:/app/outputs
+    environment:
+      - CLI_ARGS=--api --listen --port 7860 --api-port 7861
+    restart: unless-stopped

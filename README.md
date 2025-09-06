@@ -31,8 +31,9 @@ Una aplicación web moderna para crear recetas deliciosas con IA. Convierte ingr
 - **Estilos**: Tailwind CSS, CSS Modules
 - **Autenticación**: Context API con localStorage
 - **IA**: Google Gemini API
-- **Imágenes**: Unsplash API
+- **Imágenes**: Unsplash API + Stable Diffusion (IA generativa)
 - **Base de Datos**: Prisma con SQLite
+- **Contenedores**: Docker para desarrollo y Stable Diffusion
 
 ## 🏗️ Estructura del Proyecto
 
@@ -114,6 +115,19 @@ La aplicación utiliza un sistema de diseño consistente con:
    docker-compose -f docker-compose.dev.yml up --build
    ```
 
+   **Opción C: Con Stable Diffusion para imágenes IA**
+
+   ```bash
+   # Configurar Stable Diffusion
+   ./scripts/setup-stable-diffusion.sh
+
+   # Iniciar Stable Diffusion
+   docker-compose -f docker-compose.stable-diffusion.yml up -d
+
+   # Iniciar la aplicación
+   npm run dev
+   ```
+
    **Ventajas de usar Docker:**
 
    - ✅ Entorno aislado y consistente
@@ -121,11 +135,7 @@ La aplicación utiliza un sistema de diseño consistente con:
    - ✅ Fácil configuración
    - ✅ Reproducible en cualquier máquina
    - ✅ Hot reload incluido
-     npm run dev
-
-   ```
-
-   ```
+   - ✅ Stable Diffusion integrado para imágenes únicas
 
 ## 🚀 Uso
 
@@ -153,14 +163,28 @@ La aplicación utiliza un sistema de diseño consistente con:
 - **Notificaciones**: ✅ Sistema de notificaciones global
 - **Responsive**: ✅ Diseño adaptativo para móviles y desktop
 
+## 🎨 Stable Diffusion Integration
+
+Esta aplicación incluye integración con **Stable Diffusion** para generar imágenes únicas de recetas usando IA:
+
+- **Imágenes Personalizadas**: Cada receta tiene una imagen generada específicamente
+- **Múltiples Estilos**: Fotorealístico, artístico, minimalista, gourmet
+- **Fallback Inteligente**: Si Stable Diffusion no está disponible, usa Unsplash
+- **API REST**: Endpoint dedicado para generación de imágenes
+- **Docker Ready**: Configuración completa con Docker
+
+Ver [STABLE_DIFFUSION_SETUP.md](./STABLE_DIFFUSION_SETUP.md) para configuración detallada.
+
 ## 🔮 Próximas Mejoras
 
-- [ ] Integración con base de datos para recetas guardadas
+- [x] Integración con Stable Diffusion para imágenes IA
 - [ ] Sistema de categorías de recetas
 - [ ] Filtros y búsqueda avanzada
 - [ ] Compartir recetas
 - [ ] Modo offline
 - [ ] PWA (Progressive Web App)
+- [ ] Testing automatizado
+- [ ] CI/CD pipeline
 
 ## 🤝 Contribuir
 

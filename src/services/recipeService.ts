@@ -7,6 +7,8 @@ import {
 import { colors } from "@/design-system";
 import GeminiService from "./geminiService";
 import { UnsplashService } from "./unsplashService";
+import { stableDiffusionService } from "./stableDiffusionService";
+import { openaiRecipeService } from "./openaiRecipeService";
 
 export interface Recipe {
   id: string;
@@ -358,6 +360,31 @@ class RecipeService {
     difficulty: string = "medium"
   ): Promise<any> {
     try {
+      // Primero intentar con OpenAI GPT-4
+      if (openaiRecipeService.isServiceAvailable) {
+        console.log("🎯 Using OpenAI GPT-4 for recipe generation");
+        const openaiResponse = await openaiRecipeService.generateRecipe({
+          ingredients,
+          servings,
+          cuisine,
+          difficulty,
+          count: 1,
+        });
+
+        if (openaiResponse.recipes && openaiResponse.recipes.length > 0) {
+          const recipe = openaiResponse.recipes[0];
+          const image = await this.getRecipeImage(recipe.title, ingredients);
+
+          return {
+            ...recipe,
+            image,
+            source: "openai-gpt4",
+          };
+        }
+      }
+
+      // Fallback a Gemini si OpenAI no está disponible
+      console.log("🔄 Falling back to Gemini for recipe generation");
       const recipe = await this.geminiService.generateRecipe(
         ingredients,
         servings,
@@ -369,6 +396,7 @@ class RecipeService {
       return {
         ...recipe,
         image,
+        source: "gemini-fallback",
       };
     } catch (error) {
       console.error("Error generating recipe:", error);
@@ -383,6 +411,38 @@ class RecipeService {
     count: number = 4
   ): Promise<any[]> {
     try {
+      // Primero intentar con OpenAI GPT-4
+      if (openaiRecipeService.isServiceAvailable) {
+        console.log("🎯 Using OpenAI GPT-4 for multiple recipe generation");
+        const openaiResponse = await openaiRecipeService.generateRecipe({
+          ingredients,
+          servings,
+          count,
+        });
+
+        if (openaiResponse.recipes && openaiResponse.recipes.length > 0) {
+          // Add images to each recipe
+          const recipesWithImages = await Promise.all(
+            openaiResponse.recipes.map(async (recipe) => {
+              try {
+                const image = await this.getRecipeImage(
+                  recipe.title,
+                  ingredients
+                );
+                return { ...recipe, image, source: "openai-gpt4" };
+              } catch (error) {
+                console.error("Error getting image for recipe:", error);
+                return { ...recipe, image: null, source: "openai-gpt4" };
+              }
+            })
+          );
+
+          return recipesWithImages;
+        }
+      }
+
+      // Fallback a Gemini si OpenAI no está disponible
+      console.log("🔄 Falling back to Gemini for multiple recipe generation");
       const recipes = await this.geminiService.generateMultipleRecipes(
         ingredients,
         servings,
@@ -394,10 +454,10 @@ class RecipeService {
         recipes.map(async (recipe) => {
           try {
             const image = await this.getRecipeImage(recipe.title, ingredients);
-            return { ...recipe, image };
+            return { ...recipe, image, source: "gemini-fallback" };
           } catch (error) {
             console.error("Error getting image for recipe:", error);
-            return { ...recipe, image: null };
+            return { ...recipe, image: null, source: "gemini-fallback" };
           }
         })
       );
@@ -415,6 +475,22 @@ class RecipeService {
     ingredients: string[]
   ): Promise<string | null> {
     try {
+      // Primero intentar con Stable Diffusion
+      const stableDiffusionImage =
+        await stableDiffusionService.generateRecipeImage({
+          recipeName: recipeTitle,
+          ingredients,
+          style: "photorealistic",
+        });
+
+      if (
+        stableDiffusionImage &&
+        stableDiffusionImage !== "/images/plate.png"
+      ) {
+        return stableDiffusionImage;
+      }
+
+      // Fallback a Unsplash si Stable Diffusion no está disponible
       const image = await UnsplashService.getRandomFoodImage(recipeTitle);
       return image;
     } catch (error) {
