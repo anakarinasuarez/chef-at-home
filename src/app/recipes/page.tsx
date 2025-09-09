@@ -35,7 +35,6 @@ export default function RecipesPage() {
 
   const [activeIndex, setActiveIndex] = useState(0);
 
-
   // Generate recipes with AI when component mounts
   useEffect(() => {
     const generateRecipes = async () => {
@@ -56,35 +55,53 @@ export default function RecipesPage() {
 
         // Check if we have cached recipes using UniversalCacheManager
         try {
+          console.log(
+            "🔍 Checking cache for ingredients:",
+            ingredients,
+            "servings:",
+            servings
+          );
           const cachedRecipes = await UniversalCacheManager.getCachedRecipes(
             ingredients,
             servings
           );
 
           if (cachedRecipes && cachedRecipes.length > 0) {
-            console.log("📦 Using cached recipes from UniversalCacheManager");
+            console.log(
+              "📦 Using cached recipes from UniversalCacheManager:",
+              cachedRecipes.length,
+              "recipes"
+            );
             setRecipes(cachedRecipes);
             setLoading(false);
             return;
+          } else {
+            console.log("❌ No cached recipes found for these ingredients");
           }
         } catch (error) {
-          console.log("No cached recipes found, generating new ones");
+          console.log("❌ Error checking cache:", error);
         }
 
         if (ingredientsParam) {
           try {
             ingredients = JSON.parse(decodeURIComponent(ingredientsParam));
+            console.log("📝 Using ingredients from URL:", ingredients);
           } catch (e) {
             console.log("Could not parse ingredients from URL");
           }
+        } else {
+          console.log("📝 No ingredients in URL, using fallback:", ingredients);
         }
 
         if (servingsParam) {
           servings = parseInt(servingsParam) || 4;
+          console.log("📝 Using servings from URL:", servings);
+        } else {
+          console.log("📝 No servings in URL, using fallback:", servings);
         }
 
         console.log(
-          "Generating recipes with ingredients:",
+          "🎯 Final ingredients for generation:",
           ingredients,
           "servings:",
           servings
@@ -135,14 +152,22 @@ export default function RecipesPage() {
 
         // Cache the recipes using UniversalCacheManager
         try {
+          console.log(
+            "💾 Caching recipes with ingredients:",
+            ingredients,
+            "servings:",
+            servings
+          );
           await UniversalCacheManager.cacheRecipes(
             ingredients,
             servings,
             aiRecipes
           );
-          console.log("💾 Recipes cached using UniversalCacheManager");
+          console.log(
+            "✅ Recipes cached successfully using UniversalCacheManager"
+          );
         } catch (error) {
-          console.error("Error caching recipes:", error);
+          console.error("❌ Error caching recipes:", error);
         }
       } catch (error) {
         console.error("Error generating recipes:", error);
@@ -157,7 +182,7 @@ export default function RecipesPage() {
             cookingTime: "20 minutes",
             difficulty: "Easy",
             image:
-              "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=400&h=300&fit=crop&auto=format&q=80",
+              "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
             source: "fallback",
             ingredients: [
               { name: "Pasta", quantity: 400, unit: "g" },
@@ -322,7 +347,6 @@ export default function RecipesPage() {
               {recipes.length} recipes generated for you
             </p>
           </div>
-
         </div>
 
         {/* Recipes Horizontal Scroll */}

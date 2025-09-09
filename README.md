@@ -30,10 +30,10 @@ Una aplicación web moderna para crear recetas deliciosas con IA. Convierte ingr
 - **Frontend**: Next.js 14, React, TypeScript
 - **Estilos**: Tailwind CSS, CSS Modules
 - **Autenticación**: Context API con localStorage
-- **IA**: Google Gemini API
-- **Imágenes**: Unsplash API + Stable Diffusion (IA generativa)
+- **IA**: OpenAI API + Google Gemini API (fallback)
+- **Imágenes**: OpenAI DALL-E (IA generativa)
 - **Base de Datos**: Prisma con SQLite
-- **Contenedores**: Docker para desarrollo y Stable Diffusion
+- **Testing**: Vitest con React Testing Library
 
 ## 🏗️ Estructura del Proyecto
 
@@ -47,9 +47,10 @@ src/
 ├── components/            # Componentes reutilizables
 ├── contexts/              # Contextos de React
 ├── hooks/                 # Hooks personalizados
-├── services/              # Servicios de API
+├── services/              # Servicios de API (OpenAI, Gemini)
 ├── types/                 # Definiciones de tipos TypeScript
 ├── utils/                 # Utilidades
+├── lib/                   # Librerías y utilidades
 └── design-system/         # Sistema de diseño
 ```
 
@@ -99,43 +100,25 @@ La aplicación utiliza un sistema de diseño consistente con:
 
 5. **Ejecutar en desarrollo**:
 
-   **Opción A: Desarrollo local**
-
    ```bash
    npm run dev
    ```
 
-   **Opción B: Desarrollo con Docker (Recomendado)**
+6. **Ejecutar tests**:
 
    ```bash
-   # Usar el script automatizado
-   ./scripts/dev-docker.sh
+   # Ejecutar todos los tests
+   npm test
 
-   # O manualmente
-   docker-compose -f docker-compose.dev.yml up --build
+   # Ejecutar tests con UI
+   npm run test:ui
+
+   # Ejecutar tests una vez (CI)
+   npm run test:run
+
+   # Ejecutar tests con coverage
+   npm run test:coverage
    ```
-
-   **Opción C: Con Stable Diffusion para imágenes IA**
-
-   ```bash
-   # Configurar Stable Diffusion
-   ./scripts/setup-stable-diffusion.sh
-
-   # Iniciar Stable Diffusion
-   docker-compose -f docker-compose.stable-diffusion.yml up -d
-
-   # Iniciar la aplicación
-   npm run dev
-   ```
-
-   **Ventajas de usar Docker:**
-
-   - ✅ Entorno aislado y consistente
-   - ✅ Sin conflictos de versiones
-   - ✅ Fácil configuración
-   - ✅ Reproducible en cualquier máquina
-   - ✅ Hot reload incluido
-   - ✅ Stable Diffusion integrado para imágenes únicas
 
 ## 🚀 Uso
 
@@ -163,28 +146,28 @@ La aplicación utiliza un sistema de diseño consistente con:
 - **Notificaciones**: ✅ Sistema de notificaciones global
 - **Responsive**: ✅ Diseño adaptativo para móviles y desktop
 
-## 🎨 Stable Diffusion Integration
+## 🧪 Testing
 
-Esta aplicación incluye integración con **Stable Diffusion** para generar imágenes únicas de recetas usando IA:
+Esta aplicación incluye un suite completo de tests unitarios:
 
-- **Imágenes Personalizadas**: Cada receta tiene una imagen generada específicamente
-- **Múltiples Estilos**: Fotorealístico, artístico, minimalista, gourmet
-- **Fallback Inteligente**: Si Stable Diffusion no está disponible, usa Unsplash
-- **API REST**: Endpoint dedicado para generación de imágenes
-- **Docker Ready**: Configuración completa con Docker
+- **Componentes**: Tests para ImagePlaceholder y RecipeCard
+- **Hooks**: Tests para useAuth y useSavedRecipes
+- **API**: Tests para endpoints de generación de imágenes
+- **Mocks**: Servicios externos completamente mockeados
+- **Coverage**: Reportes de cobertura de código
 
-Ver [STABLE_DIFFUSION_SETUP.md](./STABLE_DIFFUSION_SETUP.md) para configuración detallada.
+Ver [src/test/README.md](./src/test/README.md) para documentación detallada.
 
 ## 🔮 Próximas Mejoras
 
-- [x] Integración con Stable Diffusion para imágenes IA
+- [x] Testing automatizado con Vitest
 - [ ] Sistema de categorías de recetas
 - [ ] Filtros y búsqueda avanzada
 - [ ] Compartir recetas
 - [ ] Modo offline
 - [ ] PWA (Progressive Web App)
-- [ ] Testing automatizado
 - [ ] CI/CD pipeline
+- [ ] Integración con Stable Diffusion para imágenes IA
 
 ## 🤝 Contribuir
 

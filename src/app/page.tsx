@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { colors, typography, spacingSystem } from "@/design-system";
 import Button from "@/components/Button";
+import AppLayout from "@/components/layouts/AppLayout";
 import Nav from "@/components/Nav";
 import Image from "next/image";
 import plateImage from "@/assets/images/plate.png";
@@ -28,98 +29,87 @@ function LandingPage() {
   const router = useRouter();
 
   return (
-    <div
-      className="min-h-screen text-white"
-      style={{ backgroundColor: colors.interface.background.primary }}
-    >
-      {/* Nav sin menú para usuarios no logueados */}
-      <Nav showMenu={false} />
+    <AppLayout className="flex pt-20">
+      {/* Columna Izquierda - Contenido de Landing */}
+      <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 pt-20">
+        {/* Título Principal */}
+        <h1
+          className="mb-8 text-center lg:text-left leading-tight"
+          style={{
+            fontSize: typography.styles["title-1"].fontSize,
+            fontWeight: typography.styles["title-1"].fontWeight,
+            lineHeight: typography.styles["title-1"].lineHeight,
+            letterSpacing: typography.styles["title-1"].letterSpacing,
+            color: colors.interface.text.primary,
+          }}
+        >
+          Turn your everyday ingredients
+          <br />
+          into gourmet masterpieces with
+          <br />
+          AI driven recipes
+        </h1>
 
-      <main className="flex min-h-[calc(100vh-120px)] pt-20">
-        {/* Columna Izquierda - Contenido de Landing */}
-        <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 pt-20">
-          {/* Título Principal */}
-          <h1
-            className="mb-8 text-center lg:text-left leading-tight"
+        {/* Lista de características */}
+        <div className="mb-8 space-y-4">
+          <div
+            className="flex items-start space-x-3"
             style={{
-              fontSize: typography.styles["title-1"].fontSize,
-              fontWeight: typography.styles["title-1"].fontWeight,
-              lineHeight: typography.styles["title-1"].lineHeight,
-              letterSpacing: typography.styles["title-1"].letterSpacing,
+              fontSize: typography.styles["body-large"].fontSize,
+              fontWeight: typography.styles["body-large"].fontWeight,
               color: colors.interface.text.primary,
             }}
           >
-            Turn your everyday ingredients
-            <br />
-            into gourmet masterpieces with
-            <br />
-            AI driven recipes
-          </h1>
-
-          {/* Lista de características */}
-          <div className="mb-8 space-y-4">
-            <div
-              className="flex items-start space-x-3"
-              style={{
-                fontSize: typography.styles["body-large"].fontSize,
-                fontWeight: typography.styles["body-large"].fontWeight,
-                color: colors.interface.text.primary,
-              }}
-            >
-              <span className="text-primary-500 text-xl">•</span>
-              <span>
-                Reduce waste, save money, and
-                <br />
-                cook like a pro
-              </span>
-            </div>
-            <div
-              className="flex items-start space-x-3"
-              style={{
-                fontSize: typography.styles["body-large"].fontSize,
-                fontWeight: typography.styles["body-large"].fontWeight,
-                color: colors.interface.text.primary,
-              }}
-            >
-              <span className="text-primary-500 text-xl">•</span>
-              <span>
-                Unleash your inner chef and create
-                <br />
-                magic in the kitchen!
-              </span>
-            </div>
+            <span className="text-primary-500 text-xl">•</span>
+            <span>
+              Reduce waste, save money, and
+              <br />
+              cook like a pro
+            </span>
           </div>
-
-          {/* Botones de acción */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-8">
-            <Button
-              variant="primary"
-              onClick={() => router.push("/auth/signup")}
-            >
-              Sign up free
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => router.push("/auth/login")}
-            >
-              Login
-            </Button>
+          <div
+            className="flex items-start space-x-3"
+            style={{
+              fontSize: typography.styles["body-large"].fontSize,
+              fontWeight: typography.styles["body-large"].fontWeight,
+              color: colors.interface.text.primary,
+            }}
+          >
+            <span className="text-primary-500 text-xl">•</span>
+            <span>
+              Unleash your inner chef and create
+              <br />
+              magic in the kitchen!
+            </span>
           </div>
         </div>
 
-        {/* Columna Derecha - Imagen */}
-        <div className="flex-1 flex items-center justify-center px-8 lg:px-16">
-          <div className="relative w-full max-w-lg">
-            <Image
-              src={plateImage}
-              alt="Gourmet dish"
-              className="w-full h-auto rounded-lg shadow-2xl"
-              priority
-            />
-          </div>
+        {/* Botones de acción */}
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
+          <Button variant="primary" onClick={() => router.push("/auth/signup")}>
+            Sign up free
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => router.push("/auth/login")}
+          >
+            Login
+          </Button>
         </div>
-      </main>
-    </div>
+      </div>
+
+      {/* Columna Derecha - Imagen */}
+      <div className="flex-1 flex items-center justify-center px-8 lg:px-16">
+        <div className="relative w-full max-w-lg">
+          <Image
+            src={plateImage}
+            alt="Gourmet dish"
+            className="w-full h-auto rounded-lg shadow-2xl"
+            priority
+          />
+        </div>
+      </div>
+    </AppLayout>
   );
 }
 
@@ -286,7 +276,7 @@ function CreateRecipePage({ userName, user }: { userName: string; user: any }) {
             servings: allServings[0], // Usar el primer valor de servings
             cuisine: "international",
             difficulty: "medium",
-            count: 1,
+            count: 4,
           }),
         });
 

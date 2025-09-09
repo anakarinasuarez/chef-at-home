@@ -6,9 +6,8 @@ import {
 } from "@/types";
 import { colors } from "@/design-system";
 import GeminiService from "./geminiService";
-import { UnsplashService } from "./unsplashService";
-import { stableDiffusionService } from "./stableDiffusionService";
 import { openaiRecipeService } from "./openaiRecipeService";
+import { openaiImageService } from "./openaiImageService";
 
 export interface Recipe {
   id: string;
@@ -475,27 +474,23 @@ class RecipeService {
     ingredients: string[]
   ): Promise<string | null> {
     try {
-      // Primero intentar con Stable Diffusion
-      const stableDiffusionImage =
-        await stableDiffusionService.generateRecipeImage({
-          recipeName: recipeTitle,
-          ingredients,
-          style: "photorealistic",
-        });
+      // Primero intentar con OpenAI DALL-E
+      const openaiImage = await openaiImageService.generateRecipeImage({
+        recipeName: recipeTitle,
+        ingredients,
+        cuisine: "International",
+        style: "photorealistic",
+      });
 
-      if (
-        stableDiffusionImage &&
-        stableDiffusionImage !== "/images/plate.png"
-      ) {
-        return stableDiffusionImage;
+      if (openaiImage && openaiImage !== "/images/plate.png") {
+        return openaiImage;
       }
 
-      // Fallback a Unsplash si Stable Diffusion no está disponible
-      const image = await UnsplashService.getRandomFoodImage(recipeTitle);
-      return image;
+      // Si OpenAI falla, usar imagen por defecto
+      return "/images/plate.png";
     } catch (error) {
       console.error("Error getting recipe image:", error);
-      return null;
+      return "/images/plate.png";
     }
   }
 

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import GeminiService from "@/services/geminiService";
-import { UnsplashService } from "@/services/unsplashService";
-import { stableDiffusionService } from "@/services/stableDiffusionService";
 import { openaiRecipeService } from "@/services/openaiRecipeService";
+import { openaiImageService } from "@/services/openaiImageService";
 
 export async function POST(request: NextRequest) {
   let ingredients: string[] = [];
@@ -110,8 +109,8 @@ export async function POST(request: NextRequest) {
         try {
           console.log(`🎨 Generating image for: ${recipe.title}`);
 
-          // Generate image using the stable diffusion service (which includes OpenAI DALL-E)
-          const image = await stableDiffusionService.generateRecipeImage({
+          // Generate image using OpenAI DALL-E
+          const image = await openaiImageService.generateRecipeImage({
             recipeName: recipe.title,
             ingredients,
             cuisine,
@@ -164,35 +163,10 @@ export async function POST(request: NextRequest) {
 
       // Add images based on ingredients
       const fallbackRecipesWithImages = fallbackRecipes.map((recipe, index) => {
-        try {
-          // Intentar buscar una imagen específica basada en los ingredientes
-          const searchQuery =
-            UnsplashService.generateSearchQueryFromIngredients(ingredients);
-
-          // Usar imagen específica de la cocina detectada
-          const detectedCuisine =
-            UnsplashService.detectCuisineFromIngredients(ingredients);
-          const imageUrl = UnsplashService.getCuisineSpecificImage(
-            detectedCuisine,
-            ingredients,
-            index
-          );
-
-          return {
-            ...recipe,
-            image: imageUrl,
-          };
-        } catch (error) {
-          // Fallback a imagen específica de la cocina
-          return {
-            ...recipe,
-            image: UnsplashService.getCuisineSpecificImage(
-              recipe.cuisine,
-              ingredients,
-              index
-            ),
-          };
-        }
+        return {
+          ...recipe,
+          image: "/images/plate.png",
+        };
       });
 
       console.log(
