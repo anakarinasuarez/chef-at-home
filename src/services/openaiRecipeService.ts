@@ -63,7 +63,7 @@ class OpenAIRecipeService {
       const prompt = this.buildPrompt(request);
 
       const completion = await this.openai.chat.completions.create({
-        model: "gpt-5-mini",
+        model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",

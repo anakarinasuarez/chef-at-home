@@ -137,9 +137,19 @@ export default function CreateRecipePage({
 
       const data = await response.json();
       console.log("Recetas generadas:", data);
+      console.log("Número de recetas recibidas:", data.recipes?.length || 0);
 
-      // Redirigir a la página de recetas
-      router.push("/recipes");
+      if (!data.recipes || data.recipes.length === 0) {
+        throw new Error("No recipes were generated");
+      }
+
+      // Redirigir a la página de recetas con force=true y los ingredientes específicos
+      const ingredientsParam = encodeURIComponent(
+        JSON.stringify(ingredients.map((ing) => ing.name))
+      );
+      const redirectUrl = `/recipes?force=true&ingredients=${ingredientsParam}&servings=${selectedServings}`;
+      console.log("Redirigiendo a:", redirectUrl);
+      router.push(redirectUrl);
     } catch (error) {
       console.error("Error generating recipes:", error);
       alert("Error generating recipes. Please try again.");

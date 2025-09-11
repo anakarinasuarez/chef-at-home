@@ -113,9 +113,13 @@ export default function RecipeDetailPage() {
       "isRecipeSavedState:",
       isRecipeSavedState,
       "Final condition:",
-      isFromMyRecipes || isRecipeSavedState
+      isFromMyRecipes || isRecipeSavedState,
+      "Recipe ID:",
+      recipe?.id,
+      "User:",
+      user?.id
     );
-  }, [isFromMyRecipes, isRecipeSavedState]);
+  }, [isFromMyRecipes, isRecipeSavedState, recipe?.id, user?.id]);
 
   const handleSaveRecipe = () => {
     if (!recipe) {
@@ -146,6 +150,39 @@ export default function RecipeDetailPage() {
         showNotification(message, newSavedState ? "success" : "info");
 
         console.log("Recipe saved status updated:", newSavedState);
+
+        // Si se guardó la receta, eliminar de Generated Recipes y volver
+        if (newSavedState) {
+          // Eliminar la receta del sessionStorage de Generated Recipes
+          try {
+            const currentRecipes = sessionStorage.getItem("currentRecipes");
+            if (currentRecipes) {
+              const parsedRecipes = JSON.parse(currentRecipes);
+              const updatedRecipes = parsedRecipes.filter(
+                (r: any) => r.id !== recipe?.id
+              );
+              sessionStorage.setItem(
+                "currentRecipes",
+                JSON.stringify(updatedRecipes)
+              );
+              console.log(
+                "🗑️ Recipe removed from Generated Recipes sessionStorage"
+              );
+            }
+          } catch (error) {
+            console.error("Error updating sessionStorage:", error);
+          }
+
+          setTimeout(() => {
+            // Usar history.back() para volver a la página anterior
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              // Si no hay historial, ir a Generated Recipes con parámetro de receta guardada
+              router.push(`/recipes?saved=${recipe?.id}`);
+            }
+          }, 1000); // Esperar 1 segundo para que se vea la notificación
+        }
       } else {
         showNotification("Error saving recipe", "error");
       }

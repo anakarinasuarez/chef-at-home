@@ -32,12 +32,52 @@ export default function RecipesPage() {
   const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasLoadedRecipes, setHasLoadedRecipes] = useState(false);
+  const [removingRecipeId, setRemovingRecipeId] = useState<string | null>(null);
+
+  // Debug: Log recipes state changes
+  useEffect(() => {
+    console.log("🔧 DEBUG: Recipes state changed:", recipes.length, "recipes");
+    if (recipes.length > 0) {
+      console.log("🔧 DEBUG: First recipe:", recipes[0]);
+    }
+  }, [recipes]);
 
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Generate recipes with AI when component mounts
   useEffect(() => {
+    console.log("🚀 useEffect triggered - hasLoadedRecipes:", hasLoadedRecipes);
     const generateRecipes = async () => {
+      console.log("🔄 generateRecipes function called");
+
+      // Verificar si hay recetas en sessionStorage primero
+      const savedRecipes = sessionStorage.getItem("currentRecipes");
+      console.log("📦 Checking sessionStorage:", !!savedRecipes);
+
+      if (savedRecipes) {
+        try {
+          const parsedRecipes = JSON.parse(savedRecipes);
+          console.log(
+            "📦 Loading recipes from sessionStorage:",
+            parsedRecipes.length
+          );
+          setRecipes(parsedRecipes);
+          setHasLoadedRecipes(true);
+          setLoading(false);
+          return;
+        } catch (error) {
+          console.error("Error parsing saved recipes:", error);
+        }
+      }
+
+      // Si ya hemos cargado recetas, no hacer nada
+      if (hasLoadedRecipes) {
+        console.log("📦 Recipes already loaded, skipping generation");
+        setLoading(false);
+        return;
+      }
+
       // Initialize cache manager
       await UniversalCacheManager.initialize();
 
@@ -49,37 +89,150 @@ export default function RecipesPage() {
         const urlParams = new URLSearchParams(window.location.search);
         const ingredientsParam = urlParams.get("ingredients");
         const servingsParam = urlParams.get("servings");
+        const forceGenerate = urlParams.get("force") === "true";
+        const savedRecipeId = urlParams.get("saved");
 
         let ingredients = ["pasta", "basil", "olive oil", "garlic", "tomatoes"]; // fallback
         let servings = 4; // fallback
 
-        // Check if we have cached recipes using UniversalCacheManager
-        try {
+        // Solo generar nuevas recetas si viene desde Create Recipe (force=true)
+        // Si no hay parámetros específicos, cargar desde sessionStorage o mostrar estado vacío
+        const hasSpecificParams =
+          ingredientsParam || servingsParam || forceGenerate;
+
+        console.log("🔍 Checking specific params:", {
+          ingredientsParam: !!ingredientsParam,
+          servingsParam: !!servingsParam,
+          forceGenerate,
+          hasSpecificParams,
+        });
+
+        console.log("🔍 URL Params Debug:", {
+          ingredientsParam,
+          servingsParam,
+          forceGenerate,
+          savedRecipeId,
+          hasSpecificParams,
+          currentUrl: window.location.href,
+        });
+
+        // Si se guardó una receta desde el detalle, eliminar del sessionStorage
+        if (savedRecipeId) {
           console.log(
-            "🔍 Checking cache for ingredients:",
+            "🗑️ Recipe saved from detail, removing from sessionStorage:",
+            savedRecipeId
+          );
+          try {
+            const currentRecipes = sessionStorage.getItem("currentRecipes");
+            if (currentRecipes) {
+              const parsedRecipes = JSON.parse(currentRecipes);
+              const updatedRecipes = parsedRecipes.filter(
+                (r: any) => r.id !== savedRecipeId
+              );
+              sessionStorage.setItem(
+                "currentRecipes",
+                JSON.stringify(updatedRecipes)
+              );
+              console.log("✅ Recipe removed from sessionStorage");
+            }
+          } catch (error) {
+            console.error("Error updating sessionStorage:", error);
+          }
+        }
+
+        if (!hasSpecificParams) {
+          // Si se guardó una receta, cargar las recetas actualizadas desde sessionStorage
+          if (savedRecipeId) {
+            console.log(
+              "🔄 Recipe saved, loading updated recipes from sessionStorage"
+            );
+            const updatedRecipes = sessionStorage.getItem("currentRecipes");
+            if (updatedRecipes) {
+              try {
+                const parsedRecipes = JSON.parse(updatedRecipes);
+                console.log(
+                  "📦 Loading updated recipes:",
+                  parsedRecipes.length
+                );
+                setRecipes(parsedRecipes);
+                setHasLoadedRecipes(true);
+                setLoading(false);
+                return;
+              } catch (error) {
+                console.error("Error parsing updated recipes:", error);
+              }
+            }
+          }
+
+          console.log(
+            "🔄 No specific params found, generating default recipes"
+          );
+          // Si no hay parámetros específicos, generar recetas por defecto
+          // Usar ingredientes por defecto para generar nuevas recetas
+          ingredients = ["pasta", "basil", "olive oil", "garlic", "tomatoes"];
+          servings = 4;
+          console.log(
+            "🎯 Using default ingredients:",
             ingredients,
             "servings:",
             servings
           );
-          const cachedRecipes = await UniversalCacheManager.getCachedRecipes(
-            ingredients,
-            servings
-          );
 
-          if (cachedRecipes && cachedRecipes.length > 0) {
-            console.log(
-              "📦 Using cached recipes from UniversalCacheManager:",
-              cachedRecipes.length,
-              "recipes"
-            );
-            setRecipes(cachedRecipes);
-            setLoading(false);
-            return;
-          } else {
-            console.log("❌ No cached recipes found for these ingredients");
+          // Limpiar cache para asegurar que se generen nuevas recetas
+          try {
+            await UniversalCacheManager.clearAllCache();
+            sessionStorage.removeItem("currentRecipes");
+            console.log("🧹 Cache cleared for default recipe generation");
+          } catch (error) {
+            console.log("❌ Error clearing cache:", error);
           }
-        } catch (error) {
-          console.log("❌ Error checking cache:", error);
+        } else if (!forceGenerate) {
+          try {
+            console.log(
+              "🔍 Checking cache for ingredients:",
+              ingredients,
+              "servings:",
+              servings
+            );
+            const cachedRecipes = await UniversalCacheManager.getCachedRecipes(
+              ingredients,
+              servings
+            );
+
+            if (cachedRecipes && cachedRecipes.length > 0) {
+              console.log(
+                "📦 Using cached recipes from UniversalCacheManager:",
+                cachedRecipes.length,
+                "recipes"
+              );
+              setRecipes(cachedRecipes);
+              setHasLoadedRecipes(true);
+              setLoading(false);
+
+              // Guardar en sessionStorage para mantenerlas al navegar
+              sessionStorage.setItem(
+                "currentRecipes",
+                JSON.stringify(cachedRecipes)
+              );
+              return;
+            } else {
+              console.log("❌ No cached recipes found for these ingredients");
+            }
+          } catch (error) {
+            console.log("❌ Error checking cache:", error);
+          }
+        } else {
+          console.log("🔄 Force generating new recipes (ignoring cache)");
+          // Limpiar cache cuando se fuerza la generación
+          try {
+            await UniversalCacheManager.clearAllCache();
+            sessionStorage.removeItem("currentRecipes");
+            console.log(
+              "🧹 Cache and sessionStorage cleared for force generation"
+            );
+          } catch (error) {
+            console.log("❌ Error clearing cache:", error);
+          }
         }
 
         if (ingredientsParam) {
@@ -108,6 +261,12 @@ export default function RecipesPage() {
         );
 
         // Generate recipes using our new API route
+        console.log("🚀 About to call API with:", {
+          ingredients,
+          servings,
+          count: 4,
+        });
+
         const response = await fetch("/api/recipes/generate", {
           method: "POST",
           headers: {
@@ -122,6 +281,8 @@ export default function RecipesPage() {
           }),
         });
 
+        console.log("📡 API Response status:", response.status);
+
         if (!response.ok) {
           throw new Error(
             `Failed to generate recipes: ${response.status} ${response.statusText}`
@@ -130,13 +291,13 @@ export default function RecipesPage() {
 
         const data = await response.json();
         console.log("Recipes generated successfully:", data);
+        console.log("Number of recipes received:", data.recipes?.length || 0);
 
         // Convert API response to Recipe format
         const aiRecipes = data.recipes.map((aiRecipe: any, index: number) => ({
-          id:
-            Date.now().toString() +
-            Math.random().toString(36).substr(2, 9) +
-            index,
+          id: `recipe_${Date.now()}_${index}_${Math.random()
+            .toString(36)
+            .substr(2, 9)}`,
           title: aiRecipe.title || `Recipe ${index + 1}`,
           servings: aiRecipe.servings || servings,
           cookingTime: aiRecipe.cookingTime || "30 minutes",
@@ -148,7 +309,15 @@ export default function RecipesPage() {
         }));
 
         console.log("Processed recipes:", aiRecipes);
+        console.log("Setting recipes state with count:", aiRecipes.length);
+        console.log("🔧 DEBUG: About to set recipes state");
         setRecipes(aiRecipes);
+        setHasLoadedRecipes(true);
+        console.log("🔧 DEBUG: Recipes state set");
+
+        // Guardar en sessionStorage para mantenerlas al navegar
+        sessionStorage.setItem("currentRecipes", JSON.stringify(aiRecipes));
+        console.log("Recipes saved to sessionStorage");
 
         // Cache the recipes using UniversalCacheManager
         try {
@@ -199,13 +368,14 @@ export default function RecipesPage() {
           },
         ];
         setRecipes(fallbackRecipes);
+        setHasLoadedRecipes(true);
       } finally {
         setLoading(false);
       }
     };
 
     generateRecipes();
-  }, []);
+  }, []); // Solo ejecutar una vez al montar el componente
 
   const handleSaveRecipe = (recipeId: string) => {
     setSavedRecipes((prev) => {
@@ -219,8 +389,74 @@ export default function RecipesPage() {
     });
   };
 
+  const handleRemoveFromList = (recipeId: string) => {
+    console.log("🗑️ handleRemoveFromList called with recipeId:", recipeId);
+    console.log("🗑️ Current recipes count:", recipes.length);
+
+    // Marcar la receta como removiendo para animación
+    setRemovingRecipeId(recipeId);
+
+    // Esperar un poco para que se vea la animación, luego eliminar
+    setTimeout(() => {
+      const updatedRecipes = recipes.filter((recipe) => recipe.id !== recipeId);
+      console.log("🗑️ Updated recipes count:", updatedRecipes.length);
+
+      setRecipes(updatedRecipes);
+      setRemovingRecipeId(null);
+
+      // Actualizar sessionStorage con las recetas restantes
+      sessionStorage.setItem("currentRecipes", JSON.stringify(updatedRecipes));
+
+      // NO redirigir automáticamente - mantener al usuario en Generated Recipes
+      console.log(
+        "✅ Recipe removed from Generated Recipes, staying on current page"
+      );
+    }, 600); // Tiempo para la animación de desvanecimiento
+  };
+
   const handleBackToHome = () => {
     router.push("/");
+  };
+
+  const clearAllCache = async () => {
+    try {
+      // Limpiar sessionStorage
+      sessionStorage.removeItem("currentRecipes");
+
+      // Limpiar cache usando UniversalCacheManager
+      await UniversalCacheManager.clearAllCache();
+
+      // Limpiar TODO el localStorage (más agresivo)
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (
+          key &&
+          (key.startsWith("recipes_") ||
+            key.startsWith("image_") ||
+            key.includes("cache"))
+        ) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
+      console.log(
+        `🗑️ Removed ${keysToRemove.length} localStorage keys:`,
+        keysToRemove
+      );
+
+      // Limpiar estado
+      setRecipes([]);
+      setHasLoadedRecipes(false);
+      setLoading(true);
+
+      console.log("🧹 Cache cleared, reloading page...");
+
+      // Recargar la página para generar nuevas recetas
+      window.location.reload();
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+    }
   };
 
   const scrollToRecipe = (index: number) => {
@@ -355,8 +591,20 @@ export default function RecipesPage() {
             {/* Scroll Container */}
             <div className="flex gap-6 overflow-x-auto scrollbar-hide items-center flex-1 pt-3 pb-1.5">
               {recipes.map((recipe) => (
-                <div key={recipe.id} className="flex-shrink-0 w-80">
-                  <RecipeCard recipe={recipe} />
+                <div
+                  key={recipe.id}
+                  className={`flex-shrink-0 w-80 transition-all duration-600 ease-in-out ${
+                    removingRecipeId === recipe.id
+                      ? "opacity-0 scale-95 transform translate-x-4"
+                      : "opacity-100 scale-100 transform translate-x-0"
+                  }`}
+                >
+                  <RecipeCard
+                    recipe={recipe}
+                    variant="save"
+                    onRemoveFromList={handleRemoveFromList}
+                    isRemoving={removingRecipeId === recipe.id}
+                  />
                 </div>
               ))}
             </div>
@@ -401,26 +649,46 @@ export default function RecipesPage() {
               {error ||
                 "We couldn't generate recipes at the moment. Please try again."}
             </p>
-            <button
-              onClick={handleBackToHome}
-              className="px-6 py-3 rounded-lg transition-colors border"
-              style={{
-                backgroundColor: "transparent",
-                color: colors.brand.primary[500],
-                borderColor: colors.brand.primary[500],
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[500];
-                e.currentTarget.style.color = colors.base.white;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = colors.brand.primary[500];
-              }}
-            >
-              Back to Home
-            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={handleBackToHome}
+                className="px-6 py-3 rounded-lg transition-colors border"
+                style={{
+                  backgroundColor: "transparent",
+                  color: colors.brand.primary[500],
+                  borderColor: colors.brand.primary[500],
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    colors.brand.primary[500];
+                  e.currentTarget.style.color = colors.base.white;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = colors.brand.primary[500];
+                }}
+              >
+                Back to Home
+              </button>
+              <button
+                onClick={clearAllCache}
+                className="px-4 py-3 rounded-lg transition-colors text-sm"
+                style={{
+                  backgroundColor: colors.brand.primary[500],
+                  color: colors.base.white,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    colors.brand.primary[600];
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    colors.brand.primary[500];
+                }}
+              >
+                🧹 Clear Cache
+              </button>
+            </div>
           </div>
         )}
       </div>

@@ -26,6 +26,8 @@ interface RecipeCardProps {
   onEdit?: (recipe: any) => void;
   onDelete?: (recipeId: string) => void;
   onShare?: (recipe: any) => void;
+  onRemoveFromList?: (recipeId: string) => void;
+  isRemoving?: boolean;
 }
 
 export default function RecipeCard({
@@ -34,6 +36,8 @@ export default function RecipeCard({
   onEdit,
   onDelete,
   onShare,
+  onRemoveFromList,
+  isRemoving = false,
 }: RecipeCardProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -46,8 +50,7 @@ export default function RecipeCard({
   const isSaved = isRecipeSaved(recipeId);
 
   const handleCardClick = () => {
-    // Generar un ID único si no existe
-    const recipeId = recipe.id || Date.now().toString();
+    // Usar el mismo ID que se usa para verificar si está guardada
 
     // Guardar los datos de la receta en localStorage para la página de detalle
     localStorage.setItem(`recipe-${recipeId}`, JSON.stringify(recipe));
@@ -68,6 +71,10 @@ export default function RecipeCard({
       return;
     }
 
+    console.log("💾 Save clicked for recipe:", recipeId);
+    console.log("💾 Variant:", variant);
+    console.log("💾 onRemoveFromList function:", !!onRemoveFromList);
+
     setIsSaving(true);
 
     try {
@@ -79,6 +86,17 @@ export default function RecipeCard({
           ? "Recipe removed from favorites"
           : "Recipe saved to favorites";
         showNotification(message, isSaved ? "info" : "success");
+
+        // Si se guardó la receta desde Generated Recipes, eliminar de la lista
+        if (!isSaved && variant === "save" && onRemoveFromList) {
+          console.log("🗑️ Removing recipe from list:", recipeId);
+          onRemoveFromList(recipeId); // Esta función ya maneja la redirección
+        } else if (!isSaved) {
+          // Si se guardó desde otro lugar (no Generated Recipes), redirigir normalmente
+          setTimeout(() => {
+            router.push("/my-recipes");
+          }, 1000);
+        }
       } else {
         showNotification("Error saving recipe", "error");
       }
@@ -188,42 +206,57 @@ export default function RecipeCard({
           // Save Button for Generated Recipes
           <button
             onClick={handleSaveClick}
-            disabled={isSaving}
+            disabled={isSaving || isRemoving}
             className="px-6 py-3 rounded-lg transition-all duration-200 flex items-center gap-2 disabled:opacity-50"
             style={{
-              backgroundColor: isSaved
+              backgroundColor: isRemoving
+                ? colors.brand.primary[600]
+                : isSaved
                 ? colors.interface.background.tertiary
                 : colors.brand.primary[500],
-              color: isSaved ? colors.brand.primary[500] : colors.base.white,
+              color: isRemoving
+                ? colors.base.white
+                : isSaved
+                ? colors.brand.primary[500]
+                : colors.base.white,
               fontSize: typography.styles["button"].fontSize,
               fontWeight: typography.styles["button"].fontWeight,
               lineHeight: typography.styles["button"].lineHeight,
               letterSpacing: typography.styles["button"].letterSpacing,
-              border: isSaved
-                ? `2px solid ${colors.brand.primary[500]}`
-                : "none",
+              border:
+                isSaved && !isRemoving
+                  ? `2px solid ${colors.brand.primary[500]}`
+                  : "none",
             }}
             onMouseEnter={(e) => {
-              if (!isSaved) {
+              if (!isSaved && !isRemoving) {
                 e.currentTarget.style.backgroundColor =
                   colors.brand.primary[600];
               }
             }}
             onMouseLeave={(e) => {
-              if (!isSaved) {
+              if (!isSaved && !isRemoving) {
                 e.currentTarget.style.backgroundColor =
                   colors.brand.primary[500];
               }
             }}
           >
-            {isSaving ? (
+            {isRemoving ? (
+              <span className="text-lg animate-pulse">✓</span>
+            ) : isSaving ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
             ) : isSaved ? (
               <span className="text-lg">✓</span>
             ) : (
               <span className="text-lg">+</span>
             )}
-            {isSaving ? "Saving..." : isSaved ? "Saved" : "Save"}
+            {isRemoving
+              ? "Saved!"
+              : isSaving
+              ? "Saving..."
+              : isSaved
+              ? "Saved"
+              : "Save"}
           </button>
         ) : (
           // Edit, Delete, Share Buttons for My Recipes (Icon only)
