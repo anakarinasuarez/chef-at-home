@@ -2,139 +2,195 @@
  * Universal Cache Manager
  * Uses Enhanced localStorage for reliable client-side caching
  */
-import { LocalStorageCacheService } from "./localStorage-cache";
+import { 
+  cacheRecipes,
+  getCachedRecipes,
+  cacheImage,
+  getCachedImage,
+  clearAllCache,
+  clearRecipesCache,
+  clearImagesCache,
+  getCacheStats,
+  cleanExpiredItems
+} from "./localStorage-cache";
 
 export type CacheProvider = "localStorage";
 
-export class UniversalCacheManager {
-  private static provider: CacheProvider = "localStorage";
+let currentProvider: CacheProvider = "localStorage";
 
-  /**
-   * Initialize cache manager
-   */
+// Initialize cache manager
+export const initializeCache = async (): Promise<void> => {
+  // Use localStorage for reliable client-side operations
+  currentProvider = "localStorage";
+  console.log("🚀 Universal Cache initialized with Enhanced localStorage");
+};
+
+// Cache recipes data
+export const cacheRecipesData = async (
+  ingredients: string[],
+  servings: number,
+  recipes: any[],
+  ttlSeconds?: number
+): Promise<void> => {
+  cacheRecipes(
+    ingredients,
+    servings,
+    recipes,
+    ttlSeconds || 3600
+  );
+};
+
+// Get cached recipes
+export const getCachedRecipesData = async (
+  ingredients: string[],
+  servings: number
+): Promise<any[] | null> => {
+  return getCachedRecipes(ingredients, servings);
+};
+
+// Cache image URL
+export const cacheImageData = async (
+  recipeName: string,
+  ingredients: string[],
+  imageUrl: string,
+  ttlSeconds?: number
+): Promise<void> => {
+  cacheImage(
+    recipeName,
+    ingredients,
+    imageUrl,
+    ttlSeconds || 86400
+  );
+};
+
+// Get cached image URL
+export const getCachedImageData = async (
+  recipeName: string,
+  ingredients: string[]
+): Promise<string | null> => {
+  return getCachedImage(recipeName, ingredients);
+};
+
+// Clear all cache
+export const clearAllCacheData = async (): Promise<void> => {
+  clearAllCache();
+};
+
+// Clear recipes cache
+export const clearRecipesCacheData = async (): Promise<void> => {
+  clearRecipesCache();
+};
+
+// Clear images cache
+export const clearImagesCacheData = async (): Promise<void> => {
+  clearImagesCache();
+};
+
+// Get cache statistics
+export const getCacheStatistics = async (): Promise<{
+  provider: string;
+  status: string;
+  features: string[];
+  details?: any;
+}> => {
+  const stats = getCacheStats();
+  return {
+    provider: stats.provider,
+    status: "✅ Active",
+    features: [
+      "Client-side caching",
+      "TTL support",
+      "Automatic expiration",
+      "Memory management",
+    ],
+    details: stats,
+  };
+};
+
+// Force specific provider (for testing)
+export const forceProvider = (provider: CacheProvider): void => {
+  currentProvider = provider;
+  console.log(`🔧 Forced cache provider: ${provider}`);
+};
+
+// Get current provider
+export const getCurrentProvider = (): CacheProvider => {
+  return currentProvider;
+};
+
+// Clean expired items
+export const cleanExpiredCacheItems = async (): Promise<number> => {
+  return cleanExpiredItems();
+};
+
+// Legacy class-based API for backward compatibility
+export class UniversalCacheManager {
   static async initialize(): Promise<void> {
-    // Use localStorage for reliable client-side operations
-    this.provider = "localStorage";
-    console.log("🚀 Universal Cache initialized with Enhanced localStorage");
+    return initializeCache();
   }
 
-  /**
-   * Cache recipes data
-   */
   static async cacheRecipes(
     ingredients: string[],
     servings: number,
     recipes: any[],
     ttlSeconds?: number
   ): Promise<void> {
-    LocalStorageCacheService.cacheRecipes(
-      ingredients,
-      servings,
-      recipes,
-      ttlSeconds || 3600
-    );
+    return cacheRecipesData(ingredients, servings, recipes, ttlSeconds);
   }
 
-  /**
-   * Get cached recipes
-   */
   static async getCachedRecipes(
     ingredients: string[],
     servings: number
   ): Promise<any[] | null> {
-    return LocalStorageCacheService.getCachedRecipes(ingredients, servings);
+    return getCachedRecipesData(ingredients, servings);
   }
 
-  /**
-   * Cache image URL
-   */
   static async cacheImage(
     recipeName: string,
     ingredients: string[],
     imageUrl: string,
     ttlSeconds?: number
   ): Promise<void> {
-    LocalStorageCacheService.cacheImage(
-      recipeName,
-      ingredients,
-      imageUrl,
-      ttlSeconds || 86400
-    );
+    return cacheImageData(recipeName, ingredients, imageUrl, ttlSeconds);
   }
 
-  /**
-   * Get cached image URL
-   */
   static async getCachedImage(
     recipeName: string,
     ingredients: string[]
   ): Promise<string | null> {
-    return LocalStorageCacheService.getCachedImage(recipeName, ingredients);
+    return getCachedImageData(recipeName, ingredients);
   }
 
-  /**
-   * Clear all cache
-   */
   static async clearAllCache(): Promise<void> {
-    LocalStorageCacheService.clearAllCache();
+    return clearAllCacheData();
   }
 
-  /**
-   * Clear recipes cache
-   */
   static async clearRecipesCache(): Promise<void> {
-    LocalStorageCacheService.clearRecipesCache();
+    return clearRecipesCacheData();
   }
 
-  /**
-   * Clear images cache
-   */
   static async clearImagesCache(): Promise<void> {
-    LocalStorageCacheService.clearImagesCache();
+    return clearImagesCacheData();
   }
 
-  /**
-   * Get cache statistics
-   */
   static async getCacheStats(): Promise<{
     provider: string;
     status: string;
     features: string[];
     details?: any;
   }> {
-    const stats = LocalStorageCacheService.getCacheStats();
-    return {
-      provider: stats.provider,
-      status: "✅ Active",
-      features: [
-        "Client-side caching",
-        "TTL support",
-        "Automatic expiration",
-        "Memory management",
-      ],
-      details: stats,
-    };
+    return getCacheStatistics();
   }
 
-  /**
-   * Force specific provider (for testing)
-   */
   static forceProvider(provider: CacheProvider): void {
-    this.provider = provider;
-    console.log(`🔧 Forced cache provider: ${provider}`);
+    return forceProvider(provider);
   }
 
-  /**
-   * Get current provider
-   */
   static getCurrentProvider(): CacheProvider {
-    return this.provider;
+    return getCurrentProvider();
   }
 
-  /**
-   * Clean expired items
-   */
   static async cleanExpiredItems(): Promise<number> {
-    return LocalStorageCacheService.cleanExpiredItems();
+    return cleanExpiredCacheItems();
   }
 }
