@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { openaiImageService } from "@/services/openaiImageService";
+import { 
+  generateRecipeImageWithOpenAI, 
+  isOpenAIImageServiceAvailable 
+} from "@/services/openaiImageService";
 
 export async function GET() {
   try {
     console.log("🧪 Testing OpenAI Image Service...");
 
-    const isAvailable = await openaiImageService.isServiceAvailable();
+    const isAvailable = isOpenAIImageServiceAvailable();
     console.log("OpenAI Image Service Available:", isAvailable);
 
     if (!isAvailable) {
@@ -25,7 +28,7 @@ export async function GET() {
     };
 
     console.log("🎨 Testing image generation...");
-    const imageUrl = await openaiImageService.generateRecipeImage(testRequest);
+    const imageUrl = await generateRecipeImageWithOpenAI(testRequest);
 
     return NextResponse.json({
       success: true,

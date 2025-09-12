@@ -1,6 +1,21 @@
 // Export all services
 export { AuthService } from "./authService";
 export { default as RecipeService } from "./recipeService";
-export { default as GeminiService } from "./geminiService";
-export { openaiImageService } from "./openaiImageService";
-export { openaiRecipeService } from "./openaiRecipeService";
+
+// Export functional services
+export { 
+  generateRecipeWithOpenAI, 
+  isOpenAIServiceAvailable 
+} from "./openaiRecipeService";
+
+export { 
+  generateRecipeWithGemini, 
+  generateMultipleRecipesWithGemini,
+  isGeminiServiceAvailable 
+} from "./geminiService";
+
+export { 
+  generateRecipeImageWithOpenAI, 
+  isOpenAIImageServiceAvailable,
+  getAvailableImageModels 
+} from "./openaiImageService";

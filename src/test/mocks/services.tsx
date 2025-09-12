@@ -1,21 +1,17 @@
 import { vi } from "vitest";
 
-// Mock OpenAI service
-export const mockOpenAIImageService = {
-  generateRecipeImage: vi.fn(),
-  isAvailable: true,
-};
+// Mock OpenAI service functions
+export const mockGenerateRecipeImageWithOpenAI = vi.fn();
+export const mockIsOpenAIImageServiceAvailable = vi.fn(() => true);
+export const mockGetAvailableImageModels = vi.fn(() => ["dall-e-3", "dall-e-2"]);
 
-export const mockOpenAIRecipeService = {
-  generateRecipes: vi.fn(),
-  isAvailable: true,
-};
+export const mockGenerateRecipeWithOpenAI = vi.fn();
+export const mockIsOpenAIServiceAvailable = vi.fn(() => true);
 
-// Mock Gemini service
-export const mockGeminiService = {
-  generateRecipes: vi.fn(),
-  isAvailable: true,
-};
+// Mock Gemini service functions
+export const mockGenerateRecipeWithGemini = vi.fn();
+export const mockGenerateMultipleRecipesWithGemini = vi.fn();
+export const mockIsGeminiServiceAvailable = vi.fn(() => true);
 
 // Mock Unsplash service
 export const mockUnsplashService = {
@@ -43,15 +39,20 @@ export const mockAuthService = {
 
 // Mock all services
 vi.mock("@/services/openaiImageService", () => ({
-  openaiImageService: mockOpenAIImageService,
+  generateRecipeImageWithOpenAI: mockGenerateRecipeImageWithOpenAI,
+  isOpenAIImageServiceAvailable: mockIsOpenAIImageServiceAvailable,
+  getAvailableImageModels: mockGetAvailableImageModels,
 }));
 
 vi.mock("@/services/openaiRecipeService", () => ({
-  openaiRecipeService: mockOpenAIRecipeService,
+  generateRecipeWithOpenAI: mockGenerateRecipeWithOpenAI,
+  isOpenAIServiceAvailable: mockIsOpenAIServiceAvailable,
 }));
 
 vi.mock("@/services/geminiService", () => ({
-  default: mockGeminiService,
+  generateRecipeWithGemini: mockGenerateRecipeWithGemini,
+  generateMultipleRecipesWithGemini: mockGenerateMultipleRecipesWithGemini,
+  isGeminiServiceAvailable: mockIsGeminiServiceAvailable,
 }));
 
 vi.mock("@/services/recipeService", () => ({

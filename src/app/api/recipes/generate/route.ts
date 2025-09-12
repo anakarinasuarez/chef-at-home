@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import GeminiService from "@/services/geminiService";
-import { openaiRecipeService } from "@/services/openaiRecipeService";
-import { openaiImageService } from "@/services/openaiImageService";
+import { 
+  generateRecipeWithOpenAI, 
+  isOpenAIServiceAvailable 
+} from "@/services/openaiRecipeService";
+import { 
+  generateRecipeWithGemini, 
+  generateMultipleRecipesWithGemini,
+  isGeminiServiceAvailable 
+} from "@/services/geminiService";
+import { 
+  generateRecipeImageWithOpenAI, 
+  isOpenAIImageServiceAvailable 
+} from "@/services/openaiImageService";
 
 export async function POST(request: NextRequest) {
   let ingredients: string[] = [];
@@ -34,16 +44,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const geminiService = new GeminiService();
-
     let recipes;
     let source = "gemini-fallback";
 
     // Primero intentar con OpenAI GPT-3.5-turbo
-    if (openaiRecipeService.isServiceAvailable) {
+    if (isOpenAIServiceAvailable()) {
       console.log("🎯 Using OpenAI GPT-3.5-turbo for recipe generation");
       try {
-        const openaiResponse = await openaiRecipeService.generateRecipe({
+        const openaiResponse = await generateRecipeWithOpenAI({
           ingredients,
           servings,
           cuisine,
@@ -63,13 +71,13 @@ export async function POST(request: NextRequest) {
         );
         // Fallback a Gemini
         if (count && count > 1) {
-          recipes = await geminiService.generateMultipleRecipes(
+          recipes = await generateMultipleRecipesWithGemini(
             ingredients,
             servings,
             count
           );
         } else {
-          const recipe = await geminiService.generateRecipe(
+          const recipe = await generateRecipeWithGemini(
             ingredients,
             servings,
             cuisine
@@ -82,13 +90,13 @@ export async function POST(request: NextRequest) {
       // Usar Gemini directamente si OpenAI no está disponible
       console.log("🔄 Using Gemini for recipe generation");
       if (count && count > 1) {
-        recipes = await geminiService.generateMultipleRecipes(
+        recipes = await generateMultipleRecipesWithGemini(
           ingredients,
           servings,
           count
         );
       } else {
-        const recipe = await geminiService.generateRecipe(
+        const recipe = await generateRecipeWithGemini(
           ingredients,
           servings,
           cuisine
@@ -105,7 +113,7 @@ export async function POST(request: NextRequest) {
           console.log(`🎨 Generating image for: ${recipe.title}`);
 
           // Generate image using OpenAI DALL-E
-          const image = await openaiImageService.generateRecipeImage({
+          const image = await generateRecipeImageWithOpenAI({
             recipeName: recipe.title,
             ingredients,
             cuisine,
