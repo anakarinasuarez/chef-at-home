@@ -6,7 +6,6 @@ export interface Recipe {
   ingredients: string; // JSON string
   instructions: string; // JSON string
   cookingTime?: number; // en minutos
-  difficulty?: "Easy" | "Medium" | "Hard";
   servings?: number;
   imageUrl?: string;
   isPublic: boolean;
@@ -26,7 +25,6 @@ export interface CreateRecipeData {
   ingredients: string;
   instructions: string;
   cookingTime?: number;
-  difficulty?: "Easy" | "Medium" | "Hard";
   servings?: number;
   imageUrl?: string;
   isPublic?: boolean;
@@ -40,7 +38,6 @@ export interface RecipeResponse {
   ingredients: string;
   instructions: string;
   cookingTime?: number;
-  difficulty?: "Easy" | "Medium" | "Hard";
   servings?: number;
   imageUrl?: string;
   isPublic: boolean;

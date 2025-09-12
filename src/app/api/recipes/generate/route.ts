@@ -7,7 +7,6 @@ export async function POST(request: NextRequest) {
   let ingredients: string[] = [];
   let servings: number = 2;
   let cuisine: string = "international";
-  let difficulty: string = "medium";
   let count: number = 1;
 
   try {
@@ -15,7 +14,6 @@ export async function POST(request: NextRequest) {
     ingredients = requestData.ingredients || ingredients;
     servings = requestData.servings || servings;
     cuisine = requestData.cuisine || cuisine;
-    difficulty = requestData.difficulty || difficulty;
     count = requestData.count || count;
 
     if (
@@ -49,7 +47,6 @@ export async function POST(request: NextRequest) {
           ingredients,
           servings,
           cuisine,
-          difficulty,
           count: count || 1,
         });
 
@@ -75,8 +72,7 @@ export async function POST(request: NextRequest) {
           const recipe = await geminiService.generateRecipe(
             ingredients,
             servings,
-            cuisine,
-            difficulty
+            cuisine
           );
           recipes = [recipe];
         }
@@ -95,8 +91,7 @@ export async function POST(request: NextRequest) {
         const recipe = await geminiService.generateRecipe(
           ingredients,
           servings,
-          cuisine,
-          difficulty
+          cuisine
         );
         recipes = [recipe];
       }
@@ -373,9 +368,7 @@ function generateFallbackRecipes(
     const detectedCuisine = getCuisineFromIngredients(ingredients);
     const cuisine = cuisineData[detectedCuisine] || cuisineData["Italian"];
 
-    // Generar variedad en dificultad, método y región
-    const difficulties = ["Easy", "Medium", "Hard"];
-    const randomDifficulty = difficulties[i % difficulties.length];
+    // Generar variedad en método y región
 
     const methods = cuisine.methods;
     const randomMethod = methods[i % methods.length];
@@ -465,7 +458,6 @@ function generateFallbackRecipes(
       cookingTime: `${cookingTime} minutes`,
       prepTime: `${prepTime} minutes`,
       totalTime: `${totalTime} minutes`,
-      difficulty: randomDifficulty,
       cuisine: detectedCuisine,
       servings: servings,
       source: "fallback-enhanced",

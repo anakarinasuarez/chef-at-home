@@ -14,7 +14,6 @@ interface Recipe {
   title: string;
   servings: number;
   cookingTime: string;
-  difficulty: string;
   image?: string;
   source: string;
   ingredients: Array<{
@@ -276,7 +275,6 @@ export default function RecipesPage() {
             ingredients: ingredients,
             servings: servings,
             cuisine: "international",
-            difficulty: "medium",
             count: 4,
           }),
         });
@@ -301,7 +299,6 @@ export default function RecipesPage() {
           title: aiRecipe.title || `Recipe ${index + 1}`,
           servings: aiRecipe.servings || servings,
           cookingTime: aiRecipe.cookingTime || "30 minutes",
-          difficulty: aiRecipe.difficulty || "Medium",
           image: aiRecipe.image || null,
           source: aiRecipe.source || "gemini",
           ingredients: aiRecipe.ingredients || [],
@@ -349,7 +346,6 @@ export default function RecipesPage() {
             title: "Simple Pasta with Herbs",
             servings: 4,
             cookingTime: "20 minutes",
-            difficulty: "Easy",
             image:
               "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
             source: "fallback",

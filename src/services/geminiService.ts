@@ -17,16 +17,10 @@ class GeminiService {
   async generateRecipe(
     ingredients: string[],
     servings: number,
-    cuisine: string = "international",
-    difficulty: string = "medium"
+    cuisine: string = "international"
   ): Promise<any> {
     try {
-      const prompt = this.buildRecipePrompt(
-        ingredients,
-        servings,
-        cuisine,
-        difficulty
-      );
+      const prompt = this.buildRecipePrompt(ingredients, servings, cuisine);
 
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
@@ -53,13 +47,11 @@ class GeminiService {
 
       for (let i = 0; i < count; i++) {
         const cuisine = this.getRandomCuisine();
-        const difficulty = this.getRandomDifficulty();
 
         const recipe = await this.generateRecipe(
           ingredients,
           servings,
-          cuisine,
-          difficulty
+          cuisine
         );
         recipes.push(recipe);
 
@@ -79,8 +71,7 @@ class GeminiService {
   private buildRecipePrompt(
     ingredients: string[],
     servings: number,
-    cuisine: string,
-    difficulty: string
+    cuisine: string
   ): string {
     const uniqueId = Math.random().toString(36).substr(2, 9);
 
@@ -193,7 +184,6 @@ IMPORTANT REQUIREMENTS:
 - Use authentic ${cuisine} cooking techniques and flavors
 - Include additional ingredients that complement the main ingredients
 - Provide detailed, step-by-step instructions
-- Make it appropriate for ${difficulty} difficulty level
 - Serve ${servings} people
 - Use realistic cooking times and quantities
 
@@ -203,7 +193,6 @@ RECIPE STRUCTURE:
 - Ingredients: Include main ingredients + complementary ingredients + spices
 - Instructions: Detailed, numbered steps with specific techniques
 - Cooking times: Realistic prep, cooking, and total times
-- Difficulty: ${difficulty}
 - Cuisine: ${cuisine}
 
 ADDITIONAL INGREDIENTS TO CONSIDER: ${additionalIngredients.join(", ")}
@@ -223,7 +212,6 @@ Return ONLY valid JSON in this exact format:
     "Detailed step 3"
   ],
   "cookingTime": "XX minutes",
-  "difficulty": "${difficulty}",
   "cuisine": "${cuisine}",
   "servings": ${servings},
   "prepTime": "XX minutes",
@@ -308,7 +296,6 @@ Return ONLY valid JSON in this exact format:
       cookingTime: recipe.cookingTime || "30 minutes",
       prepTime: recipe.prepTime || "15 minutes",
       totalTime: recipe.totalTime || "45 minutes",
-      difficulty: recipe.difficulty || "Medium",
       cuisine: recipe.cuisine || "International",
       servings: recipe.servings || servings,
     };
@@ -392,11 +379,8 @@ Return ONLY valid JSON in this exact format:
       { cuisine: "Spanish", style: "Traditional", method: "Pan-seared" },
     ];
 
-    const difficulties = ["Easy", "Medium", "Hard"];
     const randomStyle =
       cuisineStyles[Math.floor(Math.random() * cuisineStyles.length)];
-    const randomDifficulty =
-      difficulties[Math.floor(Math.random() * difficulties.length)];
     const uniqueId = Math.random().toString(36).substr(2, 6);
     const uniqueMethods = [
       "Braised",
@@ -432,7 +416,6 @@ Return ONLY valid JSON in this exact format:
         "Serve hot with garnish of your choice",
       ],
       cookingTime: `${20 + Math.floor(Math.random() * 20)} minutes`,
-      difficulty: randomDifficulty,
       cuisine: randomStyle.cuisine,
       servings: servings,
       source: "gemini-fallback",
@@ -452,11 +435,6 @@ Return ONLY valid JSON in this exact format:
       "Thai",
     ];
     return cuisines[Math.floor(Math.random() * cuisines.length)];
-  }
-
-  private getRandomDifficulty(): string {
-    const difficulties = ["Easy", "Medium", "Hard"];
-    return difficulties[Math.floor(Math.random() * difficulties.length)];
   }
 
   private getAppropriateCookingMethods(

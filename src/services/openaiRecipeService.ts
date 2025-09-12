@@ -4,7 +4,6 @@ export interface RecipeRequest {
   ingredients: string[];
   servings: number;
   cuisine?: string;
-  difficulty?: string;
   count?: number;
 }
 
@@ -18,7 +17,6 @@ export interface Recipe {
   }>;
   instructions: string[];
   cookingTime: string;
-  difficulty: string;
   cuisine: string;
   servings: number;
   prepTime?: string;
@@ -92,7 +90,7 @@ class OpenAIRecipeService {
   }
 
   private buildPrompt(request: RecipeRequest): string {
-    const { ingredients, servings, cuisine, difficulty } = request;
+    const { ingredients, servings, cuisine } = request;
 
     let prompt = `Create a delicious recipe using these ingredients: ${ingredients.join(
       ", "
@@ -104,10 +102,6 @@ class OpenAIRecipeService {
 
     if (cuisine) {
       prompt += `Cuisine style: ${cuisine}\n`;
-    }
-
-    if (difficulty) {
-      prompt += `Difficulty level: ${difficulty}\n`;
     }
 
     prompt += `\nPlease provide a complete recipe in JSON format with the following structure:
@@ -122,7 +116,6 @@ class OpenAIRecipeService {
     "Step 2: ..."
   ],
   "cookingTime": "X minutes",
-  "difficulty": "easy/medium/hard",
   "cuisine": "cuisine type",
   "servings": ${servings},
   "prepTime": "X minutes",

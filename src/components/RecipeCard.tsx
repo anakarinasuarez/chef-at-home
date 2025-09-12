@@ -18,7 +18,6 @@ interface RecipeCardProps {
     title: string;
     servings: number;
     cookingTime: string;
-    difficulty: string;
     image?: string;
     source: string;
   };
