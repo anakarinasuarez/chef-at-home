@@ -9,10 +9,7 @@ export interface CacheItem<T> {
 }
 
 // Generate cache key for recipes
-const getRecipeCacheKey = (
-  ingredients: string[],
-  servings: number
-): string => {
+const getRecipeCacheKey = (ingredients: string[], servings: number): string => {
   const ingredientsKey = ingredients.sort().join(",");
   return `recipes_${ingredientsKey}_${servings}`;
 };

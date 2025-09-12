@@ -50,23 +50,33 @@ export default function RecipesPage() {
     const generateRecipes = async () => {
       console.log("🔄 generateRecipes function called");
 
-      // Verificar si hay recetas en sessionStorage primero
-      const savedRecipes = sessionStorage.getItem("currentRecipes");
-      console.log("📦 Checking sessionStorage:", !!savedRecipes);
+      // Solo cargar desde sessionStorage si NO hay parámetros de generación
+      const urlParams = new URLSearchParams(window.location.search);
+      const forceGenerate = urlParams.get("force") === "true";
+      const ingredientsParam = urlParams.get("ingredients");
+      const servingsParam = urlParams.get("servings");
+      
+      const hasSpecificParams = ingredientsParam || servingsParam || forceGenerate;
+      
+      if (!hasSpecificParams) {
+        // Verificar si hay recetas en sessionStorage solo si no hay parámetros específicos
+        const savedRecipes = sessionStorage.getItem("currentRecipes");
+        console.log("📦 Checking sessionStorage:", !!savedRecipes);
 
-      if (savedRecipes) {
-        try {
-          const parsedRecipes = JSON.parse(savedRecipes);
-          console.log(
-            "📦 Loading recipes from sessionStorage:",
-            parsedRecipes.length
-          );
-          setRecipes(parsedRecipes);
-          setHasLoadedRecipes(true);
-          setLoading(false);
-          return;
-        } catch (error) {
-          console.error("Error parsing saved recipes:", error);
+        if (savedRecipes) {
+          try {
+            const parsedRecipes = JSON.parse(savedRecipes);
+            console.log(
+              "📦 Loading recipes from sessionStorage:",
+              parsedRecipes.length
+            );
+            setRecipes(parsedRecipes);
+            setHasLoadedRecipes(true);
+            setLoading(false);
+            return;
+          } catch (error) {
+            console.error("Error parsing saved recipes:", error);
+          }
         }
       }
 
@@ -85,26 +95,10 @@ export default function RecipesPage() {
 
       try {
         // Get ingredients from URL params or localStorage
-        const urlParams = new URLSearchParams(window.location.search);
-        const ingredientsParam = urlParams.get("ingredients");
-        const servingsParam = urlParams.get("servings");
-        const forceGenerate = urlParams.get("force") === "true";
         const savedRecipeId = urlParams.get("saved");
 
         let ingredients = ["pasta", "basil", "olive oil", "garlic", "tomatoes"]; // fallback
         let servings = 4; // fallback
-
-        // Solo generar nuevas recetas si viene desde Create Recipe (force=true)
-        // Si no hay parámetros específicos, cargar desde sessionStorage o mostrar estado vacío
-        const hasSpecificParams =
-          ingredientsParam || servingsParam || forceGenerate;
-
-        console.log("🔍 Checking specific params:", {
-          ingredientsParam: !!ingredientsParam,
-          servingsParam: !!servingsParam,
-          forceGenerate,
-          hasSpecificParams,
-        });
 
         console.log("🔍 URL Params Debug:", {
           ingredientsParam,
