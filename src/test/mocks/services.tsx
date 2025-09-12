@@ -20,22 +20,22 @@ export const mockUnsplashService = {
   isAvailable: true,
 };
 
-// Mock Recipe service
-export const mockRecipeService = {
-  generateRecipes: vi.fn(),
-  getRecipeImage: vi.fn(),
-  saveRecipe: vi.fn(),
-  getSavedRecipes: vi.fn(),
-  deleteRecipe: vi.fn(),
-};
+// Mock Recipe service functions
+export const mockCreateRecipe = vi.fn();
+export const mockGetPublicRecipes = vi.fn();
+export const mockGetUserRecipes = vi.fn();
+export const mockGetRecipeById = vi.fn();
+export const mockUpdateRecipe = vi.fn();
+export const mockDeleteRecipe = vi.fn();
+export const mockGenerateRecipe = vi.fn();
+export const mockGenerateMultipleRecipes = vi.fn();
+export const mockSaveRecipe = vi.fn();
+export const mockGetSavedRecipes = vi.fn();
 
-// Mock Auth service
-export const mockAuthService = {
-  login: vi.fn(),
-  register: vi.fn(),
-  logout: vi.fn(),
-  getCurrentUser: vi.fn(),
-};
+// Mock Auth service functions
+export const mockRegisterUser = vi.fn();
+export const mockLoginUser = vi.fn();
+export const mockGetUserById = vi.fn();
 
 // Mock all services
 vi.mock("@/services/openaiImageService", () => ({
@@ -56,11 +56,22 @@ vi.mock("@/services/geminiService", () => ({
 }));
 
 vi.mock("@/services/recipeService", () => ({
-  default: mockRecipeService,
+  createRecipe: mockCreateRecipe,
+  getPublicRecipes: mockGetPublicRecipes,
+  getUserRecipes: mockGetUserRecipes,
+  getRecipeById: mockGetRecipeById,
+  updateRecipe: mockUpdateRecipe,
+  deleteRecipe: mockDeleteRecipe,
+  generateRecipe: mockGenerateRecipe,
+  generateMultipleRecipes: mockGenerateMultipleRecipes,
+  saveRecipe: mockSaveRecipe,
+  getSavedRecipes: mockGetSavedRecipes,
 }));
 
 vi.mock("@/services/authService", () => ({
-  AuthService: mockAuthService,
+  registerUser: mockRegisterUser,
+  loginUser: mockLoginUser,
+  getUserById: mockGetUserById,
 }));
 
 // Mock React Icons

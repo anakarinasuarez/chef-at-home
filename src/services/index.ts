@@ -1,6 +1,22 @@
 // Export all services
-export { AuthService } from "./authService";
-export { default as RecipeService } from "./recipeService";
+export { 
+  registerUser, 
+  loginUser, 
+  getUserById 
+} from "./authService";
+
+export { 
+  createRecipe,
+  getPublicRecipes,
+  getUserRecipes,
+  getRecipeById,
+  updateRecipe,
+  deleteRecipe,
+  generateRecipe,
+  generateMultipleRecipes,
+  saveRecipe,
+  getSavedRecipes
+} from "./recipeService";
 
 // Export functional services
 export { 

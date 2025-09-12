@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { 
-  generateRecipeWithOpenAI, 
-  isOpenAIServiceAvailable 
+import {
+  generateRecipeWithOpenAI,
+  isOpenAIServiceAvailable,
 } from "@/services/openaiRecipeService";
-import { 
-  generateRecipeWithGemini, 
+import {
+  generateRecipeWithGemini,
   generateMultipleRecipesWithGemini,
-  isGeminiServiceAvailable 
+  isGeminiServiceAvailable,
 } from "@/services/geminiService";
-import { 
-  generateRecipeImageWithOpenAI, 
-  isOpenAIImageServiceAvailable 
+import {
+  generateRecipeImageWithOpenAI,
+  isOpenAIImageServiceAvailable,
 } from "@/services/openaiImageService";
 
 export async function POST(request: NextRequest) {

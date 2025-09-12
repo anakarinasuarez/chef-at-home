@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AuthService } from "@/services";
+import { loginUser } from "@/services";
 
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
 
     // Usar el servicio de autenticación
-    const result = await AuthService.loginUser({ email, password });
+    const result = await loginUser({ email, password });
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 401 });

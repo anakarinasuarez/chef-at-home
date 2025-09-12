@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AuthService } from "@/services";
+import { registerUser } from "@/services";
 
 export async function POST(request: NextRequest) {
   try {
     const { name, email, password } = await request.json();
 
     // Usar el servicio de autenticación
-    const result = await AuthService.registerUser({ name, email, password });
+    const result = await registerUser({ name, email, password });
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
