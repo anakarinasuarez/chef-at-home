@@ -1,7 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { buildUnifiedRecipePrompt, getSystemPrompt } from "@/lib/prompts";
 
 // Create Gemini client
-const createGeminiClient = (): { genAI: GoogleGenerativeAI; model: any } | null => {
+const createGeminiClient = (): {
+  genAI: GoogleGenerativeAI;
+  model: any;
+} | null => {
   try {
     const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
     if (!apiKey) {
@@ -11,7 +15,7 @@ const createGeminiClient = (): { genAI: GoogleGenerativeAI; model: any } | null 
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
+
     console.log("✅ Gemini client created");
     return { genAI, model };
   } catch (error) {
@@ -104,7 +108,15 @@ const getAppropriateCookingMethods = (
 // Get regional names for cuisine
 const getRegionalNamesForCuisine = (cuisine: string): string[] => {
   const regionalNames: Record<string, string[]> = {
-    Italian: ["Tuscan", "Sicilian", "Lombard", "Piedmont", "Venetian", "Roman", "Neapolitan"],
+    Italian: [
+      "Tuscan",
+      "Sicilian",
+      "Lombard",
+      "Piedmont",
+      "Venetian",
+      "Roman",
+      "Neapolitan",
+    ],
     Mexican: ["Oaxacan", "Yucatecan", "Poblano", "Veracruzano", "Jalisciense"],
     Asian: ["Cantonese", "Sichuan", "Hunan", "Shandong", "Fujian"],
     Mediterranean: ["Provençal", "Andalusian", "Catalan", "Greek", "Turkish"],
@@ -123,10 +135,24 @@ const getSpicesForCuisine = (cuisine: string): string[] => {
     Italian: ["basil", "oregano", "rosemary", "thyme", "garlic", "onion"],
     Mexican: ["cumin", "chili powder", "oregano", "garlic", "cilantro", "lime"],
     Asian: ["ginger", "garlic", "soy sauce", "sesame oil", "star anise"],
-    Mediterranean: ["oregano", "basil", "thyme", "rosemary", "garlic", "olive oil"],
+    Mediterranean: [
+      "oregano",
+      "basil",
+      "thyme",
+      "rosemary",
+      "garlic",
+      "olive oil",
+    ],
     American: ["garlic", "onion", "black pepper", "paprika", "oregano"],
     French: ["thyme", "rosemary", "tarragon", "bay leaves", "garlic"],
-    Indian: ["cumin", "coriander", "turmeric", "cardamom", "cinnamon", "ginger"],
+    Indian: [
+      "cumin",
+      "coriander",
+      "turmeric",
+      "cardamom",
+      "cinnamon",
+      "ginger",
+    ],
     Thai: ["lemongrass", "galangal", "fish sauce", "lime", "basil", "mint"],
   };
 
@@ -139,17 +165,54 @@ const getAdditionalIngredientsForCuisine = (
   mainIngredients: string[]
 ): string[] => {
   const additionalIngredients: Record<string, string[]> = {
-    Italian: ["extra virgin olive oil", "balsamic vinegar", "parmesan cheese", "white wine", "fresh herbs"],
-    Mexican: ["corn tortillas", "black beans", "queso fresco", "lime juice", "cilantro"],
-    Asian: ["soy sauce", "fish sauce", "sesame oil", "rice vinegar", "bamboo shoots"],
-    Mediterranean: ["feta cheese", "kalamata olives", "hummus", "tahini", "chickpeas"],
-    American: ["cheddar cheese", "bacon", "barbecue sauce", "hot sauce", "corn"],
+    Italian: [
+      "extra virgin olive oil",
+      "balsamic vinegar",
+      "parmesan cheese",
+      "white wine",
+      "fresh herbs",
+    ],
+    Mexican: [
+      "corn tortillas",
+      "black beans",
+      "queso fresco",
+      "lime juice",
+      "cilantro",
+    ],
+    Asian: [
+      "soy sauce",
+      "fish sauce",
+      "sesame oil",
+      "rice vinegar",
+      "bamboo shoots",
+    ],
+    Mediterranean: [
+      "feta cheese",
+      "kalamata olives",
+      "hummus",
+      "tahini",
+      "chickpeas",
+    ],
+    American: [
+      "cheddar cheese",
+      "bacon",
+      "barbecue sauce",
+      "hot sauce",
+      "corn",
+    ],
     French: ["dijon mustard", "shallots", "white wine", "butter", "cream"],
     Indian: ["basmati rice", "naan bread", "yogurt", "coconut milk", "lentils"],
-    Thai: ["coconut milk", "fish sauce", "palm sugar", "kaffir lime leaves", "peanuts"],
+    Thai: [
+      "coconut milk",
+      "fish sauce",
+      "palm sugar",
+      "kaffir lime leaves",
+      "peanuts",
+    ],
   };
 
-  const baseIngredients = additionalIngredients[cuisine] || additionalIngredients["American"];
+  const baseIngredients =
+    additionalIngredients[cuisine] || additionalIngredients["American"];
   return baseIngredients.filter(
     (ing) =>
       !mainIngredients.some(
@@ -215,61 +278,11 @@ const buildRecipePrompt = (
   servings: number,
   cuisine: string
 ): string => {
-  // Appropriate cooking techniques for ingredients
-  const cookingMethods = getAppropriateCookingMethods(ingredients, cuisine);
-  const randomMethod = cookingMethods[Math.floor(Math.random() * cookingMethods.length)];
-
-  // Appropriate regional names for cuisine
-  const regionalNames = getRegionalNamesForCuisine(cuisine);
-  const randomRegion = regionalNames[Math.floor(Math.random() * regionalNames.length)];
-
-  // Appropriate spices and herbs for cuisine
-  const spices = getSpicesForCuisine(cuisine);
-  const randomSpices = spices.slice(0, 2 + Math.floor(Math.random() * 2));
-
-  // Generate appropriate additional ingredients for cuisine
-  const additionalIngredients = getAdditionalIngredientsForCuisine(cuisine, ingredients);
-
-  return `You are a professional ${cuisine} chef. Create a unique, authentic ${cuisine} recipe using these main ingredients: ${ingredients.join(", ")}.
-
-IMPORTANT REQUIREMENTS:
-- Create a COMPLETELY UNIQUE recipe with creative variations
-- Use authentic ${cuisine} cooking techniques and flavors
-- Include additional ingredients that complement the main ingredients
-- Provide detailed, step-by-step instructions
-- Serve ${servings} people
-- Use realistic cooking times and quantities
-
-RECIPE STRUCTURE:
-- Title: Creative, descriptive name with ${cuisine} flair
-- Description: Detailed explanation of the dish
-- Ingredients: Include main ingredients + complementary ingredients + spices
-- Instructions: Detailed, numbered steps with specific techniques
-- Cooking times: Realistic prep, cooking, and total times
-- Cuisine: ${cuisine}
-
-ADDITIONAL INGREDIENTS TO CONSIDER: ${additionalIngredients.join(", ")}
-
-COOKING TECHNIQUE: ${randomMethod}
-
-Return ONLY valid JSON in this exact format:
-{
-  "title": "Creative ${cuisine} Recipe Name",
-  "description": "Detailed description of this unique dish",
-  "ingredients": [
-    {"name": "ingredient name", "quantity": "amount", "unit": "measurement unit"}
-  ],
-  "instructions": [
-    "Detailed step 1",
-    "Detailed step 2",
-    "Detailed step 3"
-  ],
-  "cookingTime": "XX minutes",
-  "cuisine": "${cuisine}",
-  "servings": ${servings},
-  "prepTime": "XX minutes",
-  "totalTime": "XX minutes"
-}`;
+  return buildUnifiedRecipePrompt({
+    ingredients,
+    servings,
+    cuisine,
+  });
 };
 
 // Clean JSON string
@@ -305,7 +318,8 @@ const validateAndCleanRecipe = (
 ): any => {
   const cleanedRecipe = {
     title: recipe.title || "Delicious Recipe",
-    description: recipe.description || "A flavorful dish made with fresh ingredients",
+    description:
+      recipe.description || "A flavorful dish made with fresh ingredients",
     ingredients: recipe.ingredients || [],
     instructions: recipe.instructions || [],
     cookingTime: recipe.cookingTime || "30 minutes",
@@ -383,7 +397,11 @@ const parseRecipeResponse = (
       let jsonString = jsonMatch[0];
       jsonString = cleanJsonString(jsonString);
       const recipe = JSON.parse(jsonString);
-      const cleanedRecipe = validateAndCleanRecipe(recipe, originalIngredients, servings);
+      const cleanedRecipe = validateAndCleanRecipe(
+        recipe,
+        originalIngredients,
+        servings
+      );
 
       return {
         ...cleanedRecipe,
@@ -401,7 +419,10 @@ const parseRecipeResponse = (
 };
 
 // Generate fallback recipe
-const generateFallbackRecipe = (ingredients: string[], servings: number): any => {
+const generateFallbackRecipe = (
+  ingredients: string[],
+  servings: number
+): any => {
   const cuisineStyles = [
     { cuisine: "Italian", style: "Rustic", method: "Sautéed" },
     { cuisine: "Mexican", style: "Spicy", method: "Grilled" },
@@ -413,12 +434,21 @@ const generateFallbackRecipe = (ingredients: string[], servings: number): any =>
     { cuisine: "Spanish", style: "Traditional", method: "Pan-seared" },
   ];
 
-  const randomStyle = cuisineStyles[Math.floor(Math.random() * cuisineStyles.length)];
+  const randomStyle =
+    cuisineStyles[Math.floor(Math.random() * cuisineStyles.length)];
   const uniqueId = Math.random().toString(36).substr(2, 6);
   const uniqueMethods = [
-    "Braised", "Grilled", "Sautéed", "Roasted", "Steamed", "Fried", "Baked", "Smoked"
+    "Braised",
+    "Grilled",
+    "Sautéed",
+    "Roasted",
+    "Steamed",
+    "Fried",
+    "Baked",
+    "Smoked",
   ];
-  const uniqueMethod = uniqueMethods[Math.floor(Math.random() * uniqueMethods.length)];
+  const uniqueMethod =
+    uniqueMethods[Math.floor(Math.random() * uniqueMethods.length)];
   const uniqueTitle = `${randomStyle.cuisine} ${uniqueMethod} ${ingredients[0]} ${randomStyle.style} Style`;
 
   return {
@@ -450,14 +480,16 @@ export const generateRecipeWithGemini = async (
   cuisine: string = "international"
 ): Promise<any> => {
   const client = createGeminiClient();
-  
+
   if (!client) {
     throw new Error("Gemini service not available");
   }
 
   try {
     const prompt = buildRecipePrompt(ingredients, servings, cuisine);
-    const result = await client.model.generateContent(prompt);
+    const systemPrompt = getSystemPrompt("gemini");
+    const fullPrompt = `${systemPrompt}\n\n${prompt}`;
+    const result = await client.model.generateContent(fullPrompt);
     const response = await result.response;
     const text = response.text();
 
@@ -465,7 +497,8 @@ export const generateRecipeWithGemini = async (
     return parseRecipeResponse(text, ingredients, servings);
   } catch (error) {
     console.error("Gemini API error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     throw new Error(`Gemini API error: ${errorMessage}`);
   }
 };
@@ -481,7 +514,11 @@ export const generateMultipleRecipesWithGemini = async (
 
     for (let i = 0; i < count; i++) {
       const cuisine = getRandomCuisine();
-      const recipe = await generateRecipeWithGemini(ingredients, servings, cuisine);
+      const recipe = await generateRecipeWithGemini(
+        ingredients,
+        servings,
+        cuisine
+      );
       recipes.push(recipe);
 
       // Small delay to avoid rate limiting

@@ -638,7 +638,7 @@ export default function RecipesPage() {
                   e.currentTarget.style.color = colors.brand.primary[500];
                 }}
               >
-                Volver a Home
+                Return home
               </button>
             </div>
           </div>

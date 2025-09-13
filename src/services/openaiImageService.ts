@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { UniversalCacheManager } from "@/lib/universal-cache";
+import { buildUnifiedImagePrompt } from "@/lib/prompts";
 
 export interface RecipeImageRequest {
   recipeName: string;
@@ -30,37 +31,14 @@ export const isOpenAIImageServiceAvailable = (): boolean => {
   return !!process.env.OPENAI_API_KEY;
 };
 
-// Build prompt for image generation
+// Build prompt for image generation using unified prompt
 const buildImagePrompt = (request: RecipeImageRequest): string => {
-  const {
-    recipeName,
-    ingredients,
-    cuisine,
-    style = "photorealistic",
-  } = request;
-
-  const mainIngredients = ingredients.slice(0, 3).join(", ");
-  const cuisineText = cuisine ? `, ${cuisine} cuisine` : "";
-
-  let stylePrompt = "";
-  switch (style) {
-    case "photorealistic":
-      stylePrompt =
-        "ultra-realistic food photography, professional studio lighting, 8K resolution, hyper-detailed, restaurant quality presentation, natural textures, authentic colors, mouth-watering appearance, perfect plating, natural lighting, realistic shadows, fresh ingredients, appetizing aroma, delicious appearance, high-end restaurant quality";
-      break;
-    case "artistic":
-      stylePrompt = "artistic food illustration, watercolor style, elegant";
-      break;
-    case "minimalist":
-      stylePrompt = "minimalist food presentation, clean background, simple";
-      break;
-    case "gourmet":
-      stylePrompt =
-        "gourmet restaurant presentation, fine dining, elegant plating";
-      break;
-  }
-
-  return `A mouth-watering ${recipeName} dish featuring ${mainIngredients}${cuisineText}. ${stylePrompt}, natural food photography, authentic home cooking, realistic lighting, natural colors, home kitchen setting, warm lighting, natural shadows, fresh ingredients, appetizing presentation, food styling, professional food photography, high-end restaurant quality, natural textures, authentic colors, detailed ingredients, appetizing aroma, delicious appearance, perfect plating, natural lighting, realistic shadows, fresh ingredients, natural colors, authentic presentation`;
+  return buildUnifiedImagePrompt({
+    recipeName: request.recipeName,
+    ingredients: request.ingredients,
+    cuisine: request.cuisine,
+    style: request.style,
+  });
 };
 
 // Generate recipe image using OpenAI
@@ -68,7 +46,7 @@ export const generateRecipeImageWithOpenAI = async (
   request: RecipeImageRequest
 ): Promise<string | null> => {
   const openai = createOpenAIClient();
-  
+
   if (!openai) {
     console.warn("OpenAI service not available");
     return null;

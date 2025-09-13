@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { buildUnifiedRecipePrompt, getSystemPrompt } from "@/lib/prompts";
 
 export interface RecipeRequest {
   ingredients: string[];
@@ -51,45 +52,20 @@ export const isOpenAIServiceAvailable = (): boolean => {
   return !!process.env.OPENAI_API_KEY;
 };
 
-// Build prompt for recipe generation
+// Build prompt for recipe generation using unified prompt
 const buildRecipePrompt = (request: RecipeRequest): string => {
-  const { ingredients, servings, cuisine } = request;
-
-  let prompt = `Create a delicious recipe using these ingredients: ${ingredients.join(
-    ", "
-  )}.\n\n`;
-
-  if (servings) {
-    prompt += `Servings: ${servings}\n`;
-  }
-
-  if (cuisine) {
-    prompt += `Cuisine style: ${cuisine}\n`;
-  }
-
-  prompt += `\nPlease provide a complete recipe in JSON format with the following structure:
-{
-  "title": "Recipe Name",
-  "description": "Brief description of the dish",
-  "ingredients": [
-    {"name": "ingredient name", "quantity": "amount", "unit": "unit"}
-  ],
-  "instructions": [
-    "Step 1: ...",
-    "Step 2: ..."
-  ],
-  "cookingTime": "X minutes",
-  "cuisine": "cuisine type",
-  "servings": ${servings},
-  "prepTime": "X minutes",
-  "totalTime": "X minutes"
-}`;
-
-  return prompt;
+  return buildUnifiedRecipePrompt({
+    ingredients: request.ingredients,
+    servings: request.servings,
+    cuisine: request.cuisine,
+  });
 };
 
 // Parse OpenAI response
-const parseRecipeResponse = (response: string, count: number): RecipeResponse => {
+const parseRecipeResponse = (
+  response: string,
+  count: number
+): RecipeResponse => {
   try {
     // Clean the response to extract JSON
     const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/) ||
@@ -118,7 +94,7 @@ export const generateRecipeWithOpenAI = async (
   request: RecipeRequest
 ): Promise<RecipeResponse> => {
   const openai = createOpenAIClient();
-  
+
   if (!openai) {
     throw new Error("OpenAI Recipe service not available");
   }
@@ -131,8 +107,7 @@ export const generateRecipeWithOpenAI = async (
       messages: [
         {
           role: "system",
-          content:
-            "You are a professional chef and recipe developer. Generate creative, detailed, and delicious recipes based on the provided ingredients. Always respond with valid JSON format.",
+          content: getSystemPrompt("openai"),
         },
         {
           role: "user",
