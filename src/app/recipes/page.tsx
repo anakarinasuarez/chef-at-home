@@ -55,9 +55,10 @@ export default function RecipesPage() {
       const forceGenerate = urlParams.get("force") === "true";
       const ingredientsParam = urlParams.get("ingredients");
       const servingsParam = urlParams.get("servings");
-      
-      const hasSpecificParams = ingredientsParam || servingsParam || forceGenerate;
-      
+
+      const hasSpecificParams =
+        ingredientsParam || servingsParam || forceGenerate;
+
       if (!hasSpecificParams) {
         // Verificar si hay recetas en sessionStorage solo si no hay parámetros específicos
         const savedRecipes = sessionStorage.getItem("currentRecipes");
@@ -109,51 +110,30 @@ export default function RecipesPage() {
           currentUrl: window.location.href,
         });
 
-        // Si se guardó una receta desde el detalle, eliminar del sessionStorage
+        // Si se guardó una receta desde el detalle, solo loggear (no eliminar del sessionStorage)
         if (savedRecipeId) {
           console.log(
-            "🗑️ Recipe saved from detail, removing from sessionStorage:",
+            "✅ Recipe saved from detail, keeping sessionStorage intact:",
             savedRecipeId
           );
-          try {
-            const currentRecipes = sessionStorage.getItem("currentRecipes");
-            if (currentRecipes) {
-              const parsedRecipes = JSON.parse(currentRecipes);
-              const updatedRecipes = parsedRecipes.filter(
-                (r: any) => r.id !== savedRecipeId
-              );
-              sessionStorage.setItem(
-                "currentRecipes",
-                JSON.stringify(updatedRecipes)
-              );
-              console.log("✅ Recipe removed from sessionStorage");
-            }
-          } catch (error) {
-            console.error("Error updating sessionStorage:", error);
-          }
         }
 
         if (!hasSpecificParams) {
-          // Si se guardó una receta, cargar las recetas actualizadas desde sessionStorage
-          if (savedRecipeId) {
-            console.log(
-              "🔄 Recipe saved, loading updated recipes from sessionStorage"
-            );
-            const updatedRecipes = sessionStorage.getItem("currentRecipes");
-            if (updatedRecipes) {
-              try {
-                const parsedRecipes = JSON.parse(updatedRecipes);
-                console.log(
-                  "📦 Loading updated recipes:",
-                  parsedRecipes.length
-                );
-                setRecipes(parsedRecipes);
-                setHasLoadedRecipes(true);
-                setLoading(false);
-                return;
-              } catch (error) {
-                console.error("Error parsing updated recipes:", error);
-              }
+          // Cargar recetas desde sessionStorage (ya sea después de guardar o normalmente)
+          const savedRecipes = sessionStorage.getItem("currentRecipes");
+          if (savedRecipes) {
+            try {
+              const parsedRecipes = JSON.parse(savedRecipes);
+              console.log(
+                "📦 Loading recipes from sessionStorage:",
+                parsedRecipes.length
+              );
+              setRecipes(parsedRecipes);
+              setHasLoadedRecipes(true);
+              setLoading(false);
+              return;
+            } catch (error) {
+              console.error("Error parsing saved recipes:", error);
             }
           }
 
@@ -639,10 +619,10 @@ export default function RecipesPage() {
               {error ||
                 "We couldn't generate recipes at the moment. Please try again."}
             </p>
-            <div className="flex gap-4">
+            <div className="flex justify-center">
               <button
                 onClick={handleBackToHome}
-                className="px-6 py-3 rounded-lg transition-colors border"
+                className="px-8 py-3 rounded-lg transition-colors border"
                 style={{
                   backgroundColor: "transparent",
                   color: colors.brand.primary[500],
@@ -658,25 +638,7 @@ export default function RecipesPage() {
                   e.currentTarget.style.color = colors.brand.primary[500];
                 }}
               >
-                Back to Home
-              </button>
-              <button
-                onClick={clearAllCache}
-                className="px-4 py-3 rounded-lg transition-colors text-sm"
-                style={{
-                  backgroundColor: colors.brand.primary[500],
-                  color: colors.base.white,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    colors.brand.primary[600];
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    colors.brand.primary[500];
-                }}
-              >
-                🧹 Clear Cache
+                Volver a Home
               </button>
             </div>
           </div>

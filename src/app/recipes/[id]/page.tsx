@@ -68,6 +68,7 @@ export default function RecipeDetailPage() {
         console.log("From My Recipes referrer:", isFromMyRecipesReferrer);
         console.log("From My Recipes final:", isFromMyRecipesPage);
 
+        // Buscar la receta en localStorage usando el ID de la URL
         const savedRecipe = localStorage.getItem(`recipe-${params.id}`);
 
         if (savedRecipe) {
@@ -76,7 +77,7 @@ export default function RecipeDetailPage() {
 
           setRecipe(recipeData);
 
-          // Verificar si la receta está guardada
+          // Verificar si la receta está guardada usando el ID original de la receta
           if (user) {
             const isSaved = isRecipeSaved(recipeData.id);
             // Si viene de My Recipes, forzar que se considere como guardada
@@ -151,36 +152,29 @@ export default function RecipeDetailPage() {
 
         console.log("Recipe saved status updated:", newSavedState);
 
-        // Si se guardó la receta, eliminar de Generated Recipes y volver
+        // Si se guardó la receta, eliminar de la lista de recetas generadas
         if (newSavedState) {
-          // Eliminar la receta del sessionStorage de Generated Recipes
-          try {
-            const currentRecipes = sessionStorage.getItem("currentRecipes");
-            if (currentRecipes) {
+          // Eliminar la receta de sessionStorage para que no aparezca en la lista
+          const currentRecipes = sessionStorage.getItem("currentRecipes");
+          if (currentRecipes) {
+            try {
               const parsedRecipes = JSON.parse(currentRecipes);
               const updatedRecipes = parsedRecipes.filter(
-                (r: any) => r.id !== recipe?.id
+                (r: any) => r.id !== recipe.id
               );
               sessionStorage.setItem(
                 "currentRecipes",
                 JSON.stringify(updatedRecipes)
               );
-              console.log(
-                "🗑️ Recipe removed from Generated Recipes sessionStorage"
-              );
+              console.log("🗑️ Removed recipe from sessionStorage:", recipe.id);
+            } catch (error) {
+              console.error("Error updating sessionStorage:", error);
             }
-          } catch (error) {
-            console.error("Error updating sessionStorage:", error);
           }
 
           setTimeout(() => {
-            // Usar history.back() para volver a la página anterior
-            if (window.history.length > 1) {
-              window.history.back();
-            } else {
-              // Si no hay historial, ir a Generated Recipes con parámetro de receta guardada
-              router.push(`/recipes?saved=${recipe?.id}`);
-            }
+            // Redirigir a la página de recetas
+            router.push("/recipes");
           }, 1000); // Esperar 1 segundo para que se vea la notificación
         }
       } else {

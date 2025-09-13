@@ -67,10 +67,11 @@ export const useSavedRecipes = () => {
       );
 
       // También guardar en localStorage para que la página de detalle pueda acceder
-      localStorage.setItem(
-        `recipe-${recipeToSave.id}`,
-        JSON.stringify(recipeToSave)
-      );
+      // Solo si no existe ya una entrada con este ID
+      const existingKey = `recipe-${recipeToSave.id}`;
+      if (!localStorage.getItem(existingKey)) {
+        localStorage.setItem(existingKey, JSON.stringify(recipeToSave));
+      }
 
       return true;
     } catch (error) {
