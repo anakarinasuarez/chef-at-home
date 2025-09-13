@@ -20,7 +20,9 @@ export const buildUnifiedRecipePrompt = (
   const { ingredients, servings, cuisine = "international" } = params;
 
   return `You are a world-class professional chef with deep expertise in ${cuisine} cuisine. 
-Create a unique, realistic recipe using these main ingredients: ${ingredients.join(", ")}.
+Create a unique, realistic recipe using these main ingredients: ${ingredients.join(
+    ", "
+  )}.
 
 🎯 CORE REQUIREMENTS:
 - Recipe must be ORIGINAL and practical for home cooking
@@ -79,23 +81,24 @@ export const buildUnifiedImagePrompt = (params: ImagePromptParams): string => {
   switch (style) {
     case "photorealistic":
       stylePrompt =
-        "ultra-realistic food photography, professional studio lighting, 8K resolution, hyper-detailed, restaurant quality presentation, natural textures, authentic colors, mouth-watering appearance, perfect plating, natural lighting, realistic shadows, fresh ingredients, appetizing aroma, delicious appearance, high-end restaurant quality";
+        "ultra-realistic food photography, professional studio lighting, high resolution, restaurant-quality plating, natural textures, authentic colors, mouth-watering presentation";
       break;
     case "artistic":
       stylePrompt =
-        "artistic food illustration, watercolor style, elegant composition, soft lighting, artistic interpretation";
+        "artistic food illustration, watercolor or digital painting, elegant composition, creative interpretation of ingredients";
       break;
     case "minimalist":
       stylePrompt =
-        "minimalist food presentation, clean background, simple composition, modern plating, elegant simplicity";
+        "minimalist food presentation, clean neutral background, modern plating, elegant simplicity, balanced composition";
       break;
     case "gourmet":
       stylePrompt =
-        "gourmet restaurant presentation, fine dining, elegant plating, sophisticated styling, luxury food photography";
+        "fine dining presentation, luxury plating, sophisticated styling, gourmet restaurant photography";
       break;
   }
 
-  return `A stunning, mouth-watering ${recipeName} dish featuring ${mainIngredients}${cuisineText}. ${stylePrompt}, natural food photography, authentic home cooking, realistic lighting, natural colors, home kitchen setting, warm lighting, natural shadows, fresh ingredients, appetizing presentation, food styling, professional food photography, high-end restaurant quality, natural textures, authentic colors, detailed ingredients, appetizing aroma, delicious appearance, perfect plating, natural lighting, realistic shadows, fresh ingredients, natural colors, authentic presentation, culinary artistry, gastronomic excellence`;
+  return `A ${style} depiction of ${recipeName}, featuring ${mainIngredients}${cuisineText}. 
+${stylePrompt}, appetizing appearance, fresh ingredients, realistic lighting, detailed textures, balanced composition, professional food styling.`;
 };
 
 // System prompts for different AI models
