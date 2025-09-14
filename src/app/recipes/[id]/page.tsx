@@ -203,7 +203,7 @@ export default function RecipeDetailPage() {
     };
 
     localStorage.setItem("editRecipeData", JSON.stringify(editData));
-    router.push("/?edit=true");
+    router.push("/create?edit=true");
   };
 
   const handleDeleteRecipe = () => {

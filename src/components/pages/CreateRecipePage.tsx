@@ -28,6 +28,7 @@ export default function CreateRecipePage({
   const [isEditing, setIsEditing] = useState(false);
   const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [recipeTitle, setRecipeTitle] = useState("");
   const { updateRecipe } = useSavedRecipes();
 
   // Cargar datos de edición si existe
@@ -42,6 +43,11 @@ export default function CreateRecipePage({
           const parsedData = JSON.parse(editData);
           setIsEditing(true);
           setEditingRecipeId(parsedData.originalId);
+
+          // Cargar título de la receta
+          if (parsedData.title) {
+            setRecipeTitle(parsedData.title);
+          }
 
           // Cargar ingredientes
           if (parsedData.ingredients && parsedData.ingredients.length > 0) {
@@ -116,6 +122,11 @@ export default function CreateRecipePage({
       return;
     }
 
+    if (isEditing && !recipeTitle.trim()) {
+      alert("Please enter a recipe title");
+      return;
+    }
+
     setIsCreating(true);
 
     try {
@@ -127,7 +138,8 @@ export default function CreateRecipePage({
         body: JSON.stringify({
           ingredients: ingredients.map((ing) => ing.name),
           servings: selectedServings,
-          count: 4, // Generar 4 recetas para que coincida con la página de recetas
+          count: isEditing ? 1 : 4, // Generar 1 receta si está editando, 4 si está creando nueva
+          ...(isEditing && recipeTitle.trim() && { title: recipeTitle.trim() }), // Solo incluir título si está editando
         }),
       });
 
@@ -143,13 +155,44 @@ export default function CreateRecipePage({
         throw new Error("No recipes were generated");
       }
 
-      // Redirigir a la página de recetas con force=true y los ingredientes específicos
-      const ingredientsParam = encodeURIComponent(
-        JSON.stringify(ingredients.map((ing) => ing.name))
-      );
-      const redirectUrl = `/recipes?force=true&ingredients=${ingredientsParam}&servings=${selectedServings}`;
-      console.log("Redirigiendo a:", redirectUrl);
-      router.push(redirectUrl);
+      if (isEditing) {
+        // Si está editando, redirigir directamente a la página de detalle de la receta generada
+        const generatedRecipe = data.recipes[0];
+        const recipeId =
+          generatedRecipe.id ||
+          `recipe_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        // Actualizar el ID de la receta generada
+        generatedRecipe.id = recipeId;
+
+        // Guardar la receta en localStorage para la página de detalle
+        localStorage.setItem(
+          `recipe-${recipeId}`,
+          JSON.stringify(generatedRecipe)
+        );
+
+        // Guardar automáticamente la receta editada en las recetas guardadas
+        if (editingRecipeId) {
+          try {
+            await updateRecipe(editingRecipeId, generatedRecipe);
+            console.log("✅ Receta editada guardada automáticamente");
+          } catch (error) {
+            console.error("❌ Error guardando receta editada:", error);
+          }
+        }
+
+        const redirectUrl = `/recipes/${recipeId}`;
+        console.log("Redirigiendo a página de detalle:", redirectUrl);
+        router.push(redirectUrl);
+      } else {
+        // Si está creando nueva, redirigir a la página de recetas múltiples
+        const ingredientsParam = encodeURIComponent(
+          JSON.stringify(ingredients.map((ing) => ing.name))
+        );
+        const redirectUrl = `/recipes?force=true&ingredients=${ingredientsParam}&servings=${selectedServings}`;
+        console.log("Redirigiendo a página de recetas múltiples:", redirectUrl);
+        router.push(redirectUrl);
+      }
     } catch (error) {
       console.error("Error generating recipes:", error);
       alert("Error generating recipes. Please try again.");
@@ -185,6 +228,32 @@ export default function CreateRecipePage({
       >
         {isEditing ? "Edit your recipe" : "Create your perfect recipe"}
       </h1>
+
+      {/* Campo de Título de la Receta - Solo en modo edición */}
+      {isEditing && (
+        <div className="mb-8">
+          <h3
+            className="mb-4"
+            style={{
+              fontSize: typography.styles["title-3"].fontSize,
+              fontWeight: typography.styles["title-3"].fontWeight,
+              color: colors.interface.text.primary,
+            }}
+          >
+            Recipe Title
+          </h3>
+          <input
+            type="text"
+            value={recipeTitle}
+            onChange={(e) => setRecipeTitle(e.target.value)}
+            placeholder="Enter recipe title..."
+            className="w-full max-w-md px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
+            style={{
+              fontSize: typography.styles["body"].fontSize,
+            }}
+          />
+        </div>
+      )}
 
       {/* Sección de Ingredientes */}
       <div className="mb-8">
@@ -350,7 +419,12 @@ export default function CreateRecipePage({
         <Button
           variant="primary"
           onClick={handleCreateRecipe}
-          disabled={isCreating || ingredients.length === 0 || !selectedServings}
+          disabled={
+            isCreating ||
+            ingredients.length === 0 ||
+            !selectedServings ||
+            (isEditing && !recipeTitle.trim())
+          }
           className="px-8 py-3"
         >
           {isCreating

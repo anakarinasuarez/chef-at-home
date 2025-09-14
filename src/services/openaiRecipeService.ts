@@ -6,6 +6,7 @@ export interface RecipeRequest {
   servings: number;
   cuisine?: string;
   count?: number;
+  title?: string; // Título personalizado
 }
 
 export interface Recipe {
@@ -64,7 +65,8 @@ const buildRecipePrompt = (request: RecipeRequest): string => {
 // Parse OpenAI response
 const parseRecipeResponse = (
   response: string,
-  count: number
+  count: number,
+  customTitle?: string
 ): RecipeResponse => {
   try {
     // Clean the response to extract JSON
@@ -76,6 +78,11 @@ const parseRecipeResponse = (
 
     // Ensure it's an array
     const recipes = Array.isArray(recipeData) ? recipeData : [recipeData];
+
+    // Si hay un título personalizado, aplicarlo a la primera receta
+    if (customTitle && recipes.length > 0) {
+      recipes[0].title = customTitle;
+    }
 
     return {
       recipes: recipes.slice(0, count),
@@ -123,7 +130,7 @@ export const generateRecipeWithOpenAI = async (
       throw new Error("No response from OpenAI");
     }
 
-    return parseRecipeResponse(response, request.count || 1);
+    return parseRecipeResponse(response, request.count || 1, request.title);
   } catch (error) {
     console.error("Error generating recipe with OpenAI:", error);
     throw error;

@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
   let servings: number = 2;
   let cuisine: string = "international";
   let count: number = 1;
+  let customTitle: string | undefined = undefined;
 
   try {
     const requestData = await request.json();
@@ -25,6 +26,7 @@ export async function POST(request: NextRequest) {
     servings = requestData.servings || servings;
     cuisine = requestData.cuisine || cuisine;
     count = requestData.count || count;
+    customTitle = requestData.title; // Recibir el título personalizado
 
     if (
       !ingredients ||
@@ -56,6 +58,7 @@ export async function POST(request: NextRequest) {
           servings,
           cuisine,
           count: count || 1,
+          title: customTitle,
         });
 
         if (openaiResponse.recipes && openaiResponse.recipes.length > 0) {
@@ -108,21 +111,26 @@ export async function POST(request: NextRequest) {
 
     // Add images to recipes - generate only one image per recipe
     const recipesWithImages = await Promise.all(
-      recipes.map(async (recipe) => {
+      recipes.map(async (recipe, index) => {
         try {
-          console.log(`🎨 Generating image for: ${recipe.title}`);
+          // Si hay un título personalizado y es la primera receta, usarlo
+          const finalTitle =
+            customTitle && index === 0 ? customTitle : recipe.title;
+
+          console.log(`🎨 Generating image for: ${finalTitle}`);
 
           // Generate image using OpenAI DALL-E
           const image = await generateRecipeImageWithOpenAI({
-            recipeName: recipe.title,
+            recipeName: finalTitle,
             ingredients,
             cuisine,
             style: "photorealistic",
           });
 
-          console.log(`✅ Image generated for: ${recipe.title}`);
+          console.log(`✅ Image generated for: ${finalTitle}`);
           return {
             ...recipe,
+            title: finalTitle, // Usar el título final (personalizado o generado)
             image: image || "/images/plate.png",
             imageSource: image ? "ai-generated" : "fallback",
           };
@@ -133,6 +141,7 @@ export async function POST(request: NextRequest) {
           );
           return {
             ...recipe,
+            title: customTitle && index === 0 ? customTitle : recipe.title, // Usar el título final
             image: "/images/plate.png",
             imageSource: "fallback",
           };
@@ -161,7 +170,8 @@ export async function POST(request: NextRequest) {
       const fallbackRecipes = generateFallbackRecipes(
         ingredients,
         servings,
-        count || 1
+        count || 1,
+        customTitle
       );
 
       // Add images based on ingredients
@@ -194,7 +204,8 @@ export async function POST(request: NextRequest) {
 function generateFallbackRecipes(
   ingredients: string[],
   servings: number,
-  count: number = 1
+  count: number = 1,
+  customTitle?: string
 ): any[] {
   const recipes = [];
 
@@ -456,8 +467,14 @@ function generateFallbackRecipes(
     const prepTime = 10 + i * 3 + Math.floor(Math.random() * 8);
     const totalTime = cookingTime + prepTime;
 
+    // Usar título personalizado si está disponible y es la primera receta
+    const finalTitle =
+      customTitle && i === 0
+        ? customTitle
+        : `${randomRegion} ${randomMethod} ${mainIngredient} ${detectedCuisine} Style`;
+
     recipes.push({
-      title: `${randomRegion} ${randomMethod} ${mainIngredient} ${detectedCuisine} Style`,
+      title: finalTitle,
       description: `A flavorful ${detectedCuisine.toLowerCase()} dish featuring ${mainIngredient} with authentic ${cuisine.spices
         .slice(0, 2)
         .join(" and ")} flavors`,

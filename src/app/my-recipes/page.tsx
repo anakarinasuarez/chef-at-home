@@ -220,8 +220,24 @@ export default function MyRecipesPage() {
                     recipe={recipe}
                     variant="my-recipes"
                     onEdit={(recipe) => {
-                      const recipeId = recipe.id || Date.now().toString();
-                      router.push(`/recipes/${recipeId}`);
+                      // Guardar los datos de la receta en localStorage para editarlos
+                      const editData = {
+                        title: recipe.title,
+                        ingredients: recipe.ingredients || [],
+                        servings: recipe.servings,
+                        cookingTime: recipe.cookingTime,
+                        difficulty: recipe.difficulty || "medium",
+                        cuisine: "international",
+                        instructions: recipe.instructions || [],
+                        isEditing: true,
+                        originalId: recipe.id,
+                      };
+
+                      localStorage.setItem(
+                        "editRecipeData",
+                        JSON.stringify(editData)
+                      );
+                      router.push("/create?edit=true");
                     }}
                     onDelete={(recipeId) => {
                       const recipe = savedRecipes.find(
