@@ -20,6 +20,7 @@ interface RecipeCardProps {
     cookingTime: string;
     image?: string;
     source: string;
+    difficulty?: string;
   };
   variant?: "save" | "my-recipes";
   onEdit?: (recipe: any) => void;
@@ -46,7 +47,29 @@ export default function RecipeCard({
   const [imageError, setImageError] = useState(false);
 
   const recipeId = recipe.id || Date.now().toString();
-  const isSaved = isRecipeSaved(recipeId);
+
+  // Verificar directamente si la receta está guardada en lugar de usar el hook
+  let isSaved = false;
+  if (user) {
+    const savedRecipesKey = `savedRecipes_${user.id}`;
+    const savedRecipes = localStorage.getItem(savedRecipesKey);
+    if (savedRecipes) {
+      try {
+        const parsedSavedRecipes = JSON.parse(savedRecipes);
+        isSaved = parsedSavedRecipes.some((r: any) => r.id === recipeId);
+      } catch (error) {
+        console.error("Error parsing saved recipes:", error);
+      }
+    }
+  }
+
+  console.log("🔍 RecipeCard DEBUG:", {
+    recipeId,
+    variant,
+    isSaved,
+    recipeTitle: recipe.title,
+    userId: user?.id,
+  });
 
   const handleCardClick = () => {
     // Usar el mismo ID que se usa para verificar si está guardada
@@ -77,7 +100,10 @@ export default function RecipeCard({
     setIsSaving(true);
 
     try {
-      const success = toggleSaveRecipe(recipe);
+      const success = toggleSaveRecipe({
+        ...recipe,
+        difficulty: recipe.difficulty || "medium",
+      });
 
       if (success) {
         // Mostrar notificación

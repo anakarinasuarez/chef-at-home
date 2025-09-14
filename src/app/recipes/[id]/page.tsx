@@ -77,17 +77,33 @@ export default function RecipeDetailPage() {
 
           setRecipe(recipeData);
 
-          // Verificar si la receta está guardada usando el ID original de la receta
+          // Verificar si la receta está realmente guardada por el usuario
           if (user) {
-            const isSaved = isRecipeSaved(recipeData.id);
-            // Si viene de My Recipes, forzar que se considere como guardada
-            const finalSavedState = isFromMyRecipesPage || isSaved;
+            // Verificar directamente en localStorage si la receta está en la lista de guardadas
+            const savedRecipesKey = `savedRecipes_${user.id}`;
+            const savedRecipes = localStorage.getItem(savedRecipesKey);
+            let isActuallySaved = false;
+
+            if (savedRecipes) {
+              try {
+                const parsedSavedRecipes = JSON.parse(savedRecipes);
+                isActuallySaved = parsedSavedRecipes.some(
+                  (r: any) => r.id === recipeData.id
+                );
+              } catch (error) {
+                console.error("Error parsing saved recipes:", error);
+              }
+            }
+
+            // Solo considerar como guardada si viene de My Recipes O si está realmente guardada
+            const finalSavedState = isFromMyRecipesPage || isActuallySaved;
             setIsRecipeSavedState(finalSavedState);
-            console.log("Recipe saved status on load:", isSaved);
-            console.log(
-              "Final saved state (with My Recipes override):",
-              finalSavedState
-            );
+
+            console.log("🔍 DEBUG - Recipe ID:", recipeData.id);
+            console.log("🔍 DEBUG - Recipe actually saved:", isActuallySaved);
+            console.log("🔍 DEBUG - From My Recipes:", isFromMyRecipesPage);
+            console.log("🔍 DEBUG - Final saved state:", finalSavedState);
+            console.log("🔍 DEBUG - User ID:", user.id);
           }
         } else {
           console.log("No recipe found in localStorage for ID:", params.id);
@@ -357,7 +373,7 @@ export default function RecipeDetailPage() {
             </div>
 
             <div className="flex gap-3 flex-shrink-0">
-              {/* Forzar botones de receta guardada si viene de My Recipes */}
+              {/* Mostrar botones de receta guardada solo si viene de My Recipes O si está realmente guardada */}
               {isFromMyRecipes || isRecipeSavedState ? (
                 // Si la receta está guardada, mostrar Edit/Delete/Share
                 <>

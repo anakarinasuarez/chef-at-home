@@ -102,7 +102,14 @@ export const useSavedRecipes = () => {
 
   // Verificar si una receta está guardada
   const isRecipeSaved = (recipeId: string): boolean => {
-    return savedRecipes.some((recipe) => recipe.id === recipeId);
+    const isSaved = savedRecipes.some((recipe) => recipe.id === recipeId);
+    console.log("🔍 isRecipeSaved check:", {
+      recipeId,
+      isSaved,
+      savedRecipesCount: savedRecipes.length,
+      savedRecipeIds: savedRecipes.map((r) => r.id),
+    });
+    return isSaved;
   };
 
   // Toggle guardar/remover receta
