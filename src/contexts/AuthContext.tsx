@@ -41,11 +41,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Por ahora, no hay token JWT, así que solo verificamos localStorage
-        // En el futuro, aquí verificaremos el token con la API
-        const savedUser = localStorage.getItem("user");
-        if (savedUser) {
-          setUser(JSON.parse(savedUser));
+        // Verificar que estamos en el cliente antes de acceder a localStorage
+        if (typeof window !== "undefined") {
+          // Por ahora, no hay token JWT, así que solo verificamos localStorage
+          // En el futuro, aquí verificaremos el token con la API
+          const savedUser = localStorage.getItem("user");
+          if (savedUser) {
+            setUser(JSON.parse(savedUser));
+          }
         }
       } catch {
         console.error("Error checking auth");
@@ -79,7 +82,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Guardar usuario en estado y localStorage
       setUser(data.user);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
       return true;
     } catch {
       setError("An unexpected error occurred");
@@ -125,7 +130,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("user");
+    }
   };
 
   const value: AuthContextType = {
