@@ -7,7 +7,12 @@ import { useToast } from "@/hooks";
 import { colors } from "@/design-system";
 import Button from "@/components/Button";
 import FormField from "./FormField";
-import { loginSchema, registerSchema, safeValidateSchema, getFirstZodError } from "@/schemas";
+import {
+  loginSchema,
+  registerSchema,
+  safeValidateSchema,
+  getFirstZodError,
+} from "@/schemas";
 
 interface AuthFormProps {
   type: "login" | "signup";
@@ -34,7 +39,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
       ...prev,
       [name]: value,
     }));
-    
+
     // Limpiar error del campo cuando el usuario escribe
     if (fieldErrors[name]) {
       setFieldErrors((prev) => ({
@@ -54,7 +59,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
       // Validar datos con Zod
       const schema = type === "login" ? loginSchema : registerSchema;
       const validation = safeValidateSchema(schema, formData);
-      
+
       if (!validation.success) {
         // Procesar errores de validación
         const errors: Record<string, string> = {};
@@ -63,7 +68,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
           errors[field] = err.message;
         });
         setFieldErrors(errors);
-        
+
         // Mostrar el primer error como mensaje general
         const firstError = getFirstZodError(validation.error);
         setError(firstError);
@@ -169,16 +174,31 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
       {/* Link adicional (login/signup) */}
       <div className="pt-2">
         <span className="text-gray-300">
-          {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
+          {type === "signup"
+            ? "Already have an account?"
+            : "Don't have an account?"}{" "}
         </span>
         <a
-          href={isSignup ? "/auth/login" : "/auth/signup"}
+          href={type === "signup" ? "/auth/login" : "/auth/signup"}
           className="underline cursor-pointer"
           style={{ color: colors.brand.primary[500] }}
         >
-          {isSignup ? "Sign in here" : "Sign up here"}
+          {type === "signup" ? "Sign in here" : "Sign up here"}
         </a>
       </div>
+
+      {/* Forgot Password Link (solo para login) */}
+      {type !== "signup" && (
+        <div className="pt-2 text-center">
+          <a
+            href="/auth/forgot-password"
+            className="text-sm underline cursor-pointer hover:text-white transition-colors"
+            style={{ color: colors.brand.primary[500] }}
+          >
+            Forgot your password?
+          </a>
+        </div>
+      )}
     </form>
   );
 }

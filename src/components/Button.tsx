@@ -67,15 +67,22 @@ export default function Button({
 
   const baseStyles = {
     ...buttonStyles[variant],
-    padding: "12px 24px", // Padding más compacto: vertical 12px, horizontal 24px
-    borderRadius: spacingSystem.components.button.borderRadius,
-    fontSize: "16px", // Tamaño de texto fijo para todos los botones
-    fontWeight: typography.styles["button"].fontWeight,
-    lineHeight: typography.styles["button"].lineHeight,
-    letterSpacing: "-0.01em", // Espaciado de letras más compacto
-    fontFamily: typography.styles["button"].fontFamily.join(", "),
+    padding: "12px 24px !important", // Padding: vertical 12px, horizontal 24px
+    borderRadius: "12px !important", // Border radius más redondeado
+    fontSize: "16px !important", // Tamaño de texto 16px
+    fontWeight: `${typography.styles["button"].fontWeight} !important`,
+    lineHeight: `${typography.styles["button"].lineHeight} !important`,
+    letterSpacing: "-0.01em !important", // Espaciado de letras más compacto
+    fontFamily: `${typography.styles["button"].fontFamily.join(
+      ", "
+    )} !important`,
     opacity: disabled ? 0.5 : 1,
     cursor: disabled ? "not-allowed" : "pointer",
+    width: "100%", // Asegurar que los botones ocupen todo el ancho disponible
+    minHeight: "44px", // Altura mínima proporcional al padding
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   };
 
   // Si es un botón de submit o no tiene href, renderizar como button
@@ -84,7 +91,7 @@ export default function Button({
       <button
         type={type}
         disabled={disabled}
-        className={`rounded-lg font-semibold text-lg transition-all duration-200 text-center hover:scale-105 ${className}`}
+        className={`transition-all duration-200 text-center hover:scale-105 ${className}`}
         style={baseStyles}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -99,7 +106,7 @@ export default function Button({
   return (
     <Link
       href={href}
-      className={`rounded-lg font-semibold text-lg transition-all duration-200 text-center hover:scale-105 ${className}`}
+      className={`transition-all duration-200 text-center hover:scale-105 ${className}`}
       style={baseStyles}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

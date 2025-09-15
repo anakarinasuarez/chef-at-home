@@ -39,26 +39,24 @@ export const registerSchema = z.object({
 });
 
 // Esquema para cambio de contraseña
-export const changePasswordSchema = z.object({
-  currentPassword: z
-    .string()
-    .min(1, "Current password is required"),
-  newPassword: z
-    .string()
-    .min(1, "New password is required")
-    .min(8, "New password must be at least 8 characters")
-    .max(100, "New password must be less than 100 characters")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "New password must contain at least one lowercase letter, one uppercase letter, and one number"
-    ),
-  confirmPassword: z
-    .string()
-    .min(1, "Please confirm your new password"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z
+      .string()
+      .min(1, "New password is required")
+      .min(8, "New password must be at least 8 characters")
+      .max(100, "New password must be less than 100 characters")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "New password must contain at least one lowercase letter, one uppercase letter, and one number"
+      ),
+    confirmPassword: z.string().min(1, "Please confirm your new password"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 // Esquema para reset de contraseña
 export const resetPasswordSchema = z.object({
@@ -68,8 +66,34 @@ export const resetPasswordSchema = z.object({
     .email("Please enter a valid email address"),
 });
 
+// Esquema para resetear contraseña con token
+export const resetPasswordWithTokenSchema = z
+  .object({
+    token: z
+      .string()
+      .min(1, "Reset token is required")
+      .length(64, "Invalid reset token format"),
+    password: z
+      .string()
+      .min(1, "New password is required")
+      .min(8, "New password must be at least 8 characters")
+      .max(100, "New password must be less than 100 characters")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "New password must contain at least one lowercase letter, one uppercase letter, and one number"
+      ),
+    confirmPassword: z.string().min(1, "Please confirm your new password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
 // Tipos TypeScript inferidos
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type ResetPasswordWithTokenInput = z.infer<
+  typeof resetPasswordWithTokenSchema
+>;
