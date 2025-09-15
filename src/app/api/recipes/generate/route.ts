@@ -12,6 +12,12 @@ import {
   generateRecipeImageWithOpenAI,
   isOpenAIImageServiceAvailable,
 } from "@/services/openaiImageService";
+import { 
+  generateRecipeRequestSchema, 
+  safeValidateSchema, 
+  getFirstZodError,
+  GenerateRecipeRequest
+} from "@/schemas";
 
 export async function POST(request: NextRequest) {
   let ingredients: string[] = [];
@@ -22,29 +28,21 @@ export async function POST(request: NextRequest) {
 
   try {
     const requestData = await request.json();
-    ingredients = requestData.ingredients || ingredients;
-    servings = requestData.servings || servings;
-    cuisine = requestData.cuisine || cuisine;
-    count = requestData.count || count;
-    customTitle = requestData.title; // Recibir el título personalizado
 
-    if (
-      !ingredients ||
-      !Array.isArray(ingredients) ||
-      ingredients.length === 0
-    ) {
+    // Validar los datos de entrada con Zod
+    const validation = safeValidateSchema(generateRecipeRequestSchema, requestData);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Ingredients are required and must be an array" },
+        { 
+          error: "Validation failed",
+          details: getFirstZodError(validation.error)
+        },
         { status: 400 }
       );
     }
 
-    if (!servings || servings < 1) {
-      return NextResponse.json(
-        { error: "Valid servings count is required" },
-        { status: 400 }
-      );
-    }
+    const validatedData = validation.data as GenerateRecipeRequest;
+    ({ ingredients, servings, cuisine, count, title: customTitle } = validatedData);
 
     let recipes;
     let source = "gemini-fallback";

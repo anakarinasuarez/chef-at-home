@@ -11,6 +11,7 @@ interface FormFieldProps {
   required?: boolean;
   minLength?: number;
   className?: string;
+  error?: string;
 }
 
 export default function FormField({
@@ -24,6 +25,7 @@ export default function FormField({
   required = false,
   minLength,
   className = "",
+  error,
 }: FormFieldProps) {
   return (
     <>
@@ -47,7 +49,11 @@ export default function FormField({
         placeholder={placeholder}
         required={required}
         minLength={minLength}
-        className="w-80 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
+        className={`w-80 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 ${
+          error 
+            ? "focus:ring-red-500 border-red-500" 
+            : "focus:ring-green-500"
+        }`}
         style={{
           fontSize: typography.styles["caption"].fontSize,
           fontFamily: typography.styles["caption"].fontFamily.join(", "),
@@ -56,6 +62,11 @@ export default function FormField({
           letterSpacing: typography.styles["caption"].letterSpacing,
         }}
       />
+      {error && (
+        <p className="text-red-400 text-sm mt-1">
+          {error}
+        </p>
+      )}
     </>
   );
 }

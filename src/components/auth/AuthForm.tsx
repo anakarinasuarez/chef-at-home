@@ -7,6 +7,7 @@ import { useToast } from "@/hooks";
 import { colors } from "@/design-system";
 import Button from "@/components/Button";
 import FormField from "./FormField";
+import { loginSchema, registerSchema, safeValidateSchema, getFirstZodError } from "@/schemas";
 
 interface AuthFormProps {
   type: "login" | "signup";
@@ -22,6 +23,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { login, register } = useAuth();
   const { showSuccess, showError } = useToast();
   const router = useRouter();
@@ -32,14 +34,44 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
       ...prev,
       [name]: value,
     }));
+    
+    // Limpiar error del campo cuando el usuario escribe
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setFieldErrors({});
 
     try {
+      // Validar datos con Zod
+      const schema = type === "login" ? loginSchema : registerSchema;
+      const validation = safeValidateSchema(schema, formData);
+      
+      if (!validation.success) {
+        // Procesar errores de validación
+        const errors: Record<string, string> = {};
+        validation.error.errors.forEach((err: any) => {
+          const field = err.path[0] as string;
+          errors[field] = err.message;
+        });
+        setFieldErrors(errors);
+        
+        // Mostrar el primer error como mensaje general
+        const firstError = getFirstZodError(validation.error);
+        setError(firstError);
+        showError(firstError);
+        return;
+      }
+
+      // Proceder con autenticación si la validación es exitosa
       if (type === "login") {
         const success = await login(formData.email, formData.password);
         if (success) {
@@ -86,6 +118,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
           value={formData.name}
           onChange={handleChange}
           required
+          error={fieldErrors.name}
         />
       )}
 
@@ -99,6 +132,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
         value={formData.email}
         onChange={handleChange}
         required
+        error={fieldErrors.email}
       />
 
       {/* Campo Contraseña */}
@@ -112,6 +146,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
         onChange={handleChange}
         required
         minLength={6}
+        error={fieldErrors.password}
       />
 
       {/* Mensaje de Error */}

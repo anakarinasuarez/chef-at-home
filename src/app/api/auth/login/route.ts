@@ -1,9 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loginUser } from "@/services";
+import { loginSchema, safeValidateSchema, getFirstZodError } from "@/schemas";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const body = await request.json();
+
+    // Validar los datos de entrada con Zod
+    const validation = safeValidateSchema(loginSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { 
+          error: "Validation failed",
+          details: getFirstZodError(validation.error)
+        },
+        { status: 400 }
+      );
+    }
+
+    const { email, password } = validation.data;
 
     // Usar el servicio de autenticación
     const result = await loginUser({ email, password });
