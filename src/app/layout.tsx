@@ -3,6 +3,7 @@ import { Poppins, Inter, Alegreya } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -44,6 +45,7 @@ export default function RootLayout({
         <AuthProvider>
           <NotificationProvider>{children}</NotificationProvider>
         </AuthProvider>
+        <ToastProvider />
       </body>
     </html>
   );
