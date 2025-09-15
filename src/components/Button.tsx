@@ -83,6 +83,8 @@ export default function Button({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    transition: "all 0.2s ease-in-out", // Transición suave
+    textAlign: "center" as const, // Centrar texto
   };
 
   // Si es un botón de submit o no tiene href, renderizar como button
@@ -91,7 +93,7 @@ export default function Button({
       <button
         type={type}
         disabled={disabled}
-        className={`transition-all duration-200 text-center hover:scale-105 ${className}`}
+        className={className}
         style={baseStyles}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -106,7 +108,7 @@ export default function Button({
   return (
     <Link
       href={href}
-      className={`transition-all duration-200 text-center hover:scale-105 ${className}`}
+      className={className}
       style={baseStyles}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
