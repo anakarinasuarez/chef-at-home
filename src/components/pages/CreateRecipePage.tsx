@@ -111,7 +111,7 @@ export default function CreateRecipePage({
     }
   };
 
-  const handleCreateRecipe = async () => {
+  const handleSaveRecipe = async () => {
     if (ingredients.length === 0) {
       alert("Please add at least one ingredient");
       return;
@@ -122,8 +122,62 @@ export default function CreateRecipePage({
       return;
     }
 
-    if (isEditing && !recipeTitle.trim()) {
+    if (!recipeTitle.trim()) {
       alert("Please enter a recipe title");
+      return;
+    }
+
+    if (!editingRecipeId) {
+      alert("No recipe ID found for editing");
+      return;
+    }
+
+    setIsCreating(true);
+
+    try {
+      // Crear los datos actualizados de la receta
+      const updatedRecipeData = {
+        title: recipeTitle.trim(),
+        ingredients: ingredients.map((ing) => ({
+          name: ing.name,
+          quantity: 1, // Valor por defecto
+          unit: "unit", // Valor por defecto
+        })),
+        servings: selectedServings,
+        cookingTime: "30 minutes", // Valor por defecto
+        difficulty: "medium", // Valor por defecto
+        source: "user-edited",
+        instructions: [
+          "Instructions will be updated when you regenerate the recipe.",
+        ], // Placeholder
+      };
+
+      // Actualizar la receta existente
+      const success = updateRecipe(editingRecipeId, updatedRecipeData);
+
+      if (success) {
+        console.log("✅ Receta editada guardada exitosamente");
+        // Redirigir a my-recipes después de guardar
+        router.push("/my-recipes");
+      } else {
+        throw new Error("Failed to update recipe");
+      }
+    } catch (error) {
+      console.error("Error saving recipe:", error);
+      alert("Error saving recipe. Please try again.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleCreateRecipe = async () => {
+    if (ingredients.length === 0) {
+      alert("Please add at least one ingredient");
+      return;
+    }
+
+    if (!selectedServings) {
+      alert("Please select the number of servings");
       return;
     }
 
@@ -138,8 +192,7 @@ export default function CreateRecipePage({
         body: JSON.stringify({
           ingredients: ingredients.map((ing) => ing.name),
           servings: selectedServings,
-          count: isEditing ? 1 : 4, // Generar 1 receta si está editando, 4 si está creando nueva
-          ...(isEditing && recipeTitle.trim() && { title: recipeTitle.trim() }), // Solo incluir título si está editando
+          count: 4, // Generar 4 recetas para nueva creación
         }),
       });
 
@@ -155,44 +208,13 @@ export default function CreateRecipePage({
         throw new Error("No recipes were generated");
       }
 
-      if (isEditing) {
-        // Si está editando, redirigir directamente a la página de detalle de la receta generada
-        const generatedRecipe = data.recipes[0];
-        const recipeId =
-          generatedRecipe.id ||
-          `recipe_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-        // Actualizar el ID de la receta generada
-        generatedRecipe.id = recipeId;
-
-        // Guardar la receta en localStorage para la página de detalle
-        localStorage.setItem(
-          `recipe-${recipeId}`,
-          JSON.stringify(generatedRecipe)
-        );
-
-        // Guardar automáticamente la receta editada en las recetas guardadas
-        if (editingRecipeId) {
-          try {
-            await updateRecipe(editingRecipeId, generatedRecipe);
-            console.log("✅ Receta editada guardada automáticamente");
-          } catch (error) {
-            console.error("❌ Error guardando receta editada:", error);
-          }
-        }
-
-        const redirectUrl = `/recipes/${recipeId}`;
-        console.log("Redirigiendo a página de detalle:", redirectUrl);
-        router.push(redirectUrl);
-      } else {
-        // Si está creando nueva, redirigir a la página de recetas múltiples
-        const ingredientsParam = encodeURIComponent(
-          JSON.stringify(ingredients.map((ing) => ing.name))
-        );
-        const redirectUrl = `/recipes?force=true&ingredients=${ingredientsParam}&servings=${selectedServings}`;
-        console.log("Redirigiendo a página de recetas múltiples:", redirectUrl);
-        router.push(redirectUrl);
-      }
+      // Redirigir a la página de recetas múltiples
+      const ingredientsParam = encodeURIComponent(
+        JSON.stringify(ingredients.map((ing) => ing.name))
+      );
+      const redirectUrl = `/recipes?force=true&ingredients=${ingredientsParam}&servings=${selectedServings}`;
+      console.log("Redirigiendo a página de recetas múltiples:", redirectUrl);
+      router.push(redirectUrl);
     } catch (error) {
       console.error("Error generating recipes:", error);
       alert("Error generating recipes. Please try again.");
@@ -414,11 +436,11 @@ export default function CreateRecipePage({
         )}
       </div>
 
-      {/* Botón de Crear Receta */}
+      {/* Botón de Crear/Guardar Receta */}
       <div className="flex gap-4">
         <Button
           variant="primary"
-          onClick={handleCreateRecipe}
+          onClick={isEditing ? handleSaveRecipe : handleCreateRecipe}
           disabled={
             isCreating ||
             ingredients.length === 0 ||
@@ -428,9 +450,11 @@ export default function CreateRecipePage({
           className="px-8 py-3"
         >
           {isCreating
-            ? "Creating recipe..."
+            ? isEditing
+              ? "Saving recipe..."
+              : "Creating recipe..."
             : isEditing
-            ? "Update Recipe"
+            ? "Save Recipe"
             : "Create Recipe"}
         </Button>
         <Button
