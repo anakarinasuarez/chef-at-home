@@ -166,7 +166,7 @@ export default function ForgotPasswordPage() {
       </form>
 
       {/* Información adicional */}
-      <div className="mt-6 text-center">
+      <div className="mt-6 text-left">
         <p className="text-gray-300 text-sm">
           Remember your password?{" "}
           <a

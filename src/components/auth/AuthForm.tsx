@@ -189,7 +189,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
 
       {/* Forgot Password Link (solo para login) */}
       {type !== "signup" && (
-        <div className="pt-2 text-center">
+        <div className="pt-2 text-left">
           <a
             href="/auth/forgot-password"
             className="text-sm underline cursor-pointer hover:text-white transition-colors"
