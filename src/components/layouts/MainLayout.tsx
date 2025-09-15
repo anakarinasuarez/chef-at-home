@@ -30,7 +30,7 @@ export default function MainLayout({
       {/* Contenido Principal - Layout de 2 columnas */}
       <main className={`flex min-h-[calc(100vh-80px)] pt-16 ${className}`}>
         {/* Columna Izquierda - Contenido específico de cada página */}
-        <div className="flex-1 flex flex-col justify-center px-8 lg:px-16 py-12">
+        <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 py-12">
           {children}
         </div>
 
