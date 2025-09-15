@@ -2,10 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RecipeCard from "../RecipeCard";
-import {
-  mockAuthContext,
-  mockNotificationContext,
-} from "../../test/mocks/contexts";
+import { mockAuthContext } from "../../test/mocks/contexts";
 import { mockPush } from "../../test/setup";
 
 // Mock all dependencies
@@ -24,18 +21,23 @@ vi.mock("@/contexts/AuthContext", () => ({
   useAuth: () => mockAuthContext,
 }));
 
-vi.mock("@/contexts/NotificationContext", () => ({
-  useNotification: () => mockNotificationContext,
-}));
-
 const mockIsRecipeSaved = vi.fn(() => false);
 const mockToggleSaveRecipe = vi.fn(() => true);
+
+// Mock toast notifications
+const mockToast = {
+  showSuccess: vi.fn(),
+  showError: vi.fn(),
+  showLoading: vi.fn(),
+  dismiss: vi.fn(),
+};
 
 vi.mock("@/hooks", () => ({
   useSavedRecipes: () => ({
     isRecipeSaved: mockIsRecipeSaved,
     toggleSaveRecipe: mockToggleSaveRecipe,
   }),
+  useToast: () => mockToast,
 }));
 
 vi.mock("@/design-system", () => ({
@@ -130,8 +132,9 @@ describe("RecipeCard", () => {
     // Reset router mock
     vi.mocked(mockRouter.push).mockClear();
 
-    // Reset notification mock
-    vi.mocked(mockNotificationContext.showNotification).mockClear();
+    // Reset toast mock
+    vi.mocked(mockToast.showSuccess).mockClear();
+    vi.mocked(mockToast.showError).mockClear();
 
     // Reset auth context
     mockAuthContext.user = {
@@ -256,9 +259,8 @@ describe("RecipeCard", () => {
       await user.click(saveButton);
 
       expect(mockToggleSaveRecipe).toHaveBeenCalledWith(mockRecipe);
-      expect(mockNotificationContext.showNotification).toHaveBeenCalledWith(
-        "Recipe saved to favorites",
-        "success"
+      expect(mockToast.showSuccess).toHaveBeenCalledWith(
+        "Recipe saved to favorites"
       );
     });
 
@@ -307,10 +309,7 @@ describe("RecipeCard", () => {
       const saveButton = screen.getByText("Save");
       await user.click(saveButton);
 
-      expect(mockNotificationContext.showNotification).toHaveBeenCalledWith(
-        "Error saving recipe",
-        "error"
-      );
+      expect(mockToast.showError).toHaveBeenCalledWith("Error saving recipe");
     });
   });
 

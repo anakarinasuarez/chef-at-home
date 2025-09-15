@@ -5,7 +5,9 @@ This directory contains comprehensive unit tests for the Chef at Home applicatio
 ## Test Structure
 
 ### Components Tests
+
 - **ImagePlaceholder.test.tsx**: Tests for the ImagePlaceholder component
+
   - Cuisine type rendering (Italian, Mexican, Asian, etc.)
   - Props handling and default values
   - Styling and accessibility
@@ -18,7 +20,9 @@ This directory contains comprehensive unit tests for the Chef at Home applicatio
   - Variant-specific behavior (save vs my-recipes)
 
 ### Hooks Tests
+
 - **useSavedRecipes.test.ts**: Tests for the useSavedRecipes hook
+
   - Recipe saving and removal
   - LocalStorage integration
   - State management
@@ -31,6 +35,7 @@ This directory contains comprehensive unit tests for the Chef at Home applicatio
   - Token management
 
 ### API Tests
+
 - **images-generate.test.ts**: Tests for the image generation API endpoint
   - Request validation
   - Service integration
@@ -40,17 +45,21 @@ This directory contains comprehensive unit tests for the Chef at Home applicatio
 ## Mock Strategy
 
 ### Third-Party Services
+
 All external services are mocked to prevent actual API calls during testing:
+
 - OpenAI DALL-E service
 - Replicate service
 - Stable Diffusion service
 - Universal Cache Manager
 
 ### Context Providers
+
 - AuthContext: Mocked with configurable user state
-- NotificationContext: Mocked notification functions
+- Toast notifications: Mocked with showSuccess, showError, showLoading functions
 
 ### Next.js Features
+
 - Router: Mocked navigation functions
 - localStorage: Mocked storage operations
 
@@ -76,6 +85,7 @@ npm run test:coverage
 ## Test Coverage
 
 The test suite covers:
+
 - ✅ Component rendering and props
 - ✅ User interactions and event handling
 - ✅ State management and updates
@@ -95,6 +105,7 @@ The test suite covers:
 ## Adding New Tests
 
 When adding new tests:
+
 1. Follow the existing naming convention: `ComponentName.test.tsx`
 2. Include both positive and negative test cases
 3. Mock all external dependencies
