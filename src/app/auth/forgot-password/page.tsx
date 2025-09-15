@@ -167,12 +167,15 @@ export default function ForgotPasswordPage() {
 
       {/* Información adicional */}
       <div className="mt-6 text-left">
-        <p className="text-gray-300 text-sm">
+        <p className="text-gray-300" style={{ fontSize: "16px" }}>
           Remember your password?{" "}
           <a
             href="/auth/login"
             className="underline cursor-pointer hover:text-white transition-colors"
-            style={{ color: colors.brand.primary[500] }}
+            style={{ 
+              color: colors.brand.primary[500],
+              fontSize: "16px"
+            }}
           >
             Sign in here
           </a>

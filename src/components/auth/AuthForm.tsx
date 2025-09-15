@@ -173,7 +173,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
 
       {/* Link adicional (login/signup) */}
       <div className="pt-2">
-        <span className="text-gray-300">
+        <span className="text-gray-300" style={{ fontSize: "16px" }}>
           {type === "signup"
             ? "Already have an account?"
             : "Don't have an account?"}{" "}
@@ -181,7 +181,10 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
         <a
           href={type === "signup" ? "/auth/login" : "/auth/signup"}
           className="underline cursor-pointer"
-          style={{ color: colors.brand.primary[500] }}
+          style={{ 
+            color: colors.brand.primary[500],
+            fontSize: "16px"
+          }}
         >
           {type === "signup" ? "Sign in here" : "Sign up here"}
         </a>
@@ -192,8 +195,11 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
         <div className="pt-2 text-left">
           <a
             href="/auth/forgot-password"
-            className="text-sm underline cursor-pointer hover:text-white transition-colors"
-            style={{ color: colors.brand.primary[500] }}
+            className="underline cursor-pointer hover:text-white transition-colors"
+            style={{ 
+              color: colors.brand.primary[500],
+              fontSize: "16px"
+            }}
           >
             Forgot your password?
           </a>
