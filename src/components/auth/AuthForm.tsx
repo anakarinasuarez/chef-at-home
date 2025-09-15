@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNotification } from "@/contexts/NotificationContext";
+import { useToast } from "@/hooks";
 import { colors } from "@/design-system";
 import Button from "@/components/Button";
 import FormField from "./FormField";
@@ -23,7 +23,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { login, register } = useAuth();
-  const { showNotification } = useNotification();
+  const { showSuccess, showError } = useToast();
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,25 +43,29 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
       if (type === "login") {
         const success = await login(formData.email, formData.password);
         if (success) {
-          showNotification("Welcome back!", "success");
+          showSuccess("Welcome back!");
           router.push("/");
         } else {
           setError("Invalid email or password");
-          showNotification("Invalid email or password", "error");
+          showError("Invalid email or password");
         }
       } else {
-        const success = await register(formData.name, formData.email, formData.password);
+        const success = await register(
+          formData.name,
+          formData.email,
+          formData.password
+        );
         if (success) {
-          showNotification("Account created successfully!", "success");
+          showSuccess("Account created successfully!");
           router.push("/");
         } else {
           setError("Registration failed. Please try again.");
-          showNotification("Registration failed. Please try again.", "error");
+          showError("Registration failed. Please try again.");
         }
       }
     } catch (err: any) {
       setError(err.message || "An error occurred");
-      showNotification(err.message || "An error occurred", "error");
+      showError(err.message || "An error occurred");
     } finally {
       setIsLoading(false);
     }
