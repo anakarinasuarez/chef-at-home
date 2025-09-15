@@ -41,13 +41,23 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
 
     try {
       if (type === "login") {
-        await login(formData.email, formData.password);
-        showNotification("Welcome back!", "success");
-        router.push("/");
+        const success = await login(formData.email, formData.password);
+        if (success) {
+          showNotification("Welcome back!", "success");
+          router.push("/");
+        } else {
+          setError("Invalid email or password");
+          showNotification("Invalid email or password", "error");
+        }
       } else {
-        await register(formData.name, formData.email, formData.password);
-        showNotification("Account created successfully!", "success");
-        router.push("/");
+        const success = await register(formData.name, formData.email, formData.password);
+        if (success) {
+          showNotification("Account created successfully!", "success");
+          router.push("/");
+        } else {
+          setError("Registration failed. Please try again.");
+          showNotification("Registration failed. Please try again.", "error");
+        }
       }
     } catch (err: any) {
       setError(err.message || "An error occurred");
