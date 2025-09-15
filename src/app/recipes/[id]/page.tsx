@@ -12,8 +12,7 @@ import IngredientsCard from "@/components/IngredientsCard";
 import { colors } from "@/design-system";
 import { typography } from "@/design-system";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSavedRecipes } from "@/hooks";
-import { useNotification } from "@/contexts/NotificationContext";
+import { useSavedRecipes, useToast } from "@/hooks";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 
@@ -39,7 +38,7 @@ export default function RecipeDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { isRecipeSaved, removeRecipe, toggleSaveRecipe } = useSavedRecipes();
-  const { showNotification } = useNotification();
+  const { showSuccess, showError } = useToast();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFromMyRecipes, setIsFromMyRecipes] = useState(false);
@@ -146,7 +145,7 @@ export default function RecipeDetailPage() {
 
     if (!user) {
       console.log("No user available");
-      showNotification("Please log in to save recipes", "error");
+      showError("Please log in to save recipes");
       return;
     }
 
@@ -161,10 +160,11 @@ export default function RecipeDetailPage() {
         const newSavedState = !isRecipeSavedState;
         setIsRecipeSavedState(newSavedState);
 
-        const message = newSavedState
-          ? "Recipe saved to favorites!"
-          : "Recipe removed from favorites!";
-        showNotification(message, newSavedState ? "success" : "info");
+        if (newSavedState) {
+          showSuccess("Recipe saved to favorites!");
+        } else {
+          showSuccess("Recipe removed from favorites!");
+        }
 
         console.log("Recipe saved status updated:", newSavedState);
 
@@ -194,11 +194,11 @@ export default function RecipeDetailPage() {
           }, 1000); // Esperar 1 segundo para que se vea la notificación
         }
       } else {
-        showNotification("Error saving recipe", "error");
+        showError("Error saving recipe");
       }
     } catch (error) {
       console.error("Error saving recipe:", error);
-      showNotification("Error saving recipe", "error");
+      showError("Error saving recipe");
     }
   };
 

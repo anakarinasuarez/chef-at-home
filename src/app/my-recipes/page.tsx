@@ -6,8 +6,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import Nav from "@/components/Nav";
 import { colors, typography } from "@/design-system";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSavedRecipes } from "@/hooks";
-import { useNotification } from "@/contexts/NotificationContext";
+import { useSavedRecipes, useToast } from "@/hooks";
 import RecipeCard from "@/components/RecipeCard";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 
@@ -15,7 +14,7 @@ export default function MyRecipesPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const { savedRecipes, loading, removeRecipe } = useSavedRecipes();
-  const { showNotification } = useNotification();
+  const { showSuccess } = useToast();
   const [activeIndex, setActiveIndex] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recipeToDelete, setRecipeToDelete] = useState<any>(null);
@@ -80,7 +79,7 @@ export default function MyRecipesPage() {
     if (recipeToDelete) {
       const success = removeRecipe(recipeToDelete.id);
       if (success) {
-        showNotification("Recipe deleted successfully!", "success");
+        showSuccess("Recipe deleted successfully!");
       }
     }
     setShowDeleteModal(false);
@@ -256,10 +255,7 @@ export default function MyRecipesPage() {
                         });
                       } else {
                         navigator.clipboard.writeText(window.location.href);
-                        showNotification(
-                          "Recipe link copied to clipboard!",
-                          "success"
-                        );
+                        showSuccess("Recipe link copied to clipboard!");
                       }
                     }}
                   />

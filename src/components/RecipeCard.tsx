@@ -8,8 +8,7 @@ import { MdDelete } from "react-icons/md";
 import { BiShare } from "react-icons/bi";
 import { colors, typography } from "@/design-system";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSavedRecipes } from "@/hooks";
-import { useNotification } from "@/contexts/NotificationContext";
+import { useSavedRecipes, useToast } from "@/hooks";
 import ImagePlaceholder from "./ImagePlaceholder";
 
 interface RecipeCardProps {
@@ -42,7 +41,7 @@ export default function RecipeCard({
   const router = useRouter();
   const { user } = useAuth();
   const { isRecipeSaved, toggleSaveRecipe } = useSavedRecipes();
-  const { showNotification } = useNotification();
+  const { showSuccess, showError } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -107,10 +106,11 @@ export default function RecipeCard({
 
       if (success) {
         // Mostrar notificación
-        const message = isSaved
-          ? "Recipe removed from favorites"
-          : "Recipe saved to favorites";
-        showNotification(message, isSaved ? "info" : "success");
+        if (isSaved) {
+          showSuccess("Recipe removed from favorites");
+        } else {
+          showSuccess("Recipe saved to favorites");
+        }
 
         // Si se guardó la receta desde Generated Recipes, eliminar de la lista
         if (!isSaved && variant === "save" && onRemoveFromList) {
@@ -123,11 +123,11 @@ export default function RecipeCard({
           }, 1000);
         }
       } else {
-        showNotification("Error saving recipe", "error");
+        showError("Error saving recipe");
       }
     } catch (error) {
       console.error("Error saving recipe:", error);
-      showNotification("Error saving recipe", "error");
+      showError("Error saving recipe");
     } finally {
       setIsSaving(false);
     }
