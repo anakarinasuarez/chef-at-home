@@ -12,3 +12,6 @@ export { useRecipesNavigationZustand } from "./useRecipesNavigationZustand";
 
 // Toast notifications
 export { useToast } from "./useToast";
+
+// Unified auth hook (compatible with AuthContext)
+export { useAuthUnified } from "./useAuthUnified";

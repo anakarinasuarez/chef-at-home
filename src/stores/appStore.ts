@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { UserResponse } from "@/types";
 
 // Types
 interface User {
@@ -25,8 +26,8 @@ interface Recipe {
 }
 
 interface AppState {
-  // User state
-  user: User | null;
+  // User state (compatible with AuthContext)
+  user: UserResponse | null;
   isLoading: boolean;
   error: string | null;
 
@@ -39,8 +40,13 @@ interface AppState {
   // Navigation state
   activeIndex: number;
 
-  // Actions
-  setUser: (user: User | null) => void;
+  // Auth actions (compatible with AuthContext)
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string) => Promise<boolean>;
+  logout: () => void;
+
+  // User actions
+  setUser: (user: UserResponse | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 
@@ -67,7 +73,7 @@ interface AppState {
 // Initial state
 const initialState = {
   user: null,
-  isLoading: false,
+  isLoading: true, // Start with true to match AuthContext behavior
   error: null,
   recipes: [],
   savedRecipes: [],
@@ -80,6 +86,80 @@ export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       ...initialState,
+
+      // Auth actions (compatible with AuthContext)
+      login: async (email: string, password: string): Promise<boolean> => {
+        try {
+          set({ isLoading: true, error: null });
+
+          const response = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            set({ error: data.error || "Login failed", isLoading: false });
+            return false;
+          }
+
+          // Guardar usuario en estado y localStorage
+          set({ user: data.user, isLoading: false });
+          if (typeof window !== "undefined") {
+            localStorage.setItem("user", JSON.stringify(data.user));
+          }
+          return true;
+        } catch {
+          set({ error: "An unexpected error occurred", isLoading: false });
+          return false;
+        }
+      },
+
+      register: async (
+        name: string,
+        email: string,
+        password: string
+      ): Promise<boolean> => {
+        try {
+          set({ isLoading: true, error: null });
+
+          const response = await fetch("/api/auth/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name, email, password }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            set({
+              error: data.error || "Registration failed",
+              isLoading: false,
+            });
+            return false;
+          }
+
+          // No logueamos automáticamente después del registro
+          set({ isLoading: false });
+          return true;
+        } catch {
+          set({ error: "An unexpected error occurred", isLoading: false });
+          return false;
+        }
+      },
+
+      logout: () => {
+        set({ user: null });
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("user");
+        }
+      },
 
       // User actions
       setUser: (user) => set({ user }),
@@ -127,6 +207,22 @@ export const useAppStore = create<AppState>()(
         user: state.user,
         savedRecipes: state.savedRecipes,
       }),
+      // Initialize auth check on store creation
+      onRehydrateStorage: () => (state) => {
+        if (state && typeof window !== "undefined") {
+          // Check for existing user in localStorage (same as AuthContext)
+          const savedUser = localStorage.getItem("user");
+          if (savedUser) {
+            try {
+              state.setUser(JSON.parse(savedUser));
+            } catch {
+              console.error("Error parsing saved user");
+            }
+          }
+          // Set loading to false after check (same as AuthContext)
+          state.setLoading(false);
+        }
+      },
     }
   )
 );
@@ -146,9 +242,15 @@ export const useActiveIndex = () => useAppStore((state) => state.activeIndex);
 // Action selectors
 export const useAppActions = () =>
   useAppStore((state) => ({
+    // Auth actions
+    login: state.login,
+    register: state.register,
+    logout: state.logout,
+    // User actions
     setUser: state.setUser,
     setLoading: state.setLoading,
     setError: state.setError,
+    // Recipe actions
     setRecipes: state.setRecipes,
     addRecipe: state.addRecipe,
     removeRecipe: state.removeRecipe,
@@ -160,4 +262,12 @@ export const useAppActions = () =>
     setActiveIndex: state.setActiveIndex,
     clearError: state.clearError,
     reset: state.reset,
+  }));
+
+// Auth-specific selectors (compatible with AuthContext interface)
+export const useAuthActions = () =>
+  useAppStore((state) => ({
+    login: state.login,
+    register: state.register,
+    logout: state.logout,
   }));
