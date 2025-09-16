@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthUnified } from "@/hooks";
 import Nav from "@/components/Nav";
 import RecipeCard from "@/components/RecipeCard";
 import { FiArrowLeft } from "react-icons/fi";
@@ -25,7 +25,7 @@ interface Recipe {
 }
 
 export default function RecipesPage() {
-  const { user } = useAuth();
+  const { user } = useAuthUnified();
   const router = useRouter();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set());

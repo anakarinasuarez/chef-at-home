@@ -1,12 +1,12 @@
 "use client";
 
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthUnified } from "@/hooks";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import CreateRecipePage from "@/components/pages/CreateRecipePage";
 
 export default function CreatePage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuthUnified();
   const router = useRouter();
 
   useEffect(() => {

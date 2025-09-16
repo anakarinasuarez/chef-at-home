@@ -7,7 +7,7 @@ import { FaPencil } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
 import { BiShare } from "react-icons/bi";
 import { colors, typography } from "@/design-system";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthUnified } from "@/hooks";
 import { useSavedRecipes, useToast } from "@/hooks";
 import ImagePlaceholder from "./ImagePlaceholder";
 
@@ -39,7 +39,7 @@ export default function RecipeCard({
   isRemoving = false,
 }: RecipeCardProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useAuthUnified();
   const { isRecipeSaved, toggleSaveRecipe } = useSavedRecipes();
   const { showSuccess, showError } = useToast();
   const [isSaving, setIsSaving] = useState(false);

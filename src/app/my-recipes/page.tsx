@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
 import Nav from "@/components/Nav";
 import { colors, typography } from "@/design-system";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthUnified } from "@/hooks";
 import { useSavedRecipes, useToast } from "@/hooks";
 import RecipeCard from "@/components/RecipeCard";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 
 export default function MyRecipesPage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuthUnified();
   const router = useRouter();
   const { savedRecipes, loading, removeRecipe } = useSavedRecipes();
   const { showSuccess } = useToast();

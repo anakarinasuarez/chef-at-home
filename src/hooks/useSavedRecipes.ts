@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthUnified } from "@/hooks";
 
 // Tipo flexible para recetas en el frontend
 interface FrontendRecipe {
@@ -21,7 +21,7 @@ interface FrontendRecipe {
 }
 
 export const useSavedRecipes = () => {
-  const { user } = useAuth();
+  const { user } = useAuthUnified();
   const [savedRecipes, setSavedRecipes] = useState<FrontendRecipe[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -168,7 +168,7 @@ export const useSavedRecipes = () => {
   // Cargar recetas al montar el componente
   useEffect(() => {
     loadSavedRecipes();
-  }, [user]);
+  }, [user?.id]); // Solo depende del ID del usuario, no del objeto completo
 
   return {
     savedRecipes,

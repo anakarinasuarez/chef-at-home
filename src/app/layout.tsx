@@ -3,6 +3,7 @@ import { Poppins, Inter, Alegreya } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/components/ui/ToastProvider";
+import AuthInitializer from "@/components/AuthInitializer";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -41,7 +42,7 @@ export default function RootLayout({
         className={`${poppins.variable} ${inter.variable} ${alegreya.variable} antialiased`}
         style={{ fontFamily: "var(--font-poppins), system-ui, sans-serif" }}
       >
-        <AuthProvider>{children}</AuthProvider>
+        {children}
         <ToastProvider />
       </body>
     </html>

@@ -73,7 +73,7 @@ interface AppState {
 // Initial state
 const initialState = {
   user: null,
-  isLoading: true, // Start with true to match AuthContext behavior
+  isLoading: false, // Start with false to avoid infinite loops
   error: null,
   recipes: [],
   savedRecipes: [],
@@ -207,22 +207,6 @@ export const useAppStore = create<AppState>()(
         user: state.user,
         savedRecipes: state.savedRecipes,
       }),
-      // Initialize auth check on store creation
-      onRehydrateStorage: () => (state) => {
-        if (state && typeof window !== "undefined") {
-          // Check for existing user in localStorage (same as AuthContext)
-          const savedUser = localStorage.getItem("user");
-          if (savedUser) {
-            try {
-              state.setUser(JSON.parse(savedUser));
-            } catch {
-              console.error("Error parsing saved user");
-            }
-          }
-          // Set loading to false after check (same as AuthContext)
-          state.setLoading(false);
-        }
-      },
     }
   )
 );

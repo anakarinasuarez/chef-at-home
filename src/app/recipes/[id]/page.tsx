@@ -11,7 +11,7 @@ import Nav from "@/components/Nav";
 import IngredientsCard from "@/components/IngredientsCard";
 import { colors } from "@/design-system";
 import { typography } from "@/design-system";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthUnified } from "@/hooks";
 import { useSavedRecipes, useToast } from "@/hooks";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
@@ -36,7 +36,7 @@ interface Recipe {
 export default function RecipeDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useAuthUnified();
   const { isRecipeSaved, removeRecipe, toggleSaveRecipe } = useSavedRecipes();
   const { showSuccess, showError } = useToast();
   const [recipe, setRecipe] = useState<Recipe | null>(null);

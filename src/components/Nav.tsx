@@ -11,7 +11,7 @@ import { FiLogOut } from "react-icons/fi";
 import { MdFavorite } from "react-icons/md";
 import Link from "next/link";
 import { colors, typography } from "@/design-system";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthUnified } from "@/hooks";
 
 interface NavProps {
   showMenu?: boolean;
@@ -25,7 +25,7 @@ export default function Nav({
   currentPage = "create",
 }: NavProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { logout } = useAuth();
+  const { logout } = useAuthUnified();
   const router = useRouter();
 
   const toggleMenu = () => {

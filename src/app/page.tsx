@@ -5,10 +5,10 @@ import { colors, typography, spacingSystem } from "@/design-system";
 import Button from "@/components/Button";
 import MainLayout from "@/components/layouts/MainLayout";
 import CreateRecipePage from "@/components/pages/CreateRecipePage";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthUnified } from "@/hooks";
 
 export default function HomePage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuthUnified();
   const router = useRouter();
 
   // Si el usuario está logueado, mostrar la interfaz de crear recetas

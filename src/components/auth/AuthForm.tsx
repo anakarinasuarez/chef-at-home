@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthUnified } from "@/hooks";
 import { useToast } from "@/hooks";
 import { colors } from "@/design-system";
 import Button from "@/components/Button";
@@ -29,7 +29,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const { login, register } = useAuth();
+  const { login, register } = useAuthUnified();
   const { showSuccess, showError } = useToast();
   const router = useRouter();
 
