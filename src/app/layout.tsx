@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Inter, Alegreya } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/ToastProvider";
+import { ErrorBoundaryAdvanced } from "@/components/ErrorBoundaryAdvanced";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -40,8 +41,15 @@ export default function RootLayout({
         className={`${poppins.variable} ${inter.variable} ${alegreya.variable} antialiased`}
         style={{ fontFamily: "var(--font-poppins), system-ui, sans-serif" }}
       >
-        {children}
-        <ToastProvider />
+        <ErrorBoundaryAdvanced
+          level="critical"
+          errorBoundaryName="RootLayout"
+          allowRetry={true}
+          showDetails={process.env.NODE_ENV === "development"}
+        >
+          {children}
+          <ToastProvider />
+        </ErrorBoundaryAdvanced>
       </body>
     </html>
   );

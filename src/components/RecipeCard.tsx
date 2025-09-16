@@ -11,6 +11,7 @@ import { useAuthUnified } from "@/hooks";
 import { useSavedRecipes, useToast } from "@/hooks";
 import ImagePlaceholder from "./ImagePlaceholder";
 import OptimizedImage from "./OptimizedImage";
+import { ComponentErrorBoundary } from "./ComponentErrorBoundary";
 
 interface RecipeCardProps {
   recipe: {
@@ -165,242 +166,244 @@ function RecipeCard({
   );
 
   return (
-    <div
-      onClick={handleCardClick}
-      className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 group"
-      style={{
-        backgroundColor: colors.interface.background.secondary,
-        boxShadow: `0 10px 25px ${colors.app.recipeCard.shadow}`,
-      }}
-    >
-      {/* Recipe Info - Above image */}
-      <div className="p-6">
-        {/* Title */}
-        <h3
-          className="mb-4 line-clamp-2"
-          style={{
-            color: colors.interface.text.primary,
-            fontSize: typography.styles["subtitle"].fontSize,
-            fontWeight: typography.styles["subtitle"].fontWeight,
-            lineHeight: typography.styles["subtitle"].lineHeight,
-            letterSpacing: typography.styles["subtitle"].letterSpacing,
-            minHeight: "3rem",
-            maxHeight: "3rem",
-          }}
-          title={recipe.title}
-        >
-          {recipe.title}
-        </h3>
+    <ComponentErrorBoundary componentName="RecipeCard">
+      <div
+        onClick={handleCardClick}
+        className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 group"
+        style={{
+          backgroundColor: colors.interface.background.secondary,
+          boxShadow: `0 10px 25px ${colors.app.recipeCard.shadow}`,
+        }}
+      >
+        {/* Recipe Info - Above image */}
+        <div className="p-6">
+          {/* Title */}
+          <h3
+            className="mb-4 line-clamp-2"
+            style={{
+              color: colors.interface.text.primary,
+              fontSize: typography.styles["subtitle"].fontSize,
+              fontWeight: typography.styles["subtitle"].fontWeight,
+              lineHeight: typography.styles["subtitle"].lineHeight,
+              letterSpacing: typography.styles["subtitle"].letterSpacing,
+              minHeight: "3rem",
+              maxHeight: "3rem",
+            }}
+            title={recipe.title}
+          >
+            {recipe.title}
+          </h3>
 
-        {/* Recipe metadata - Two lines below title */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <BiUser style={{ color: colors.brand.primary[500] }} />
-            <span
-              style={{
-                color: colors.interface.text.secondary,
-                fontSize: typography.styles["caption"].fontSize,
-                fontWeight: typography.styles["caption"].fontWeight,
-                lineHeight: typography.styles["caption"].lineHeight,
-                letterSpacing: typography.styles["caption"].letterSpacing,
-              }}
-            >
-              for {recipe.servings} people
-            </span>
-          </div>
+          {/* Recipe metadata - Two lines below title */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <BiUser style={{ color: colors.brand.primary[500] }} />
+              <span
+                style={{
+                  color: colors.interface.text.secondary,
+                  fontSize: typography.styles["caption"].fontSize,
+                  fontWeight: typography.styles["caption"].fontWeight,
+                  lineHeight: typography.styles["caption"].lineHeight,
+                  letterSpacing: typography.styles["caption"].letterSpacing,
+                }}
+              >
+                for {recipe.servings} people
+              </span>
+            </div>
 
-          <div className="flex items-center gap-2">
-            <BiTime style={{ color: colors.brand.primary[500] }} />
-            <span
-              style={{
-                color: colors.interface.text.secondary,
-                fontSize: typography.styles["caption"].fontSize,
-                fontWeight: typography.styles["caption"].fontWeight,
-                lineHeight: typography.styles["caption"].lineHeight,
-                letterSpacing: typography.styles["caption"].letterSpacing,
-              }}
-            >
-              duration {recipe.cookingTime}
-            </span>
+            <div className="flex items-center gap-2">
+              <BiTime style={{ color: colors.brand.primary[500] }} />
+              <span
+                style={{
+                  color: colors.interface.text.secondary,
+                  fontSize: typography.styles["caption"].fontSize,
+                  fontWeight: typography.styles["caption"].fontWeight,
+                  lineHeight: typography.styles["caption"].lineHeight,
+                  letterSpacing: typography.styles["caption"].letterSpacing,
+                }}
+              >
+                duration {recipe.cookingTime}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Recipe Image - Below info with padding */}
-      <div className="px-6">
-        <div className="relative h-48 overflow-hidden rounded-lg">
-          {recipe.image && !imageError ? (
-            <OptimizedImage
-              src={recipe.image}
-              alt={recipe.title}
-              width={400}
-              height={192}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              onError={() => setImageError(true)}
-              quality={80}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
+        {/* Recipe Image - Below info with padding */}
+        <div className="px-6">
+          <div className="relative h-48 overflow-hidden rounded-lg">
+            {recipe.image && !imageError ? (
+              <OptimizedImage
+                src={recipe.image}
+                alt={recipe.title}
+                width={400}
+                height={192}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                onError={() => setImageError(true)}
+                quality={80}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            ) : (
+              <ImagePlaceholder
+                title={recipe.title}
+                cuisine={
+                  recipe.source === "fallback-enhanced"
+                    ? "Italian"
+                    : "International"
+                }
+                className="h-48"
+                ingredients={[]}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Action Buttons - Bottom right */}
+        <div className="p-6 flex justify-end">
+          {variant === "save" ? (
+            // Save Button for Generated Recipes
+            <button
+              onClick={handleSaveClick}
+              disabled={isSaving || isRemoving}
+              className="px-6 py-3 rounded-lg transition-all duration-200 flex items-center gap-2 disabled:opacity-50"
+              style={{
+                backgroundColor: isRemoving
+                  ? colors.brand.primary[600]
+                  : isSaved
+                  ? colors.interface.background.tertiary
+                  : colors.brand.primary[500],
+                color: isRemoving
+                  ? colors.base.white
+                  : isSaved
+                  ? colors.brand.primary[500]
+                  : colors.base.white,
+                fontSize: typography.styles["button"].fontSize,
+                fontWeight: typography.styles["button"].fontWeight,
+                lineHeight: typography.styles["button"].lineHeight,
+                letterSpacing: typography.styles["button"].letterSpacing,
+                border:
+                  isSaved && !isRemoving
+                    ? `2px solid ${colors.brand.primary[500]}`
+                    : "none",
+              }}
+              onMouseEnter={(e) => {
+                if (!isSaved && !isRemoving) {
+                  e.currentTarget.style.backgroundColor =
+                    colors.brand.primary[600];
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSaved && !isRemoving) {
+                  e.currentTarget.style.backgroundColor =
+                    colors.brand.primary[500];
+                }
+              }}
+            >
+              {isRemoving ? (
+                <span className="text-lg animate-pulse">✓</span>
+              ) : isSaving ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+              ) : isSaved ? (
+                <span className="text-lg">✓</span>
+              ) : (
+                <span className="text-lg">+</span>
+              )}
+              {isRemoving
+                ? "Saved!"
+                : isSaving
+                ? "Saving..."
+                : isSaved
+                ? "Saved"
+                : "Save"}
+            </button>
           ) : (
-            <ImagePlaceholder
-              title={recipe.title}
-              cuisine={
-                recipe.source === "fallback-enhanced"
-                  ? "Italian"
-                  : "International"
-              }
-              className="h-48"
-              ingredients={[]}
-            />
+            // Edit, Delete, Share Buttons for My Recipes (Icon only)
+            <div className="flex gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.(recipe);
+                }}
+                className="p-3 rounded-lg transition-colors border flex items-center justify-center"
+                style={{
+                  backgroundColor: "transparent",
+                  color: colors.brand.primary[500],
+                  borderColor: colors.brand.primary[500],
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    colors.brand.primary[500];
+                  e.currentTarget.style.color =
+                    colors.interface.background.primary;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = colors.brand.primary[500];
+                }}
+                title="Edit recipe"
+              >
+                <FaPencil
+                  className="text-lg"
+                  style={{ color: colors.brand.primary[500] }}
+                />
+              </button>
+              <button
+                onClick={handleDeleteClick}
+                className="p-3 rounded-lg transition-colors border flex items-center justify-center"
+                style={{
+                  backgroundColor: "transparent",
+                  color: colors.brand.primary[500],
+                  borderColor: colors.brand.primary[500],
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#EF4444";
+                  e.currentTarget.style.color =
+                    colors.interface.background.primary;
+                  e.currentTarget.style.borderColor = "#EF4444";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = colors.brand.primary[500];
+                  e.currentTarget.style.borderColor = colors.brand.primary[500];
+                }}
+                title="Delete recipe"
+              >
+                <MdDelete
+                  className="text-lg"
+                  style={{ color: colors.brand.primary[500] }}
+                />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShare?.(recipe);
+                }}
+                className="p-3 rounded-lg transition-colors border flex items-center justify-center"
+                style={{
+                  backgroundColor: "transparent",
+                  color: colors.brand.primary[500],
+                  borderColor: colors.brand.primary[500],
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    colors.interface.background.tertiary;
+                  e.currentTarget.style.color = colors.interface.text.primary;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = colors.brand.primary[500];
+                }}
+                title="Share recipe"
+              >
+                <BiShare
+                  className="text-lg"
+                  style={{ color: colors.brand.primary[500] }}
+                />
+              </button>
+            </div>
           )}
         </div>
       </div>
-
-      {/* Action Buttons - Bottom right */}
-      <div className="p-6 flex justify-end">
-        {variant === "save" ? (
-          // Save Button for Generated Recipes
-          <button
-            onClick={handleSaveClick}
-            disabled={isSaving || isRemoving}
-            className="px-6 py-3 rounded-lg transition-all duration-200 flex items-center gap-2 disabled:opacity-50"
-            style={{
-              backgroundColor: isRemoving
-                ? colors.brand.primary[600]
-                : isSaved
-                ? colors.interface.background.tertiary
-                : colors.brand.primary[500],
-              color: isRemoving
-                ? colors.base.white
-                : isSaved
-                ? colors.brand.primary[500]
-                : colors.base.white,
-              fontSize: typography.styles["button"].fontSize,
-              fontWeight: typography.styles["button"].fontWeight,
-              lineHeight: typography.styles["button"].lineHeight,
-              letterSpacing: typography.styles["button"].letterSpacing,
-              border:
-                isSaved && !isRemoving
-                  ? `2px solid ${colors.brand.primary[500]}`
-                  : "none",
-            }}
-            onMouseEnter={(e) => {
-              if (!isSaved && !isRemoving) {
-                e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[600];
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isSaved && !isRemoving) {
-                e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[500];
-              }
-            }}
-          >
-            {isRemoving ? (
-              <span className="text-lg animate-pulse">✓</span>
-            ) : isSaving ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-            ) : isSaved ? (
-              <span className="text-lg">✓</span>
-            ) : (
-              <span className="text-lg">+</span>
-            )}
-            {isRemoving
-              ? "Saved!"
-              : isSaving
-              ? "Saving..."
-              : isSaved
-              ? "Saved"
-              : "Save"}
-          </button>
-        ) : (
-          // Edit, Delete, Share Buttons for My Recipes (Icon only)
-          <div className="flex gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit?.(recipe);
-              }}
-              className="p-3 rounded-lg transition-colors border flex items-center justify-center"
-              style={{
-                backgroundColor: "transparent",
-                color: colors.brand.primary[500],
-                borderColor: colors.brand.primary[500],
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[500];
-                e.currentTarget.style.color =
-                  colors.interface.background.primary;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = colors.brand.primary[500];
-              }}
-              title="Edit recipe"
-            >
-              <FaPencil
-                className="text-lg"
-                style={{ color: colors.brand.primary[500] }}
-              />
-            </button>
-            <button
-              onClick={handleDeleteClick}
-              className="p-3 rounded-lg transition-colors border flex items-center justify-center"
-              style={{
-                backgroundColor: "transparent",
-                color: colors.brand.primary[500],
-                borderColor: colors.brand.primary[500],
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#EF4444";
-                e.currentTarget.style.color =
-                  colors.interface.background.primary;
-                e.currentTarget.style.borderColor = "#EF4444";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = colors.brand.primary[500];
-                e.currentTarget.style.borderColor = colors.brand.primary[500];
-              }}
-              title="Delete recipe"
-            >
-              <MdDelete
-                className="text-lg"
-                style={{ color: colors.brand.primary[500] }}
-              />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onShare?.(recipe);
-              }}
-              className="p-3 rounded-lg transition-colors border flex items-center justify-center"
-              style={{
-                backgroundColor: "transparent",
-                color: colors.brand.primary[500],
-                borderColor: colors.brand.primary[500],
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  colors.interface.background.tertiary;
-                e.currentTarget.style.color = colors.interface.text.primary;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = colors.brand.primary[500];
-              }}
-              title="Share recipe"
-            >
-              <BiShare
-                className="text-lg"
-                style={{ color: colors.brand.primary[500] }}
-              />
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+    </ComponentErrorBoundary>
   );
 }
 

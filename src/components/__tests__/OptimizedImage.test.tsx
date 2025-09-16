@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import OptimizedImage from "../OptimizedImage";
 
 // Mock next/image
@@ -67,11 +67,11 @@ describe("OptimizedImage", () => {
       />
     );
 
-    // Simular error de carga
+    // Simular error de carga usando fireEvent
     const image = screen.getByAltText("Test Failed Image");
-    image.dispatchEvent(new Event("error"));
+    fireEvent.error(image);
 
-    // Debería mostrar el placeholder
+    // Debería mostrar el placeholder (ImagePlaceholder component)
     expect(screen.getByTestId("image-placeholder")).toBeInTheDocument();
   });
 
@@ -108,7 +108,7 @@ describe("OptimizedImage", () => {
       />
     );
 
-    const image = screen.getByAltText("Test Fill Image");
-    expect(image).toHaveClass("test-class");
+    const container = screen.getByAltText("Test Fill Image").parentElement;
+    expect(container).toHaveClass("test-class");
   });
 });

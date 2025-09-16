@@ -7,22 +7,24 @@ import MainLayout from "@/components/layouts/MainLayout";
 import { useAuthUnified } from "@/hooks";
 import { SuspenseWrapper } from "@/components/lazy/SuspenseWrapper";
 import { LazyCreateRecipePage } from "@/components/lazy/LazyComponents";
+import { PageErrorBoundary } from "@/components/PageErrorBoundary";
 
 export default function HomePage() {
   const { user, isLoading } = useAuthUnified();
   const router = useRouter();
 
-  // Si el usuario está logueado, mostrar la interfaz de crear recetas con lazy loading
-  if (user) {
-    return (
-      <SuspenseWrapper minHeight="600px">
-        <LazyCreateRecipePage userName={user.name} user={user} />
-      </SuspenseWrapper>
-    );
-  }
-
-  // Si no está logueado, mostrar la página de landing
-  return <LandingPage />;
+  return (
+    <PageErrorBoundary pageName="Home">
+      {/* Si el usuario está logueado, mostrar la interfaz de crear recetas con lazy loading */}
+      {user ? (
+        <SuspenseWrapper minHeight="600px">
+          <LazyCreateRecipePage userName={user.name} user={user} />
+        </SuspenseWrapper>
+      ) : (
+        <LandingPage />
+      )}
+    </PageErrorBoundary>
+  );
 }
 
 // Componente para la página de landing (cuando no está logueado)

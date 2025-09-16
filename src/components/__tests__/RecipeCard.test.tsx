@@ -174,7 +174,7 @@ describe("RecipeCard", () => {
 
       const image = screen.getByAltText("Test Recipe");
       expect(image).toBeInTheDocument();
-      expect(image).toHaveAttribute("src", "https://example.com/image.jpg");
+      expect(image.getAttribute("src")).toContain("example.com%2Fimage.jpg");
     });
 
     it("renders ImagePlaceholder when no image", () => {

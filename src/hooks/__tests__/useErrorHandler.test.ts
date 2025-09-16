@@ -42,6 +42,7 @@ describe("useErrorHandler", () => {
         hasError: true,
         error: testError,
         errorMessage: "Test error message",
+        errorId: expect.any(String),
       });
       expect(consoleSpy).toHaveBeenCalledWith("Error handled:", testError);
     });
