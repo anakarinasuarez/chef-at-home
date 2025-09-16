@@ -3,22 +3,33 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RecipeCard from "../RecipeCard";
 import { mockAuthContext } from "../../test/mocks/contexts";
-import { mockPush } from "../../test/setup";
 
 // Mock all dependencies
+const mockPush = vi.fn();
+const mockReplace = vi.fn();
+const mockPrefetch = vi.fn();
+const mockBack = vi.fn();
+const mockForward = vi.fn();
+const mockRefresh = vi.fn();
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    prefetch: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    refresh: vi.fn(),
+    push: mockPush,
+    replace: mockReplace,
+    prefetch: mockPrefetch,
+    back: mockBack,
+    forward: mockForward,
+    refresh: mockRefresh,
   }),
 }));
 
-vi.mock("@/contexts/AuthContext", () => ({
-  useAuth: () => mockAuthContext,
+vi.mock("@/hooks", () => ({
+  useAuthUnified: () => mockAuthContext,
+  useSavedRecipes: () => ({
+    isRecipeSaved: mockIsRecipeSaved,
+    toggleSaveRecipe: mockToggleSaveRecipe,
+  }),
+  useToast: () => mockToast,
 }));
 
 const mockIsRecipeSaved = vi.fn(() => false);
@@ -31,14 +42,6 @@ const mockToast = {
   showLoading: vi.fn(),
   dismiss: vi.fn(),
 };
-
-vi.mock("@/hooks", () => ({
-  useSavedRecipes: () => ({
-    isRecipeSaved: mockIsRecipeSaved,
-    toggleSaveRecipe: mockToggleSaveRecipe,
-  }),
-  useToast: () => mockToast,
-}));
 
 vi.mock("@/design-system", () => ({
   colors: {
@@ -120,7 +123,6 @@ describe("RecipeCard", () => {
   };
 
   const mockUseSavedRecipes = vi.fn();
-  const mockRouter = { push: vi.fn() };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -130,7 +132,7 @@ describe("RecipeCard", () => {
     vi.mocked(localStorage.getItem).mockClear();
 
     // Reset router mock
-    vi.mocked(mockRouter.push).mockClear();
+    mockPush.mockClear();
 
     // Reset toast mock
     vi.mocked(mockToast.showSuccess).mockClear();
@@ -277,22 +279,32 @@ describe("RecipeCard", () => {
       expect(mockPush).toHaveBeenCalledWith("/auth/login");
     });
 
-    it("shows loading state while saving", async () => {
+    it("calls toggleSaveRecipe when save button is clicked", async () => {
       const user = userEvent.setup();
-      mockToggleSaveRecipe.mockImplementation(
-        () => new Promise((resolve) => setTimeout(resolve, 100))
-      );
+
+      // Mock localStorage to simulate no saved recipes initially
+      vi.mocked(localStorage.getItem).mockReturnValue(null);
+
+      mockToggleSaveRecipe.mockReturnValue(true);
 
       render(<RecipeCard recipe={mockRecipe} />);
 
       const saveButton = screen.getByText("Save");
       await user.click(saveButton);
 
-      expect(screen.getByText("Saving...")).toBeInTheDocument();
+      // Verify that toggleSaveRecipe was called with the correct recipe
+      expect(mockToggleSaveRecipe).toHaveBeenCalledWith({
+        ...mockRecipe,
+        difficulty: "Easy",
+      });
     });
 
     it("shows saved state when recipe is already saved", () => {
-      mockIsRecipeSaved.mockReturnValue(true);
+      // Mock localStorage to simulate the recipe is already saved
+      const savedRecipes = [mockRecipe];
+      vi.mocked(localStorage.getItem).mockReturnValue(
+        JSON.stringify(savedRecipes)
+      );
 
       render(<RecipeCard recipe={mockRecipe} />);
 
@@ -302,6 +314,10 @@ describe("RecipeCard", () => {
 
     it("handles save error gracefully", async () => {
       const user = userEvent.setup();
+
+      // Mock localStorage to simulate no saved recipes initially
+      vi.mocked(localStorage.getItem).mockReturnValue(null);
+
       mockToggleSaveRecipe.mockReturnValue(false);
 
       render(<RecipeCard recipe={mockRecipe} />);
@@ -462,6 +478,9 @@ describe("RecipeCard", () => {
 
     it("handles rapid state changes", async () => {
       const user = userEvent.setup();
+
+      // Mock localStorage to simulate no saved recipes initially
+      vi.mocked(localStorage.getItem).mockReturnValue(null);
 
       render(<RecipeCard recipe={mockRecipe} />);
 
