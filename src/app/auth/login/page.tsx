@@ -1,7 +1,8 @@
 "use client";
 
 import AuthLayout from "@/components/auth/AuthLayout";
-import AuthForm from "@/components/auth/AuthForm";
+import { SuspenseWrapper } from "@/components/lazy/SuspenseWrapper";
+import { LazyAuthForm } from "@/components/lazy/LazyComponents";
 
 export default function LoginPage() {
   return (
@@ -9,11 +10,13 @@ export default function LoginPage() {
       title="Welcome back chef"
       subtitle="Sign in to continue creating amazing recipes"
     >
-      <AuthForm
-        type="login"
-        title="Welcome back chef"
-        subtitle="Sign in to continue creating amazing recipes"
-      />
+      <SuspenseWrapper minHeight="400px">
+        <LazyAuthForm
+          type="login"
+          title="Welcome back chef"
+          subtitle="Sign in to continue creating amazing recipes"
+        />
+      </SuspenseWrapper>
     </AuthLayout>
   );
 }

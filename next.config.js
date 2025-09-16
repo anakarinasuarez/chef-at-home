@@ -3,7 +3,7 @@ const nextConfig = {
   // 🐳 Configuración para Docker
   output: "standalone", // Necesario para Docker
 
-  // 🖼️ Optimización de imágenes - Configuración estándar
+  // 🖼️ Optimización de imágenes - Configuración para OpenAI DALL-E
   images: {
     unoptimized: false, // Habilitar optimización de imágenes
     // Permitir importaciones desde src/assets
@@ -11,12 +11,27 @@ const nextConfig = {
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
+      // OpenAI DALL-E URLs
       {
         protocol: "https",
-        hostname: "images.unsplash.com",
+        hostname: "oaidalleapiprodscus.blob.core.windows.net",
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "oaidalleapiprodscus.blob.core.windows.net",
+        port: "",
+        pathname: "/**",
+      },
+      // URLs de OpenAI API (backup)
+      {
+        protocol: "https",
+        hostname: "api.openai.com",
+        port: "",
+        pathname: "/**",
+      },
+      // URLs de fallback (Unsplash como backup)
       {
         protocol: "https",
         hostname: "images.unsplash.com",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { BiTime, BiUser, BiStar, BiBookmark } from "react-icons/bi";
 import { FaPencil } from "react-icons/fa6";
@@ -10,6 +10,7 @@ import { colors, typography } from "@/design-system";
 import { useAuthUnified } from "@/hooks";
 import { useSavedRecipes, useToast } from "@/hooks";
 import ImagePlaceholder from "./ImagePlaceholder";
+import OptimizedImage from "./OptimizedImage";
 
 interface RecipeCardProps {
   recipe: {
@@ -29,7 +30,7 @@ interface RecipeCardProps {
   isRemoving?: boolean;
 }
 
-export default function RecipeCard({
+function RecipeCard({
   recipe,
   variant = "save",
   onEdit,
@@ -45,22 +46,29 @@ export default function RecipeCard({
   const [isSaving, setIsSaving] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const recipeId = recipe.id || Date.now().toString();
+  // Memoizar el ID de la receta para evitar recálculos
+  const recipeId = useMemo(
+    () => recipe.id || Date.now().toString(),
+    [recipe.id]
+  );
 
-  // Verificar directamente si la receta está guardada en lugar de usar el hook
-  let isSaved = false;
-  if (user) {
+  // Memoizar la verificación de si la receta está guardada
+  const isSaved = useMemo(() => {
+    if (!user) return false;
+
     const savedRecipesKey = `savedRecipes_${user.id}`;
     const savedRecipes = localStorage.getItem(savedRecipesKey);
     if (savedRecipes) {
       try {
         const parsedSavedRecipes = JSON.parse(savedRecipes);
-        isSaved = parsedSavedRecipes.some((r: any) => r.id === recipeId);
+        return parsedSavedRecipes.some((r: any) => r.id === recipeId);
       } catch (error) {
         console.error("Error parsing saved recipes:", error);
+        return false;
       }
     }
-  }
+    return false;
+  }, [user?.id, recipeId]);
 
   console.log("🔍 RecipeCard DEBUG:", {
     recipeId,
@@ -70,9 +78,8 @@ export default function RecipeCard({
     userId: user?.id,
   });
 
-  const handleCardClick = () => {
-    // Usar el mismo ID que se usa para verificar si está guardada
-
+  // Memoizar el handler de click de la tarjeta
+  const handleCardClick = useCallback(() => {
     // Guardar los datos de la receta en localStorage para la página de detalle
     localStorage.setItem(`recipe-${recipeId}`, JSON.stringify(recipe));
 
@@ -82,61 +89,80 @@ export default function RecipeCard({
     } else {
       router.push(`/recipes/${recipeId}`);
     }
-  };
+  }, [recipeId, recipe, variant, router]);
 
-  const handleSaveClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Evitar que se active el click de la tarjeta
+  // Memoizar el handler de save
+  const handleSaveClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation(); // Evitar que se active el click de la tarjeta
 
-    if (!user) {
-      router.push("/auth/login");
-      return;
-    }
-
-    console.log("💾 Save clicked for recipe:", recipeId);
-    console.log("💾 Variant:", variant);
-    console.log("💾 onRemoveFromList function:", !!onRemoveFromList);
-
-    setIsSaving(true);
-
-    try {
-      const success = toggleSaveRecipe({
-        ...recipe,
-        difficulty: recipe.difficulty || "medium",
-      });
-
-      if (success) {
-        // Mostrar notificación
-        if (isSaved) {
-          showSuccess("Recipe removed from favorites");
-        } else {
-          showSuccess("Recipe saved to favorites");
-        }
-
-        // Si se guardó la receta desde Generated Recipes, eliminar de la lista
-        if (!isSaved && variant === "save" && onRemoveFromList) {
-          console.log("🗑️ Removing recipe from list:", recipeId);
-          onRemoveFromList(recipeId); // Esta función ya maneja la redirección
-        } else if (!isSaved) {
-          // Si se guardó desde otro lugar (no Generated Recipes), redirigir normalmente
-          setTimeout(() => {
-            router.push("/my-recipes");
-          }, 1000);
-        }
-      } else {
-        showError("Error saving recipe");
+      if (!user) {
+        router.push("/auth/login");
+        return;
       }
-    } catch (error) {
-      console.error("Error saving recipe:", error);
-      showError("Error saving recipe");
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete?.(recipe.id || "");
-  };
+      console.log("💾 Save clicked for recipe:", recipeId);
+      console.log("💾 Variant:", variant);
+      console.log("💾 onRemoveFromList function:", !!onRemoveFromList);
+
+      setIsSaving(true);
+
+      try {
+        const success = toggleSaveRecipe({
+          ...recipe,
+          difficulty: recipe.difficulty || "medium",
+        });
+
+        if (success) {
+          // Mostrar notificación
+          if (isSaved) {
+            showSuccess("Recipe removed from favorites");
+          } else {
+            showSuccess("Recipe saved to favorites");
+          }
+
+          // Si se guardó la receta desde Generated Recipes, eliminar de la lista
+          if (!isSaved && variant === "save" && onRemoveFromList) {
+            console.log("🗑️ Removing recipe from list:", recipeId);
+            onRemoveFromList(recipeId); // Esta función ya maneja la redirección
+          } else if (!isSaved) {
+            // Si se guardó desde otro lugar (no Generated Recipes), redirigir normalmente
+            setTimeout(() => {
+              router.push("/my-recipes");
+            }, 1000);
+          }
+        } else {
+          showError("Error saving recipe");
+        }
+      } catch (error) {
+        console.error("Error saving recipe:", error);
+        showError("Error saving recipe");
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [
+      user,
+      router,
+      recipeId,
+      variant,
+      onRemoveFromList,
+      recipe,
+      toggleSaveRecipe,
+      isSaved,
+      showSuccess,
+      showError,
+    ]
+  );
+
+  // Memoizar el handler de delete
+  const handleDeleteClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDelete?.(recipe.id || "");
+    },
+    [onDelete, recipe.id]
+  );
 
   return (
     <div
@@ -204,11 +230,15 @@ export default function RecipeCard({
       <div className="px-6">
         <div className="relative h-48 overflow-hidden rounded-lg">
           {recipe.image && !imageError ? (
-            <img
+            <OptimizedImage
               src={recipe.image}
               alt={recipe.title}
+              width={400}
+              height={192}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               onError={() => setImageError(true)}
+              quality={80}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
             <ImagePlaceholder
@@ -373,3 +403,6 @@ export default function RecipeCard({
     </div>
   );
 }
+
+// Exportar el componente memoizado para evitar re-renders innecesarios
+export default memo(RecipeCard);

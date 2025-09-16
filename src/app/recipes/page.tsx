@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthUnified } from "@/hooks";
 import Nav from "@/components/Nav";
-import RecipeCard from "@/components/RecipeCard";
 import { FiArrowLeft } from "react-icons/fi";
 import { colors } from "@/design-system";
 import { UniversalCacheManager } from "@/lib/universal-cache";
+import { SuspenseWrapper } from "@/components/lazy/SuspenseWrapper";
+import { LazyRecipeCard } from "@/components/lazy/LazyComponents";
 
 interface Recipe {
   id: string;
@@ -347,7 +348,8 @@ export default function RecipesPage() {
     generateRecipes();
   }, []); // Solo ejecutar una vez al montar el componente
 
-  const handleSaveRecipe = (recipeId: string) => {
+  // Memoizar el handler de save recipe
+  const handleSaveRecipe = useCallback((recipeId: string) => {
     setSavedRecipes((prev) => {
       const newSaved = new Set(prev);
       if (newSaved.has(recipeId)) {
@@ -357,9 +359,10 @@ export default function RecipesPage() {
       }
       return newSaved;
     });
-  };
+  }, []);
 
-  const handleRemoveFromList = (recipeId: string) => {
+  // Memoizar el handler de remove from list
+  const handleRemoveFromList = useCallback((recipeId: string) => {
     console.log("🗑️ handleRemoveFromList called with recipeId:", recipeId);
     console.log("🗑️ Current recipes count:", recipes.length);
 
@@ -382,11 +385,12 @@ export default function RecipesPage() {
         "✅ Recipe removed from Generated Recipes, staying on current page"
       );
     }, 600); // Tiempo para la animación de desvanecimiento
-  };
+  }, [recipes]);
 
-  const handleBackToHome = () => {
+  // Memoizar el handler de back to home
+  const handleBackToHome = useCallback(() => {
     router.push("/");
-  };
+  }, [router]);
 
   const clearAllCache = async () => {
     try {
@@ -429,7 +433,8 @@ export default function RecipesPage() {
     }
   };
 
-  const scrollToRecipe = (index: number) => {
+  // Memoizar el handler de scroll to recipe
+  const scrollToRecipe = useCallback((index: number) => {
     const container = document.querySelector(".overflow-x-auto") as HTMLElement;
     if (container) {
       const recipeCard = container.children[index] as HTMLElement;
@@ -442,7 +447,7 @@ export default function RecipesPage() {
         setActiveIndex(index);
       }
     }
-  };
+  }, []);
 
   // Detectar scroll automáticamente para actualizar el punto activo
   useEffect(() => {
@@ -569,12 +574,14 @@ export default function RecipesPage() {
                       : "opacity-100 scale-100 transform translate-x-0"
                   }`}
                 >
-                  <RecipeCard
-                    recipe={recipe}
-                    variant="save"
-                    onRemoveFromList={handleRemoveFromList}
-                    isRemoving={removingRecipeId === recipe.id}
-                  />
+                  <SuspenseWrapper minHeight="400px">
+                    <LazyRecipeCard
+                      recipe={recipe}
+                      variant="save"
+                      onRemoveFromList={handleRemoveFromList}
+                      isRemoving={removingRecipeId === recipe.id}
+                    />
+                  </SuspenseWrapper>
                 </div>
               ))}
             </div>

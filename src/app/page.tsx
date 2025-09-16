@@ -4,16 +4,21 @@ import { useRouter } from "next/navigation";
 import { colors, typography, spacingSystem } from "@/design-system";
 import Button from "@/components/Button";
 import MainLayout from "@/components/layouts/MainLayout";
-import CreateRecipePage from "@/components/pages/CreateRecipePage";
 import { useAuthUnified } from "@/hooks";
+import { SuspenseWrapper } from "@/components/lazy/SuspenseWrapper";
+import { LazyCreateRecipePage } from "@/components/lazy/LazyComponents";
 
 export default function HomePage() {
   const { user, isLoading } = useAuthUnified();
   const router = useRouter();
 
-  // Si el usuario está logueado, mostrar la interfaz de crear recetas
+  // Si el usuario está logueado, mostrar la interfaz de crear recetas con lazy loading
   if (user) {
-    return <CreateRecipePage userName={user.name} user={user} />;
+    return (
+      <SuspenseWrapper minHeight="600px">
+        <LazyCreateRecipePage userName={user.name} user={user} />
+      </SuspenseWrapper>
+    );
   }
 
   // Si no está logueado, mostrar la página de landing

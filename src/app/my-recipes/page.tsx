@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
 import Nav from "@/components/Nav";
 import { colors, typography } from "@/design-system";
 import { useAuthUnified } from "@/hooks";
 import { useSavedRecipes, useToast } from "@/hooks";
-import RecipeCard from "@/components/RecipeCard";
-import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
+import { SuspenseWrapper } from "@/components/lazy/SuspenseWrapper";
+import { LazyRecipeCard, LazyDeleteConfirmationModal } from "@/components/lazy/LazyComponents";
 
 export default function MyRecipesPage() {
   const { user, isLoading } = useAuthUnified();
@@ -215,50 +215,52 @@ export default function MyRecipesPage() {
             <div className="flex gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide flex-1 items-center pt-3 pb-1.5">
               {savedRecipes.map((recipe) => (
                 <div key={recipe.id} className="flex-shrink-0 w-80">
-                  <RecipeCard
-                    recipe={recipe}
-                    variant="my-recipes"
-                    onEdit={(recipe) => {
-                      // Guardar los datos de la receta en localStorage para editarlos
-                      const editData = {
-                        title: recipe.title,
-                        ingredients: recipe.ingredients || [],
-                        servings: recipe.servings,
-                        cookingTime: recipe.cookingTime,
-                        difficulty: recipe.difficulty || "medium",
-                        cuisine: "international",
-                        instructions: recipe.instructions || [],
-                        isEditing: true,
-                        originalId: recipe.id,
-                      };
-
-                      localStorage.setItem(
-                        "editRecipeData",
-                        JSON.stringify(editData)
-                      );
-                      router.push("/create?edit=true");
-                    }}
-                    onDelete={(recipeId) => {
-                      const recipe = savedRecipes.find(
-                        (r) => r.id === recipeId
-                      );
-                      if (recipe) {
-                        handleDeleteClick(recipe);
-                      }
-                    }}
-                    onShare={(recipe) => {
-                      if (navigator.share) {
-                        navigator.share({
+                  <SuspenseWrapper minHeight="400px">
+                    <LazyRecipeCard
+                      recipe={recipe}
+                      variant="my-recipes"
+                      onEdit={(recipe) => {
+                        // Guardar los datos de la receta en localStorage para editarlos
+                        const editData = {
                           title: recipe.title,
-                          text: `Check out this recipe: ${recipe.title}`,
-                          url: window.location.href,
-                        });
-                      } else {
-                        navigator.clipboard.writeText(window.location.href);
-                        showSuccess("Recipe link copied to clipboard!");
-                      }
-                    }}
-                  />
+                          ingredients: recipe.ingredients || [],
+                          servings: recipe.servings,
+                          cookingTime: recipe.cookingTime,
+                          difficulty: recipe.difficulty || "medium",
+                          cuisine: "international",
+                          instructions: recipe.instructions || [],
+                          isEditing: true,
+                          originalId: recipe.id,
+                        };
+
+                        localStorage.setItem(
+                          "editRecipeData",
+                          JSON.stringify(editData)
+                        );
+                        router.push("/create?edit=true");
+                      }}
+                      onDelete={(recipeId) => {
+                        const recipe = savedRecipes.find(
+                          (r) => r.id === recipeId
+                        );
+                        if (recipe) {
+                          handleDeleteClick(recipe);
+                        }
+                      }}
+                      onShare={(recipe) => {
+                        if (navigator.share) {
+                          navigator.share({
+                            title: recipe.title,
+                            text: `Check out this recipe: ${recipe.title}`,
+                            url: window.location.href,
+                          });
+                        } else {
+                          navigator.clipboard.writeText(window.location.href);
+                          showSuccess("Recipe link copied to clipboard!");
+                        }
+                      }}
+                    />
+                  </SuspenseWrapper>
                 </div>
               ))}
             </div>
@@ -287,12 +289,14 @@ export default function MyRecipesPage() {
         )}
 
         {/* Delete Confirmation Modal */}
-        <DeleteConfirmationModal
-          isOpen={showDeleteModal}
-          title={recipeToDelete?.title || ""}
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
+        <SuspenseWrapper minHeight="200px">
+          <LazyDeleteConfirmationModal
+            isOpen={showDeleteModal}
+            title={recipeToDelete?.title || ""}
+            onConfirm={confirmDelete}
+            onCancel={cancelDelete}
+          />
+        </SuspenseWrapper>
       </div>
     </div>
   );
