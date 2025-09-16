@@ -67,15 +67,13 @@ export default function Button({
 
   const baseStyles = {
     ...buttonStyles[variant],
-    padding: "12px 24px !important", // Padding: vertical 12px, horizontal 24px
-    borderRadius: "12px !important", // Border radius más redondeado
-    fontSize: "16px !important", // Tamaño de texto 16px
-    fontWeight: `${typography.styles["button"].fontWeight} !important`,
-    lineHeight: `${typography.styles["button"].lineHeight} !important`,
-    letterSpacing: "-0.01em !important", // Espaciado de letras más compacto
-    fontFamily: `${typography.styles["button"].fontFamily.join(
-      ", "
-    )} !important`,
+    padding: "12px 24px", // Padding: vertical 12px, horizontal 24px
+    borderRadius: "12px", // Border radius más redondeado
+    fontSize: "16px", // Tamaño de texto 16px
+    fontWeight: typography.styles["button"].fontWeight,
+    lineHeight: typography.styles["button"].lineHeight,
+    letterSpacing: "-0.01em", // Espaciado de letras más compacto
+    fontFamily: typography.styles["button"].fontFamily.join(", "),
     opacity: disabled ? 0.5 : 1,
     cursor: disabled ? "not-allowed" : "pointer",
     width: "100%", // Asegurar que los botones ocupen todo el ancho disponible
@@ -85,6 +83,8 @@ export default function Button({
     justifyContent: "center",
     transition: "all 0.2s ease-in-out", // Transición suave
     textAlign: "center" as const, // Centrar texto
+    border: "none", // Eliminar cualquier border por defecto
+    outline: "none", // Eliminar outline por defecto
   };
 
   // Si es un botón de submit o no tiene href, renderizar como button
@@ -93,7 +93,7 @@ export default function Button({
       <button
         type={type}
         disabled={disabled}
-        className={className}
+        className={`custom-button custom-button-${variant} ${className}`}
         style={baseStyles}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -108,7 +108,7 @@ export default function Button({
   return (
     <Link
       href={href}
-      className={className}
+      className={`custom-button custom-button-${variant} ${className}`}
       style={baseStyles}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
