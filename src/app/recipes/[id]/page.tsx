@@ -9,6 +9,7 @@ import { MdDelete } from "react-icons/md";
 import { BiShare } from "react-icons/bi";
 import Nav from "@/components/Nav";
 import IngredientsCard from "@/components/IngredientsCard";
+import Button from "@/components/Button";
 import { colors } from "@/design-system";
 import { typography } from "@/design-system";
 import { useAuthUnified } from "@/hooks";
@@ -295,24 +296,13 @@ export default function RecipeDetailPage() {
             >
               Recipe not found
             </h1>
-            <button
+            <Button
+              variant="primary"
               onClick={() => router.push("/recipes")}
-              className="px-6 py-2 rounded-lg transition-colors"
-              style={{
-                backgroundColor: colors.brand.primary[500],
-                color: colors.base.white,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[600];
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  colors.brand.primary[500];
-              }}
+              className="px-6 py-2"
             >
               Back to Recipes
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -331,24 +321,13 @@ export default function RecipeDetailPage() {
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
             <div className="flex items-start gap-4 flex-1">
-              <button
+              <Button
+                variant="tertiary"
                 onClick={() => router.back()}
-                className="p-2 rounded-lg transition-colors mt-1"
-                style={{
-                  backgroundColor: colors.interface.background.tertiary,
-                  color: colors.base.white,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    colors.interface.background.secondary;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    colors.interface.background.tertiary;
-                }}
+                className="p-2 mt-1"
               >
                 <IoIosArrowBack className="text-xl" />
-              </button>
+              </Button>
               <div className="flex-1">
                 <h1
                   className="text-4xl font-bold mb-4"
@@ -377,113 +356,38 @@ export default function RecipeDetailPage() {
               {isFromMyRecipes || isRecipeSavedState ? (
                 // Si la receta está guardada, mostrar Edit/Delete/Share
                 <>
-                  <button
+                  <Button
+                    variant="secondary"
                     onClick={() => handleEditRecipe()}
-                    className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium border"
-                    style={{
-                      backgroundColor: "transparent",
-                      color: colors.brand.primary[500],
-                      borderColor: colors.brand.primary[500],
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        colors.brand.primary[500];
-                      e.currentTarget.style.color = colors.base.white;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color = colors.brand.primary[500];
-                      e.currentTarget.style.borderColor =
-                        colors.brand.primary[500];
-                    }}
+                    className="px-6 py-3 flex items-center gap-2"
                   >
-                    <FaPencil
-                      className="text-lg"
-                      style={{ color: colors.brand.primary[500] }}
-                    />
+                    <FaPencil className="text-lg" />
                     Edit
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="secondary"
                     onClick={() => handleDeleteRecipe()}
-                    className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium border"
-                    style={{
-                      backgroundColor: "transparent",
-                      color: colors.brand.primary[500],
-                      borderColor: colors.brand.primary[500],
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#EF4444";
-                      e.currentTarget.style.color = colors.base.white;
-                      e.currentTarget.style.borderColor = "#EF4444";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color = colors.brand.primary[500];
-                      e.currentTarget.style.borderColor =
-                        colors.brand.primary[500];
-                    }}
+                    className="px-6 py-3 flex items-center gap-2 hover:bg-red-500 hover:text-white hover:border-red-500"
                   >
-                    <MdDelete
-                      className="text-lg"
-                      style={{ color: colors.brand.primary[500] }}
-                    />
+                    <MdDelete className="text-lg" />
                     Delete
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="secondary"
                     onClick={() => handleShareRecipe()}
-                    className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium border"
-                    style={{
-                      backgroundColor: "transparent",
-                      color: colors.brand.primary[500],
-                      borderColor: colors.brand.primary[500],
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        colors.interface.background.tertiary;
-                      e.currentTarget.style.color =
-                        colors.interface.text.primary;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color = colors.brand.primary[500];
-                    }}
+                    className="px-6 py-3 flex items-center gap-2"
                   >
-                    <BiShare
-                      className="text-lg"
-                      style={{ color: colors.brand.primary[500] }}
-                    />
+                    <BiShare className="text-lg" />
                     Share
-                  </button>
+                  </Button>
                 </>
               ) : (
                 // Si la receta NO está guardada, mostrar Save/Share
                 <>
-                  <button
+                  <Button
+                    variant={isRecipeSavedState ? "secondary" : "primary"}
                     onClick={() => handleSaveRecipe()}
-                    className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium"
-                    style={{
-                      backgroundColor: isRecipeSavedState
-                        ? colors.interface.background.tertiary
-                        : colors.brand.primary[500],
-                      color: isRecipeSavedState
-                        ? colors.brand.primary[500]
-                        : colors.base.white,
-                      border: isRecipeSavedState
-                        ? `2px solid ${colors.brand.primary[500]}`
-                        : "none",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isRecipeSavedState) {
-                        e.currentTarget.style.backgroundColor =
-                          colors.brand.primary[600];
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isRecipeSavedState) {
-                        e.currentTarget.style.backgroundColor =
-                          colors.brand.primary[500];
-                      }
-                    }}
+                    className="px-6 py-3 flex items-center gap-2"
                   >
                     {isRecipeSavedState ? (
                       <span className="text-lg">✓</span>
@@ -491,28 +395,15 @@ export default function RecipeDetailPage() {
                       <BiPlus className="text-lg" />
                     )}
                     {isRecipeSavedState ? "Saved" : "Save"}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="secondary"
                     onClick={() => handleShareRecipe()}
-                    className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors font-medium border"
-                    style={{
-                      backgroundColor: "transparent",
-                      color: colors.brand.primary[500],
-                      borderColor: colors.brand.primary[500],
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        colors.brand.primary[500];
-                      e.currentTarget.style.color = colors.base.white;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color = colors.brand.primary[500];
-                    }}
+                    className="px-6 py-3 flex items-center gap-2"
                   >
                     <BiShareAlt className="text-lg" />
                     Share
-                  </button>
+                  </Button>
                 </>
               )}
             </div>

@@ -8,6 +8,7 @@ import { MdDelete } from "react-icons/md";
 import { BiShare } from "react-icons/bi";
 import { colors, typography } from "@/design-system";
 import { useAuthUnified } from "@/hooks";
+import Button from "@/components/Button";
 import { useSavedRecipes, useToast } from "@/hooks";
 import ImagePlaceholder from "./ImagePlaceholder";
 import OptimizedImage from "./OptimizedImage";
@@ -261,42 +262,11 @@ function RecipeCard({
         <div className="p-6 flex justify-end">
           {variant === "save" ? (
             // Save Button for Generated Recipes
-            <button
-              onClick={handleSaveClick}
+            <Button
+              variant={isSaved ? "secondary" : "primary"}
+              onClick={() => handleSaveClick({} as React.MouseEvent)}
               disabled={isSaving || isRemoving}
-              className="px-6 py-3 rounded-lg transition-all duration-200 flex items-center gap-2 disabled:opacity-50"
-              style={{
-                backgroundColor: isRemoving
-                  ? colors.brand.primary[600]
-                  : isSaved
-                  ? colors.interface.background.tertiary
-                  : colors.brand.primary[500],
-                color: isRemoving
-                  ? colors.base.white
-                  : isSaved
-                  ? colors.brand.primary[500]
-                  : colors.base.white,
-                fontSize: typography.styles["button"].fontSize,
-                fontWeight: typography.styles["button"].fontWeight,
-                lineHeight: typography.styles["button"].lineHeight,
-                letterSpacing: typography.styles["button"].letterSpacing,
-                border:
-                  isSaved && !isRemoving
-                    ? `2px solid ${colors.brand.primary[500]}`
-                    : "none",
-              }}
-              onMouseEnter={(e) => {
-                if (!isSaved && !isRemoving) {
-                  e.currentTarget.style.backgroundColor =
-                    colors.brand.primary[600];
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isSaved && !isRemoving) {
-                  e.currentTarget.style.backgroundColor =
-                    colors.brand.primary[500];
-                }
-              }}
+              className="px-6 py-3 flex items-center gap-2"
             >
               {isRemoving ? (
                 <span className="text-lg animate-pulse">✓</span>
@@ -314,91 +284,35 @@ function RecipeCard({
                 : isSaved
                 ? "Saved"
                 : "Save"}
-            </button>
+            </Button>
           ) : (
             // Edit, Delete, Share Buttons for My Recipes (Icon only)
             <div className="flex gap-2">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
+              <Button
+                variant="secondary"
+                onClick={() => {
                   onEdit?.(recipe);
                 }}
-                className="p-3 rounded-lg transition-colors border flex items-center justify-center"
-                style={{
-                  backgroundColor: "transparent",
-                  color: colors.brand.primary[500],
-                  borderColor: colors.brand.primary[500],
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    colors.brand.primary[500];
-                  e.currentTarget.style.color =
-                    colors.interface.background.primary;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = colors.brand.primary[500];
-                }}
-                title="Edit recipe"
+                className="p-3 flex items-center justify-center"
               >
-                <FaPencil
-                  className="text-lg"
-                  style={{ color: colors.brand.primary[500] }}
-                />
-              </button>
-              <button
-                onClick={handleDeleteClick}
-                className="p-3 rounded-lg transition-colors border flex items-center justify-center"
-                style={{
-                  backgroundColor: "transparent",
-                  color: colors.brand.primary[500],
-                  borderColor: colors.brand.primary[500],
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#EF4444";
-                  e.currentTarget.style.color =
-                    colors.interface.background.primary;
-                  e.currentTarget.style.borderColor = "#EF4444";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = colors.brand.primary[500];
-                  e.currentTarget.style.borderColor = colors.brand.primary[500];
-                }}
-                title="Delete recipe"
+                <FaPencil className="text-lg" />
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => handleDeleteClick({} as React.MouseEvent)}
+                className="p-3 flex items-center justify-center hover:bg-red-500 hover:text-white hover:border-red-500"
               >
-                <MdDelete
-                  className="text-lg"
-                  style={{ color: colors.brand.primary[500] }}
-                />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
+                <MdDelete className="text-lg" />
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
                   onShare?.(recipe);
                 }}
-                className="p-3 rounded-lg transition-colors border flex items-center justify-center"
-                style={{
-                  backgroundColor: "transparent",
-                  color: colors.brand.primary[500],
-                  borderColor: colors.brand.primary[500],
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    colors.interface.background.tertiary;
-                  e.currentTarget.style.color = colors.interface.text.primary;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = colors.brand.primary[500];
-                }}
-                title="Share recipe"
+                className="p-3 flex items-center justify-center"
               >
-                <BiShare
-                  className="text-lg"
-                  style={{ color: colors.brand.primary[500] }}
-                />
-              </button>
+                <BiShare className="text-lg" />
+              </Button>
             </div>
           )}
         </div>

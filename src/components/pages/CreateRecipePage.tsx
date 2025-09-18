@@ -331,17 +331,9 @@ export default function CreateRecipePage({
                 </span>
                 <button
                   onClick={() => handleRemoveIngredient(ingredient.id)}
-                  className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
-                  style={{
-                    backgroundColor: colors.interface.background.secondary,
-                  }}
+                  className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 bg-red-500 text-white hover:bg-red-600"
                 >
-                  <span
-                    className="text-xs font-bold"
-                    style={{ color: colors.brand.primary[500] }}
-                  >
-                    ×
-                  </span>
+                  ×
                 </button>
               </div>
             ))}
@@ -366,36 +358,24 @@ export default function CreateRecipePage({
         {!showCustomInput && (
           <div className="flex flex-wrap gap-2 mb-4">
             {[1, 2, 4, 6, 8].map((servings) => (
-              <button
+              <Button
                 key={servings}
+                variant={
+                  selectedServings === servings ? "primary" : "secondary"
+                }
                 onClick={() => handleServingsChange(servings)}
-                className="px-4 py-2 rounded-lg border transition-colors duration-200"
-                style={{
-                  backgroundColor:
-                    selectedServings === servings
-                      ? colors.brand.primary[500]
-                      : colors.interface.background.secondary,
-                  borderColor: colors.brand.primary[500],
-                  color:
-                    selectedServings === servings
-                      ? colors.interface.text.primary
-                      : colors.interface.text.primary,
-                }}
+                className="px-4 py-2"
               >
                 {servings}
-              </button>
+              </Button>
             ))}
-            <button
+            <Button
+              variant="secondary"
               onClick={() => setShowCustomInput(true)}
-              className="px-4 py-2 rounded-lg border transition-colors duration-200"
-              style={{
-                backgroundColor: colors.interface.background.secondary,
-                borderColor: colors.brand.primary[500],
-                color: colors.interface.text.primary,
-              }}
+              className="px-4 py-2"
             >
               +
-            </button>
+            </Button>
           </div>
         )}
 
@@ -410,28 +390,20 @@ export default function CreateRecipePage({
               className="w-40 px-3 py-2 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
               min="1"
             />
-            <button
+            <Button
+              variant="secondary"
               onClick={() => setShowCustomInput(false)}
-              className="w-10 h-10 flex items-center justify-center rounded-lg border transition-colors duration-200"
-              style={{
-                backgroundColor: colors.interface.background.secondary,
-                borderColor: colors.brand.primary[500],
-                color: colors.interface.text.primary,
-              }}
+              className="w-10 h-10 flex items-center justify-center"
             >
               ×
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
               onClick={handleCustomServings}
-              className="w-10 h-10 flex items-center justify-center rounded-lg border transition-colors duration-200"
-              style={{
-                backgroundColor: colors.interface.background.secondary,
-                borderColor: colors.brand.primary[500],
-                color: colors.interface.text.primary,
-              }}
+              className="w-10 h-10 flex items-center justify-center"
             >
               +
-            </button>
+            </Button>
           </div>
         )}
       </div>

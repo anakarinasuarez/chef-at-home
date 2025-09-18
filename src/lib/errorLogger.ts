@@ -39,6 +39,9 @@ class ErrorLogger {
   }
 
   private setupGlobalErrorHandlers(): void {
+    // Solo ejecutar en el cliente
+    if (typeof window === "undefined") return;
+
     // Capturar errores globales
     window.addEventListener("error", (event) => {
       this.logError(
