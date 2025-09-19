@@ -1,6 +1,7 @@
 // Exportar todos los stores especializados
 export * from "./authStore";
 export * from "./recipesStore";
+export * from "./recipesGenerationStore";
 export * from "./savedRecipesStore";
 
 // Exportar el coordinador de stores

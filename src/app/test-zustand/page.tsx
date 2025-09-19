@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useRecipesStore } from "@/stores/recipesStore";
+import { useRecipesGenerationStore } from "@/stores/recipesGenerationStore";
 import { useSavedRecipesStore } from "@/stores/savedRecipesStore";
 import { colors } from "@/design-system/colors";
 import MainLayout from "@/components/layouts/MainLayout";
@@ -26,6 +27,12 @@ export default function TestZustandPage() {
         hasLoadedRecipes: useRecipesStore.getState().hasLoadedRecipes,
         activeIndex: useRecipesStore.getState().activeIndex,
       },
+      recipesGeneration: {
+        recipes: useRecipesGenerationStore.getState().recipes,
+        isLoading: useRecipesGenerationStore.getState().isLoading,
+        error: useRecipesGenerationStore.getState().error,
+        hasLoadedRecipes: useRecipesGenerationStore.getState().hasLoadedRecipes,
+      },
       savedRecipes: {
         savedRecipes: useSavedRecipesStore.getState().savedRecipes,
         isLoading: useSavedRecipesStore.getState().isLoading,
@@ -47,9 +54,15 @@ export default function TestZustandPage() {
       recipes: {
         addRecipe: useRecipesStore.getState().addRecipe,
         clearRecipes: useRecipesStore.getState().clearRecipes,
+        generateRecipes: useRecipesStore.getState().generateRecipes,
+      },
+      recipesGeneration: {
+        generateRecipes: useRecipesGenerationStore.getState().generateRecipes,
+        clearCache: useRecipesGenerationStore.getState().clearCache,
       },
       savedRecipes: {
         saveRecipe: useSavedRecipesStore.getState().saveRecipe,
+        removeRecipe: useSavedRecipesStore.getState().removeRecipe,
         clearSavedRecipes: useSavedRecipesStore.getState().clearSavedRecipes,
       },
     };
@@ -87,6 +100,9 @@ export default function TestZustandPage() {
       );
       addTestResult(
         `✅ Test 2: Estado inicial - Recetas guardadas: ${currentState.savedRecipes.savedRecipes.length}`
+      );
+      addTestResult(
+        `✅ Test 2: Estado inicial - Recetas generación: ${currentState.recipesGeneration.recipes.length}`
       );
 
       // Test 3: Simular login
@@ -195,8 +211,23 @@ export default function TestZustandPage() {
         addTestResult("❌ Test 10: Error al limpiar error");
       }
 
-      // Test 11: Reset completo
-      addTestResult("🔄 Test 11: Reseteando estado completo...");
+      // Test 11: Generar recetas con IA
+      addTestResult("🔄 Test 11: Simulando generación de recetas...");
+      try {
+        await actions.recipesGeneration.generateRecipes();
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        const stateAfterGeneration = getCurrentState();
+        if (stateAfterGeneration.recipesGeneration.recipes.length > 0) {
+          addTestResult("✅ Test 11: Recetas generadas correctamente");
+        } else {
+          addTestResult("❌ Test 11: Error al generar recetas");
+        }
+      } catch (error) {
+        addTestResult("❌ Test 11: Error en generación de recetas");
+      }
+
+      // Test 12: Reset completo
+      addTestResult("🔄 Test 12: Reseteando estado completo...");
       actions.auth.logout();
       actions.recipes.clearRecipes();
       actions.savedRecipes.clearSavedRecipes();
@@ -209,9 +240,9 @@ export default function TestZustandPage() {
         finalState.recipes.recipes.length === 0 &&
         finalState.savedRecipes.savedRecipes.length === 0
       ) {
-        addTestResult("✅ Test 11: Estado reseteado correctamente");
+        addTestResult("✅ Test 12: Estado reseteado correctamente");
       } else {
-        addTestResult("❌ Test 11: Error al resetear estado");
+        addTestResult("❌ Test 12: Error al resetear estado");
       }
 
       addTestResult("🎉 ¡Todos los tests completados!");
@@ -307,6 +338,33 @@ export default function TestZustandPage() {
                 <div>
                   Índice activo: {getCurrentState().recipes.activeIndex}
                 </div>
+              </div>
+            </div>
+
+            {/* Estado de Generación de Recetas */}
+            <div
+              className="p-4 rounded-lg border"
+              style={{
+                backgroundColor: colors.interface.background.secondary,
+                borderColor: colors.interface.border.light,
+              }}
+            >
+              <h3
+                className="text-lg font-semibold mb-3"
+                style={{ color: colors.interface.text.primary }}
+              >
+                🤖 Generación de Recetas
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div>Cantidad: {getCurrentState().recipesGeneration.recipes.length}</div>
+                <div>
+                  Loading: {getCurrentState().recipesGeneration.isLoading ? "Sí" : "No"}
+                </div>
+                <div>
+                  Cargadas:{" "}
+                  {getCurrentState().recipesGeneration.hasLoadedRecipes ? "Sí" : "No"}
+                </div>
+                <div>Error: {getCurrentState().recipesGeneration.error || "Ninguno"}</div>
               </div>
             </div>
 
