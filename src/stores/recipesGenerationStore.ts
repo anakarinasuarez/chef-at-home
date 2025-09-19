@@ -75,7 +75,11 @@ export const useRecipesGenerationStore = create<RecipesGenerationState>()(
                 "📦 Loading recipes from sessionStorage:",
                 parsedRecipes.length
               );
-              set({ recipes: parsedRecipes, hasLoadedRecipes: true, isLoading: false });
+              set({
+                recipes: parsedRecipes,
+                hasLoadedRecipes: true,
+                isLoading: false,
+              });
               return;
             } catch (error) {
               console.error("Error parsing saved recipes:", error);
@@ -100,7 +104,13 @@ export const useRecipesGenerationStore = create<RecipesGenerationState>()(
           // Get ingredients from URL params or localStorage
           const savedRecipeId = urlParams.get("saved");
 
-          let ingredients = ["pasta", "basil", "olive oil", "garlic", "tomatoes"]; // fallback
+          let ingredients = [
+            "pasta",
+            "basil",
+            "olive oil",
+            "garlic",
+            "tomatoes",
+          ]; // fallback
           let servings = 4; // fallback
 
           console.log("🔍 URL Params Debug:", {
@@ -130,14 +140,20 @@ export const useRecipesGenerationStore = create<RecipesGenerationState>()(
                   "📦 Loading recipes from sessionStorage:",
                   parsedRecipes.length
                 );
-                set({ recipes: parsedRecipes, hasLoadedRecipes: true, isLoading: false });
+                set({
+                  recipes: parsedRecipes,
+                  hasLoadedRecipes: true,
+                  isLoading: false,
+                });
                 return;
               } catch (error) {
                 console.error("Error parsing saved recipes:", error);
               }
             }
 
-            console.log("🔄 No specific params found, generating default recipes");
+            console.log(
+              "🔄 No specific params found, generating default recipes"
+            );
             // Si no hay parámetros específicos, generar recetas por defecto
             // Usar ingredientes por defecto para generar nuevas recetas
             ingredients = ["pasta", "basil", "olive oil", "garlic", "tomatoes"];
@@ -165,10 +181,11 @@ export const useRecipesGenerationStore = create<RecipesGenerationState>()(
                 "servings:",
                 servings
               );
-              const cachedRecipes = await UniversalCacheManager.getCachedRecipes(
-                ingredients,
-                servings
-              );
+              const cachedRecipes =
+                await UniversalCacheManager.getCachedRecipes(
+                  ingredients,
+                  servings
+                );
 
               if (cachedRecipes && cachedRecipes.length > 0) {
                 console.log(
@@ -176,7 +193,11 @@ export const useRecipesGenerationStore = create<RecipesGenerationState>()(
                   cachedRecipes.length,
                   "recipes"
                 );
-                set({ recipes: cachedRecipes, hasLoadedRecipes: true, isLoading: false });
+                set({
+                  recipes: cachedRecipes,
+                  hasLoadedRecipes: true,
+                  isLoading: false,
+                });
 
                 // Guardar en sessionStorage para mantenerlas al navegar
                 sessionStorage.setItem(
@@ -212,7 +233,10 @@ export const useRecipesGenerationStore = create<RecipesGenerationState>()(
               console.log("Could not parse ingredients from URL");
             }
           } else {
-            console.log("📝 No ingredients in URL, using fallback:", ingredients);
+            console.log(
+              "📝 No ingredients in URL, using fallback:",
+              ingredients
+            );
           }
 
           if (servingsParam) {
@@ -262,18 +286,20 @@ export const useRecipesGenerationStore = create<RecipesGenerationState>()(
           console.log("Number of recipes received:", data.recipes?.length || 0);
 
           // Convert API response to Recipe format
-          const aiRecipes = data.recipes.map((aiRecipe: any, index: number) => ({
-            id: `recipe_${Date.now()}_${index}_${Math.random()
-              .toString(36)
-              .substr(2, 9)}`,
-            title: aiRecipe.title || `Recipe ${index + 1}`,
-            servings: aiRecipe.servings || servings,
-            cookingTime: aiRecipe.cookingTime || "30 minutes",
-            image: aiRecipe.image || null,
-            source: aiRecipe.source || "gemini",
-            ingredients: aiRecipe.ingredients || [],
-            instructions: aiRecipe.instructions || [],
-          }));
+          const aiRecipes = data.recipes.map(
+            (aiRecipe: any, index: number) => ({
+              id: `recipe_${Date.now()}_${index}_${Math.random()
+                .toString(36)
+                .substr(2, 9)}`,
+              title: aiRecipe.title || `Recipe ${index + 1}`,
+              servings: aiRecipe.servings || servings,
+              cookingTime: aiRecipe.cookingTime || "30 minutes",
+              image: aiRecipe.image || null,
+              source: aiRecipe.source || "gemini",
+              ingredients: aiRecipe.ingredients || [],
+              instructions: aiRecipe.instructions || [],
+            })
+          );
 
           console.log("Processed recipes:", aiRecipes);
           console.log("Setting recipes state with count:", aiRecipes.length);
@@ -393,10 +419,12 @@ export const useRecipesGenerationStore = create<RecipesGenerationState>()(
 );
 
 // Selectores para facilitar el uso
-export const useRecipesGeneration = () => useRecipesGenerationStore((state) => state.recipes);
+export const useRecipesGeneration = () =>
+  useRecipesGenerationStore((state) => state.recipes);
 export const useRecipesGenerationLoading = () =>
   useRecipesGenerationStore((state) => state.isLoading);
-export const useRecipesGenerationError = () => useRecipesGenerationStore((state) => state.error);
+export const useRecipesGenerationError = () =>
+  useRecipesGenerationStore((state) => state.error);
 export const useHasLoadedRecipesGeneration = () =>
   useRecipesGenerationStore((state) => state.hasLoadedRecipes);
 export const useRecipesGenerationActions = () =>
