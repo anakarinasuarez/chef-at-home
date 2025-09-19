@@ -10,15 +10,18 @@ export async function POST(request: NextRequest) {
     const validation = safeValidateSchema(loginSchema, body);
     if (!validation.success) {
       return NextResponse.json(
-        { 
+        {
           error: "Validation failed",
-          details: getFirstZodError(validation.error)
+          details: getFirstZodError(validation.error),
         },
         { status: 400 }
       );
     }
 
-    const { email, password } = validation.data;
+    const { email, password } = validation.data as {
+      email: string;
+      password: string;
+    };
 
     // Usar el servicio de autenticación
     const result = await loginUser({ email, password });

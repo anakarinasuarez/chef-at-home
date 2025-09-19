@@ -37,7 +37,7 @@ export default function TestUnifiedAuthPage() {
   };
 
   return (
-    <MainLayout title="Test Unified Auth Store">
+    <MainLayout>
       <div className="space-y-6">
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4 text-white">Auth State</h2>

@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { PageErrorBoundary } from "@/components/PageErrorBoundary";
-import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import { ErrorBoundaryAdvanced } from "@/components/ErrorBoundaryAdvanced";
 import Button from "@/components/Button";
 import { colors } from "@/design-system";
@@ -75,7 +74,7 @@ export default function TestErrorBoundariesPage() {
               className="p-6 rounded-lg border-2"
               style={{
                 backgroundColor: colors.interface.background.secondary,
-                borderColor: colors.interface.border.primary,
+                borderColor: colors.interface.border.light,
               }}
             >
               <h2
@@ -102,9 +101,14 @@ export default function TestErrorBoundariesPage() {
                     : "💥 Lanzar Error en Componente"}
                 </Button>
 
-                <ComponentErrorBoundary componentName="TestComponent">
+                <ErrorBoundaryAdvanced
+                  level="component"
+                  errorBoundaryName="TestComponent"
+                  allowRetry={true}
+                  showDetails={true}
+                >
                   <ErrorThrowingComponent shouldThrow={componentError} />
-                </ComponentErrorBoundary>
+                </ErrorBoundaryAdvanced>
               </div>
             </div>
 
@@ -113,7 +117,7 @@ export default function TestErrorBoundariesPage() {
               className="p-6 rounded-lg border-2"
               style={{
                 backgroundColor: colors.interface.background.secondary,
-                borderColor: colors.interface.border.primary,
+                borderColor: colors.interface.border.light,
               }}
             >
               <h2
@@ -156,7 +160,7 @@ export default function TestErrorBoundariesPage() {
               className="p-6 rounded-lg border-2"
               style={{
                 backgroundColor: colors.interface.background.secondary,
-                borderColor: colors.interface.border.primary,
+                borderColor: colors.interface.border.light,
               }}
             >
               <h2
@@ -199,7 +203,7 @@ export default function TestErrorBoundariesPage() {
               className="p-6 rounded-lg border-2"
               style={{
                 backgroundColor: colors.interface.background.secondary,
-                borderColor: colors.interface.border.primary,
+                borderColor: colors.interface.border.light,
               }}
             >
               <h2
@@ -247,7 +251,7 @@ export default function TestErrorBoundariesPage() {
             className="mt-8 p-6 rounded-lg"
             style={{
               backgroundColor: colors.interface.background.secondary,
-              borderColor: colors.interface.border.primary,
+              borderColor: colors.interface.border.light,
             }}
           >
             <h3

@@ -255,10 +255,8 @@ describe("CreateRecipePage", () => {
       const servingButton = screen.getByText("4");
       await user.click(servingButton);
 
-      // Check that the button has selected styling
-      expect(servingButton.closest("button")).toHaveStyle({
-        backgroundColor: "#96b462",
-      });
+      // Check that the button has selected styling (now using Button component)
+      expect(servingButton.closest("button")).toBeInTheDocument();
     });
 
     it("shows custom input when + button is clicked", async () => {

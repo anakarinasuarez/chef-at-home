@@ -113,8 +113,8 @@ describe("Button", () => {
 
       const button = screen.getByRole("button");
       expect(button).toHaveClass("custom-class");
-      expect(button).toHaveClass("custom-button");
-      expect(button).toHaveClass("custom-button-primary");
+      expect(button).toHaveClass("button");
+      expect(button).toHaveClass("button-primary");
     });
   });
 
@@ -123,7 +123,7 @@ describe("Button", () => {
       render(<Button variant="primary">Primary Button</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("custom-button-primary");
+      expect(button).toHaveClass("button-primary");
       expect(button).toHaveStyle({
         backgroundColor: "#96b462",
         color: "#ffffff",
@@ -134,7 +134,7 @@ describe("Button", () => {
       render(<Button variant="secondary">Secondary Button</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("custom-button-secondary");
+      expect(button).toHaveClass("button-secondary");
       // Check that the component renders without errors
       expect(button).toBeInTheDocument();
     });
@@ -271,8 +271,8 @@ describe("Button", () => {
       const button = screen.getByRole("button");
 
       // Check that the component renders with the correct classes
-      expect(button).toHaveClass("custom-button");
-      expect(button).toHaveClass("custom-button-primary");
+      expect(button).toHaveClass("button");
+      expect(button).toHaveClass("button-primary");
       expect(button).toBeInTheDocument();
     });
   });

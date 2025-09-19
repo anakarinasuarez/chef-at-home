@@ -23,7 +23,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { token, password } = validation.data;
+    const { token, password } = validation.data as {
+      token: string;
+      password: string;
+    };
 
     // Buscar el usuario por token de reset
     const user = await prisma.user.findFirst({

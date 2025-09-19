@@ -60,7 +60,7 @@ export class ErrorBoundaryAdvanced extends Component<
       {
         message: error.message,
         stack: error.stack,
-        componentStack: errorInfo.componentStack,
+        componentStack: errorInfo.componentStack || undefined,
         severity: this.getSeverityLevel(),
         userId: this.getCurrentUserId(),
       },

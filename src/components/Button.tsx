@@ -11,7 +11,7 @@ interface ButtonProps {
   className?: string;
   type?: "button" | "submit";
   disabled?: boolean;
-  onClick?: () => void;
+  onClick?: (e?: React.MouseEvent) => void;
   size?: "sm" | "md" | "lg";
   fullWidth?: boolean;
 }
@@ -32,20 +32,20 @@ export default function Button({
     switch (variant) {
       case "primary":
         return {
-          backgroundColor: colors.brand.primary[500], // Verde claro sólido (fila 1)
-          color: colors.interface.text.inverse, // Texto blanco
+          backgroundColor: colors.brand?.primary?.[500] || "#96b462", // Verde claro sólido (fila 1)
+          color: colors.interface?.text?.inverse || "#ffffff", // Texto blanco
           border: "none",
         };
       case "secondary":
         return {
           backgroundColor: "transparent", // Fondo transparente (fila 3)
-          color: colors.brand.primary[500], // Texto verde
-          border: `1px solid ${colors.brand.primary[500]}`, // Borde verde
+          color: colors.brand?.primary?.[500] || "#96b462", // Texto verde
+          border: `1px solid ${colors.brand?.primary?.[500] || "#96b462"}`, // Borde verde
         };
       case "tertiary":
         return {
           backgroundColor: "transparent", // Sin fondo (fila 5)
-          color: colors.brand.primary[500], // Texto verde claro
+          color: colors.brand?.primary?.[500] || "#96b462", // Texto verde claro
           border: "none",
         };
       default:
@@ -58,18 +58,18 @@ export default function Button({
     switch (variant) {
       case "primary":
         return {
-          backgroundColor: colors.brand.primary[600], // Verde más oscuro (fila 2)
-          color: colors.interface.text.inverse, // Texto blanco
+          backgroundColor: colors.brand?.primary?.[600] || "#7a9a4f", // Verde más oscuro (fila 2)
+          color: colors.interface?.text?.inverse || "#ffffff", // Texto blanco
         };
       case "secondary":
         return {
-          backgroundColor: colors.brand.secondary[500], // Verde muy claro (fila 4)
-          color: colors.brand.primary[600], // Texto verde más oscuro
+          backgroundColor: colors.brand?.secondary?.[500] || "#e8f5e8", // Verde muy claro (fila 4)
+          color: colors.brand?.primary?.[600] || "#7a9a4f", // Texto verde más oscuro
         };
       case "tertiary":
         return {
           backgroundColor: "transparent", // Sin cambio de fondo
-          color: colors.brand.primary[600], // Texto verde más oscuro (fila 6)
+          color: colors.brand?.primary?.[600] || "#7a9a4f", // Texto verde más oscuro (fila 6)
         };
       default:
         return {};
@@ -106,9 +106,11 @@ export default function Button({
     ...getVariantStyles(),
     ...getSizeStyles(),
     borderRadius: "8px", // Border radius redondeado como en la imagen
-    fontWeight: typography.styles["button"].fontWeight,
-    lineHeight: typography.styles["button"].lineHeight,
-    fontFamily: typography.styles["button"].fontFamily.join(", "),
+    fontWeight: typography.styles?.["button-medium"]?.fontWeight || "600",
+    lineHeight: typography.styles?.["button-medium"]?.lineHeight || "1",
+    fontFamily:
+      typography.styles?.["button-medium"]?.fontFamily?.join(", ") ||
+      "Poppins, sans-serif",
     opacity: disabled ? 0.5 : 1,
     cursor: disabled ? "not-allowed" : "pointer",
     width: fullWidth ? "100%" : "auto",
@@ -155,7 +157,7 @@ export default function Button({
         style={baseStyles}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        onClick={onClick}
+        onClick={(e) => onClick?.(e)}
       >
         {children}
       </button>

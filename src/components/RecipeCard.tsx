@@ -12,7 +12,7 @@ import Button from "@/components/Button";
 import { useSavedRecipes, useToast } from "@/hooks";
 import ImagePlaceholder from "./ImagePlaceholder";
 import OptimizedImage from "./OptimizedImage";
-import { ComponentErrorBoundary } from "./ComponentErrorBoundary";
+import { ErrorBoundaryAdvanced } from "./ErrorBoundaryAdvanced";
 
 interface RecipeCardProps {
   recipe: {
@@ -96,7 +96,7 @@ function RecipeCard({
   // Memoizar el handler de save
   const handleSaveClick = useCallback(
     (e: React.MouseEvent) => {
-      e.stopPropagation(); // Evitar que se active el click de la tarjeta
+      e?.stopPropagation?.(); // Evitar que se active el click de la tarjeta
 
       if (!user) {
         router.push("/auth/login");
@@ -167,7 +167,12 @@ function RecipeCard({
   );
 
   return (
-    <ComponentErrorBoundary componentName="RecipeCard">
+    <ErrorBoundaryAdvanced
+      level="component"
+      errorBoundaryName="RecipeCard"
+      allowRetry={true}
+      showDetails={process.env.NODE_ENV === "development"}
+    >
       <div
         onClick={handleCardClick}
         className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 group"
@@ -290,34 +295,36 @@ function RecipeCard({
             <div className="flex gap-2">
               <Button
                 variant="secondary"
-                onClick={() => {
+                onClick={(e) => {
+                  e?.stopPropagation();
                   onEdit?.(recipe);
                 }}
                 className="p-3 flex items-center justify-center"
               >
-                <FaPencil className="text-lg" />
+                <FaPencil className="text-lg" data-testid="fa-pencil" />
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => handleDeleteClick({} as React.MouseEvent)}
+                onClick={(e) => e && handleDeleteClick(e)}
                 className="p-3 flex items-center justify-center hover:bg-red-500 hover:text-white hover:border-red-500"
               >
-                <MdDelete className="text-lg" />
+                <MdDelete className="text-lg" data-testid="md-delete" />
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => {
+                onClick={(e) => {
+                  e?.stopPropagation();
                   onShare?.(recipe);
                 }}
                 className="p-3 flex items-center justify-center"
               >
-                <BiShare className="text-lg" />
+                <BiShare className="text-lg" data-testid="bi-share" />
               </Button>
             </div>
           )}
         </div>
       </div>
-    </ComponentErrorBoundary>
+    </ErrorBoundaryAdvanced>
   );
 }
 

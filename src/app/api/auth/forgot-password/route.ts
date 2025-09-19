@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email } = validation.data;
+    const { email } = validation.data as { email: string };
 
     // Buscar el usuario por email
     const user = await prisma.user.findUnique({
