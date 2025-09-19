@@ -14,7 +14,7 @@ import Button from "@/components/Button";
 import { colors } from "@/design-system";
 import { typography } from "@/design-system";
 import { useAuthUnified } from "@/hooks";
-import { useSavedRecipes, useToast } from "@/hooks";
+import { useSavedRecipesTransition, useToast } from "@/hooks";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 
@@ -39,7 +39,8 @@ export default function RecipeDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthUnified();
-  const { isRecipeSaved, removeRecipe, toggleSaveRecipe } = useSavedRecipes();
+  const { savedRecipes, removeRecipe, saveRecipe } =
+    useSavedRecipesTransition();
   const { showSuccess, showError } = useToast();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,21 +81,10 @@ export default function RecipeDetailPage() {
 
           // Verificar si la receta está realmente guardada por el usuario
           if (user) {
-            // Verificar directamente en localStorage si la receta está en la lista de guardadas
-            const savedRecipesKey = `savedRecipes_${user.id}`;
-            const savedRecipes = localStorage.getItem(savedRecipesKey);
-            let isActuallySaved = false;
-
-            if (savedRecipes) {
-              try {
-                const parsedSavedRecipes = JSON.parse(savedRecipes);
-                isActuallySaved = parsedSavedRecipes.some(
-                  (r: Record<string, unknown>) => r.id === recipeData.id
-                );
-              } catch (error) {
-                console.error("Error parsing saved recipes:", error);
-              }
-            }
+            // Verificar directamente en el store de Zustand si la receta está en la lista de guardadas
+            const isActuallySaved = savedRecipes.some(
+              (r) => r.id === recipeData.id
+            );
 
             // Solo considerar como guardada si viene de My Recipes O si está realmente guardada
             const finalSavedState = isFromMyRecipesPage || isActuallySaved;
@@ -122,6 +112,17 @@ export default function RecipeDetailPage() {
 
     loadRecipe();
   }, [params.id, router, user]);
+
+  // useEffect separado para actualizar el estado cuando cambien las recetas guardadas
+  useEffect(() => {
+    if (user && recipe) {
+      const isActuallySaved = savedRecipes.some((r) => r.id === recipe.id);
+      const finalSavedState = isFromMyRecipes || isActuallySaved;
+      setIsRecipeSavedState(finalSavedState);
+
+      console.log("🔍 DEBUG - Updated saved state:", finalSavedState);
+    }
+  }, [savedRecipes, user, recipe, isFromMyRecipes]);
 
   // Debug useEffect para monitorear cambios
   useEffect(() => {
@@ -154,48 +155,53 @@ export default function RecipeDetailPage() {
     console.log("Saving recipe:", recipe.title, "with ID:", recipe.id);
 
     try {
-      const success = toggleSaveRecipe(recipe);
-      console.log("Toggle save result:", success);
+      let success = false;
 
-      if (success) {
-        // Actualizar el estado local
-        const newSavedState = !isRecipeSavedState;
-        setIsRecipeSavedState(newSavedState);
-
-        if (newSavedState) {
-          showSuccess("Recipe saved to favorites!");
-        } else {
+      if (isRecipeSavedState) {
+        // Si ya está guardada, la removemos
+        success = removeRecipe(recipe.id);
+        if (success) {
+          setIsRecipeSavedState(false);
           showSuccess("Recipe removed from favorites!");
         }
-
-        console.log("Recipe saved status updated:", newSavedState);
-
-        // Si se guardó la receta, eliminar de la lista de recetas generadas
-        if (newSavedState) {
-          // Eliminar la receta de sessionStorage para que no aparezca en la lista
-          const currentRecipes = sessionStorage.getItem("currentRecipes");
-          if (currentRecipes) {
-            try {
-              const parsedRecipes = JSON.parse(currentRecipes);
-              const updatedRecipes = parsedRecipes.filter(
-                (r: Record<string, unknown>) => r.id !== recipe.id
-              );
-              sessionStorage.setItem(
-                "currentRecipes",
-                JSON.stringify(updatedRecipes)
-              );
-              console.log("🗑️ Removed recipe from sessionStorage:", recipe.id);
-            } catch (error) {
-              console.error("Error updating sessionStorage:", error);
-            }
-          }
-
-          setTimeout(() => {
-            // Redirigir a la página de recetas
-            router.push("/recipes");
-          }, 1000); // Esperar 1 segundo para que se vea la notificación
-        }
       } else {
+        // Si no está guardada, la guardamos
+        success = saveRecipe(recipe);
+        if (success) {
+          setIsRecipeSavedState(true);
+          showSuccess("Recipe saved to favorites!");
+        }
+      }
+
+      console.log("Toggle save result:", success);
+
+      // Si se guardó la receta, eliminar de la lista de recetas generadas
+      if (success && !isRecipeSavedState) {
+        // Eliminar la receta de sessionStorage para que no aparezca en la lista
+        const currentRecipes = sessionStorage.getItem("currentRecipes");
+        if (currentRecipes) {
+          try {
+            const parsedRecipes = JSON.parse(currentRecipes);
+            const updatedRecipes = parsedRecipes.filter(
+              (r: Record<string, unknown>) => r.id !== recipe.id
+            );
+            sessionStorage.setItem(
+              "currentRecipes",
+              JSON.stringify(updatedRecipes)
+            );
+            console.log("🗑️ Removed recipe from sessionStorage:", recipe.id);
+          } catch (error) {
+            console.error("Error updating sessionStorage:", error);
+          }
+        }
+
+        setTimeout(() => {
+          // Redirigir a la página de recetas
+          router.push("/recipes");
+        }, 1000); // Esperar 1 segundo para que se vea la notificación
+      }
+
+      if (!success) {
         showError("Error saving recipe");
       }
     } catch (error) {

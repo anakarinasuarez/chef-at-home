@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { colors, typography, spacingSystem } from "@/design-system";
 import Button from "@/components/Button";
 import MainLayout from "@/components/layouts/MainLayout";
-import { useSavedRecipes } from "@/hooks";
+import { useSavedRecipesTransition } from "@/hooks";
 
 interface CreateRecipePageProps {
   userName: string;
@@ -29,7 +29,7 @@ export default function CreateRecipePage({
   const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [recipeTitle, setRecipeTitle] = useState("");
-  const { updateRecipe } = useSavedRecipes();
+  const { updateRecipe } = useSavedRecipesTransition();
 
   // Cargar datos de edición si existe
   useEffect(() => {

@@ -9,7 +9,7 @@ import { BiShare } from "react-icons/bi";
 import { colors, typography } from "@/design-system";
 import { useAuthUnified } from "@/hooks";
 import Button from "@/components/Button";
-import { useSavedRecipes, useToast } from "@/hooks";
+import { useSavedRecipesTransition, useToast } from "@/hooks";
 import ImagePlaceholder from "./ImagePlaceholder";
 import OptimizedImage from "./OptimizedImage";
 import { ErrorBoundaryAdvanced } from "./ErrorBoundaryAdvanced";
@@ -43,7 +43,8 @@ function RecipeCard({
 }: RecipeCardProps) {
   const router = useRouter();
   const { user } = useAuthUnified();
-  const { isRecipeSaved, toggleSaveRecipe } = useSavedRecipes();
+  const { savedRecipes, saveRecipe, removeRecipe } =
+    useSavedRecipesTransition();
   const { showSuccess, showError } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -57,20 +58,8 @@ function RecipeCard({
   // Memoizar la verificación de si la receta está guardada
   const isSaved = useMemo(() => {
     if (!user) return false;
-
-    const savedRecipesKey = `savedRecipes_${user.id}`;
-    const savedRecipes = localStorage.getItem(savedRecipesKey);
-    if (savedRecipes) {
-      try {
-        const parsedSavedRecipes = JSON.parse(savedRecipes);
-        return parsedSavedRecipes.some((r: any) => r.id === recipeId);
-      } catch (error) {
-        console.error("Error parsing saved recipes:", error);
-        return false;
-      }
-    }
-    return false;
-  }, [user, recipeId]);
+    return savedRecipes.some((r) => r.id === recipeId);
+  }, [user, recipeId, savedRecipes]);
 
   console.log("🔍 RecipeCard DEBUG:", {
     recipeId,
@@ -110,30 +99,38 @@ function RecipeCard({
       setIsSaving(true);
 
       try {
-        const success = toggleSaveRecipe({
-          ...recipe,
-          difficulty: recipe.difficulty || "medium",
-        });
+        let success = false;
 
-        if (success) {
-          // Mostrar notificación
-          if (isSaved) {
+        if (isSaved) {
+          // Si ya está guardada, la removemos
+          success = removeRecipe(recipeId);
+          if (success) {
             showSuccess("Recipe removed from favorites");
-          } else {
-            showSuccess("Recipe saved to favorites");
-          }
-
-          // Si se guardó la receta desde Generated Recipes, eliminar de la lista
-          if (!isSaved && variant === "save" && onRemoveFromList) {
-            console.log("🗑️ Removing recipe from list:", recipeId);
-            onRemoveFromList(recipeId); // Esta función ya maneja la redirección
-          } else if (!isSaved) {
-            // Si se guardó desde otro lugar (no Generated Recipes), redirigir normalmente
-            setTimeout(() => {
-              router.push("/my-recipes");
-            }, 1000);
           }
         } else {
+          // Si no está guardada, la guardamos
+          success = saveRecipe({
+            ...recipe,
+            difficulty: recipe.difficulty || "medium",
+          });
+
+          if (success) {
+            showSuccess("Recipe saved to favorites");
+
+            // Si se guardó la receta desde Generated Recipes, eliminar de la lista
+            if (variant === "save" && onRemoveFromList) {
+              console.log("🗑️ Removing recipe from list:", recipeId);
+              onRemoveFromList(recipeId); // Esta función ya maneja la redirección
+            } else {
+              // Si se guardó desde otro lugar (no Generated Recipes), redirigir normalmente
+              setTimeout(() => {
+                router.push("/my-recipes");
+              }, 1000);
+            }
+          }
+        }
+
+        if (!success) {
           showError("Error saving recipe");
         }
       } catch (error) {
@@ -150,7 +147,8 @@ function RecipeCard({
       variant,
       onRemoveFromList,
       recipe,
-      toggleSaveRecipe,
+      saveRecipe,
+      removeRecipe,
       isSaved,
       showSuccess,
       showError,

@@ -1,5 +1,5 @@
 // Exportar todos los hooks
-export { useSavedRecipes } from "./useSavedRecipes";
+export { useSavedRecipesTransition } from "./useSavedRecipesTransition";
 export { useRecipesGeneration } from "./useRecipesGeneration";
 export { useRecipesNavigation } from "./useRecipesNavigation";
 
