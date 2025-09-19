@@ -55,8 +55,8 @@ export const PageErrorBoundary: React.FC<PageErrorBoundaryProps> = ({
           className="mb-8 text-lg"
           style={{ color: colors.interface.text.secondary }}
         >
-          Something went wrong while loading the {pageName} page. Don't worry,
-          our chefs are working on it!
+          Something went wrong while loading the {pageName} page. Don&apos;t
+          worry, our chefs are working on it!
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">

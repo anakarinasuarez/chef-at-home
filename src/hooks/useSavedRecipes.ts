@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuthUnified } from "@/hooks";
 
 // Tipo flexible para recetas en el frontend
@@ -26,7 +26,7 @@ export const useSavedRecipes = () => {
   const [loading, setLoading] = useState(true);
 
   // Cargar recetas guardadas
-  const loadSavedRecipes = () => {
+  const loadSavedRecipes = useCallback(() => {
     if (!user) {
       setSavedRecipes([]);
       setLoading(false);
@@ -46,7 +46,7 @@ export const useSavedRecipes = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   // Guardar una receta
   const saveRecipe = (recipe: FrontendRecipe): boolean => {
@@ -168,7 +168,7 @@ export const useSavedRecipes = () => {
   // Cargar recetas al montar el componente
   useEffect(() => {
     loadSavedRecipes();
-  }, [user?.id]); // Solo depende del ID del usuario, no del objeto completo
+  }, [user?.id, loadSavedRecipes]); // Solo depende del ID del usuario, no del objeto completo
 
   return {
     savedRecipes,

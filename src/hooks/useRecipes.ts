@@ -79,16 +79,16 @@ export const useRecipes = (
           "currentRecipes",
           JSON.stringify(unifiedRecipes)
         );
-       } catch (error) {
-         console.error("Error generating recipes:", error);
-         handleError(
-           error instanceof Error ? error : "Failed to generate recipes"
-         );
-       } finally {
-         setLoading(false);
-       }
+      } catch (error) {
+        console.error("Error generating recipes:", error);
+        handleError(
+          error instanceof Error ? error : "Failed to generate recipes"
+        );
+      } finally {
+        setLoading(false);
+      }
     },
-    []
+    [clearError, handleError]
   );
 
   // Función para remover receta

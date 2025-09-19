@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { UniversalCacheManager } from "@/lib/universal-cache";
 
 interface Recipe {
@@ -31,7 +31,7 @@ export const useRecipesGeneration = (): UseRecipesGenerationReturn => {
   const [error, setError] = useState<string | null>(null);
   const [hasLoadedRecipes, setHasLoadedRecipes] = useState(false);
 
-  const generateRecipes = async () => {
+  const generateRecipes = useCallback(async () => {
     console.log("🚀 generateRecipes function called");
 
     // Solo cargar desde sessionStorage si NO hay parámetros de generación
@@ -324,7 +324,7 @@ export const useRecipesGeneration = (): UseRecipesGenerationReturn => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [hasLoadedRecipes]);
 
   const clearCache = async () => {
     try {
@@ -371,7 +371,7 @@ export const useRecipesGeneration = (): UseRecipesGenerationReturn => {
   useEffect(() => {
     console.log("🚀 useEffect triggered - hasLoadedRecipes:", hasLoadedRecipes);
     generateRecipes();
-  }, []); // Solo ejecutar una vez al montar el componente
+  }, [generateRecipes, hasLoadedRecipes]); // Solo ejecutar una vez al montar el componente
 
   return {
     recipes,

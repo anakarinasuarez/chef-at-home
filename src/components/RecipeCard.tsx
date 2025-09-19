@@ -70,7 +70,7 @@ function RecipeCard({
       }
     }
     return false;
-  }, [user?.id, recipeId]);
+  }, [user, recipeId]);
 
   console.log("🔍 RecipeCard DEBUG:", {
     recipeId,

@@ -346,7 +346,7 @@ export default function RecipesPage() {
     };
 
     generateRecipes();
-  }, []); // Solo ejecutar una vez al montar el componente
+  }, [hasLoadedRecipes]); // Solo ejecutar una vez al montar el componente
 
   // Memoizar el handler de save recipe
   const handleSaveRecipe = useCallback((recipeId: string) => {
@@ -362,30 +362,38 @@ export default function RecipesPage() {
   }, []);
 
   // Memoizar el handler de remove from list
-  const handleRemoveFromList = useCallback((recipeId: string) => {
-    console.log("🗑️ handleRemoveFromList called with recipeId:", recipeId);
-    console.log("🗑️ Current recipes count:", recipes.length);
+  const handleRemoveFromList = useCallback(
+    (recipeId: string) => {
+      console.log("🗑️ handleRemoveFromList called with recipeId:", recipeId);
+      console.log("🗑️ Current recipes count:", recipes.length);
 
-    // Marcar la receta como removiendo para animación
-    setRemovingRecipeId(recipeId);
+      // Marcar la receta como removiendo para animación
+      setRemovingRecipeId(recipeId);
 
-    // Esperar un poco para que se vea la animación, luego eliminar
-    setTimeout(() => {
-      const updatedRecipes = recipes.filter((recipe) => recipe.id !== recipeId);
-      console.log("🗑️ Updated recipes count:", updatedRecipes.length);
+      // Esperar un poco para que se vea la animación, luego eliminar
+      setTimeout(() => {
+        const updatedRecipes = recipes.filter(
+          (recipe) => recipe.id !== recipeId
+        );
+        console.log("🗑️ Updated recipes count:", updatedRecipes.length);
 
-      setRecipes(updatedRecipes);
-      setRemovingRecipeId(null);
+        setRecipes(updatedRecipes);
+        setRemovingRecipeId(null);
 
-      // Actualizar sessionStorage con las recetas restantes
-      sessionStorage.setItem("currentRecipes", JSON.stringify(updatedRecipes));
+        // Actualizar sessionStorage con las recetas restantes
+        sessionStorage.setItem(
+          "currentRecipes",
+          JSON.stringify(updatedRecipes)
+        );
 
-      // NO redirigir automáticamente - mantener al usuario en Generated Recipes
-      console.log(
-        "✅ Recipe removed from Generated Recipes, staying on current page"
-      );
-    }, 600); // Tiempo para la animación de desvanecimiento
-  }, [recipes]);
+        // NO redirigir automáticamente - mantener al usuario en Generated Recipes
+        console.log(
+          "✅ Recipe removed from Generated Recipes, staying on current page"
+        );
+      }, 600); // Tiempo para la animación de desvanecimiento
+    },
+    [recipes]
+  );
 
   // Memoizar el handler de back to home
   const handleBackToHome = useCallback(() => {

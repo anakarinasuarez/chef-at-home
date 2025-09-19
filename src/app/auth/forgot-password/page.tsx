@@ -112,7 +112,8 @@ export default function ForgotPasswordPage() {
 
           <div className="space-y-4">
             <p className="text-gray-300 text-sm">
-              Didn't receive the email? Check your spam folder or try again.
+              Didn&apos;t receive the email? Check your spam folder or try
+              again.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -164,7 +165,6 @@ export default function ForgotPasswordPage() {
           </Button>
         </div>
       </form>
-
     </AuthLayout>
   );
 }

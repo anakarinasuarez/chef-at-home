@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Image from "next/image";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 
 interface RecipeCardImageProps {
@@ -18,10 +19,11 @@ export default function RecipeCardImage({
     <div className="px-6">
       <div className="relative h-48 overflow-hidden rounded-lg">
         {image && !imageError ? (
-          <img
+          <Image
             src={image}
             alt={title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            fill
+            className="object-cover group-hover:scale-110 transition-transform duration-300"
             onError={() => setImageError(true)}
           />
         ) : (

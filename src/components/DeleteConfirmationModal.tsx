@@ -42,8 +42,8 @@ export default function DeleteConfirmationModal({
           Delete Recipe
         </h3>
         <p className="mb-6" style={{ color: colors.interface.text.secondary }}>
-          Are you sure you want to delete "{title}"? This action cannot be
-          undone.
+          Are you sure you want to delete &quot;{title}&quot;? This action
+          cannot be undone.
         </p>
         <div className="flex gap-3">
           <button

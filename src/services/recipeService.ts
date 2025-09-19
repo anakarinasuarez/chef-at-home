@@ -5,17 +5,17 @@ import {
   RecipeServiceResponse,
 } from "@/types";
 import { colors } from "@/design-system";
-import { 
-  generateRecipeWithGemini, 
-  generateMultipleRecipesWithGemini 
+import {
+  generateRecipeWithGemini,
+  generateMultipleRecipesWithGemini,
 } from "./geminiService";
-import { 
-  generateRecipeWithOpenAI, 
-  isOpenAIServiceAvailable 
+import {
+  generateRecipeWithOpenAI,
+  isOpenAIServiceAvailable,
 } from "./openaiRecipeService";
-import { 
-  generateRecipeImageWithOpenAI, 
-  isOpenAIImageServiceAvailable 
+import {
+  generateRecipeImageWithOpenAI,
+  isOpenAIImageServiceAvailable,
 } from "./openaiImageService";
 
 export interface Recipe {
@@ -36,19 +36,27 @@ export interface RecipeGenerationRequest {
 
 // Convert Prisma recipe to RecipeResponse
 const convertPrismaRecipeToResponse = (recipe: unknown): RecipeResponse => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const r = recipe as unknown as any;
+  const r = recipe as Record<string, unknown>;
   return {
-    ...r,
-    description: r.description ?? undefined,
-    cookingTime: r.cookingTime ?? undefined,
-    servings: r.servings ?? undefined,
-    imageUrl: r.imageUrl ?? undefined,
+    id: r.id as string,
+    title: r.title as string,
+    description: (r.description as string) ?? undefined,
+    ingredients: r.ingredients as string,
+    instructions: r.instructions as string,
+    cookingTime: (r.cookingTime as number) ?? undefined,
+    servings: (r.servings as number) ?? undefined,
+    imageUrl: (r.imageUrl as string) ?? undefined,
+    isPublic: r.isPublic as boolean,
+    createdAt: r.createdAt as Date,
+    updatedAt: r.updatedAt as Date,
+    user: r.user as any,
   };
 };
 
 // Create a new recipe
-export const createRecipe = async (data: CreateRecipeData): Promise<{
+export const createRecipe = async (
+  data: CreateRecipeData
+): Promise<{
   success: boolean;
   recipe?: RecipeResponse;
   error?: string;
@@ -153,7 +161,9 @@ export const getPublicRecipes = async (): Promise<{
 };
 
 // Get recipes for a specific user
-export const getUserRecipes = async (userId: string): Promise<{
+export const getUserRecipes = async (
+  userId: string
+): Promise<{
   success: boolean;
   recipes?: RecipeResponse[];
   error?: string;
@@ -189,7 +199,9 @@ export const getUserRecipes = async (userId: string): Promise<{
 };
 
 // Get recipe by ID
-export const getRecipeById = async (recipeId: string): Promise<{
+export const getRecipeById = async (
+  recipeId: string
+): Promise<{
   success: boolean;
   recipe?: RecipeResponse;
   error?: string;
@@ -362,13 +374,7 @@ const getRecipeImage = async (
 
 // Generate custom recipe fallback
 const generateCustomRecipe = (ingredients: string[], servings: number): any => {
-  const cuisines = [
-    "Italian",
-    "Mexican",
-    "Asian",
-    "Mediterranean",
-    "American",
-  ];
+  const cuisines = ["Italian", "Mexican", "Asian", "Mediterranean", "American"];
   const randomCuisine = cuisines[Math.floor(Math.random() * cuisines.length)];
 
   return {
@@ -409,8 +415,7 @@ const generateMultipleCustomRecipes = (
   ];
 
   for (let i = 0; i < count; i++) {
-    const randomCuisine =
-      cuisines[Math.floor(Math.random() * cuisines.length)];
+    const randomCuisine = cuisines[Math.floor(Math.random() * cuisines.length)];
 
     recipes.push({
       title: `${randomCuisine} ${ingredients[0]} ${i + 1}`,
@@ -548,7 +553,10 @@ export const generateMultipleRecipes = async (
 };
 
 // Save recipe to user's collection
-export const saveRecipe = async (userId: string, recipe: Recipe): Promise<void> => {
+export const saveRecipe = async (
+  userId: string,
+  recipe: Recipe
+): Promise<void> => {
   try {
     // Here you would save to your database
     // For now, we'll just log it

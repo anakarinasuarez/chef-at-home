@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { BiPlus, BiShareAlt, BiTime, BiUser } from "react-icons/bi";
 import { IoIosArrowBack } from "react-icons/io";
@@ -120,7 +121,7 @@ export default function RecipeDetailPage() {
     };
 
     loadRecipe();
-  }, [params.id, router]);
+  }, [params.id, router, user]);
 
   // Debug useEffect para monitorear cambios
   useEffect(() => {
@@ -416,10 +417,11 @@ export default function RecipeDetailPage() {
           <div className="lg:col-span-2">
             <div className="relative rounded-2xl overflow-hidden h-[500px] w-full">
               {recipe.image && !imageError ? (
-                <img
+                <Image
                   src={recipe.image}
                   alt={recipe.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                   onError={() => setImageError(true)}
                 />
               ) : (
