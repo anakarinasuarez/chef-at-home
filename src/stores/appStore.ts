@@ -211,47 +211,4 @@ export const useAppStore = create<AppState>()(
   )
 );
 
-// Selectors for better performance
-export const useUser = () => useAppStore((state) => state.user);
-export const useIsLoading = () => useAppStore((state) => state.isLoading);
-export const useError = () => useAppStore((state) => state.error);
-export const useRecipes = () => useAppStore((state) => state.recipes);
-export const useSavedRecipes = () => useAppStore((state) => state.savedRecipes);
-export const useHasLoadedRecipes = () =>
-  useAppStore((state) => state.hasLoadedRecipes);
-export const useRemovingRecipeId = () =>
-  useAppStore((state) => state.removingRecipeId);
-export const useActiveIndex = () => useAppStore((state) => state.activeIndex);
-
-// Action selectors
-export const useAppActions = () =>
-  useAppStore((state) => ({
-    // Auth actions
-    login: state.login,
-    register: state.register,
-    logout: state.logout,
-    // User actions
-    setUser: state.setUser,
-    setLoading: state.setLoading,
-    setError: state.setError,
-    // Recipe actions
-    setRecipes: state.setRecipes,
-    addRecipe: state.addRecipe,
-    removeRecipe: state.removeRecipe,
-    setHasLoadedRecipes: state.setHasLoadedRecipes,
-    setRemovingRecipeId: state.setRemovingRecipeId,
-    saveRecipe: state.saveRecipe,
-    unsaveRecipe: state.unsaveRecipe,
-    isRecipeSaved: state.isRecipeSaved,
-    setActiveIndex: state.setActiveIndex,
-    clearError: state.clearError,
-    reset: state.reset,
-  }));
-
-// Auth-specific selectors (compatible with AuthContext interface)
-export const useAuthActions = () =>
-  useAppStore((state) => ({
-    login: state.login,
-    register: state.register,
-    logout: state.logout,
-  }));
+// Store exports are used directly via useAppStore hook

@@ -18,36 +18,7 @@ export { typography } from "./typography";
 export { spacingSystem } from "./spacing";
 export { breakpointSystem } from "./breakpoints";
 
-// Exportar tipos principales desde sus archivos correspondientes
-export type {
-  BaseColor,
-  SemanticColor,
-  BrandColor,
-  InterfaceColor,
-  AppColor,
-} from "./colors";
-
-export type {
-  FontSize,
-  FontWeight,
-  LineHeight,
-  LetterSpacing,
-  FontFamily,
-  TextStyle,
-} from "./typography";
-
-export type {
-  SpacingSize,
-  ComponentSpacing,
-  ResponsiveBreakpoint,
-} from "./spacing";
-
-export type {
-  Breakpoint,
-  BreakpointValue,
-  Container,
-  MediaQuery,
-} from "./breakpoints";
+// Los tipos se exportan directamente desde sus archivos cuando se necesiten
 
 // Función helper para obtener tokens del Design System
 export const getDesignToken = (
@@ -166,9 +137,6 @@ export const designSystem = {
     createComponentVariants,
   },
 } as const;
-
-// Tipo para el Design System completo
-export type DesignSystem = typeof designSystem;
 
 // Exportar por defecto
 export default designSystem;

@@ -9,10 +9,6 @@ import { z } from "zod";
 export { z };
 
 // Utilidades de validación
-export const validateSchema = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
-  return schema.parse(data);
-};
-
 export const safeValidateSchema = <T>(
   schema: z.ZodSchema<T>,
   data: unknown
@@ -31,14 +27,6 @@ export const safeValidateSchema = <T>(
   } else {
     return { success: false, error: result.error };
   }
-};
-
-// Función para formatear errores de Zod
-export const formatZodError = (error: z.ZodError): string[] => {
-  return error.errors.map((err) => {
-    const path = err.path.length > 0 ? `${err.path.join(".")}: ` : "";
-    return `${path}${err.message}`;
-  });
 };
 
 // Función para obtener el primer error de Zod

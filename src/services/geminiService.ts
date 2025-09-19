@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { buildUnifiedRecipePrompt, getSystemPrompt } from "@/lib/prompts";
+import { RecipeValidator } from "@/utils";
 
 // Create Gemini client
 const createGeminiClient = (): {
@@ -300,90 +301,11 @@ const cleanJsonString = (jsonString: string): string => {
   return jsonString;
 };
 
-// Clean time format
-const cleanTimeFormat = (time: string): string => {
-  const timeMatch = time.match(/(\d+)/);
-  if (timeMatch) {
-    const minutes = parseInt(timeMatch[1]);
-    return `${minutes} minutes`;
-  }
-  return "30 minutes";
-};
+// Usar la función centralizada de RecipeValidator
+const cleanTimeFormat = RecipeValidator.cleanTimeFormat;
 
-// Validate and clean recipe
-const validateAndCleanRecipe = (
-  recipe: any,
-  originalIngredients: string[],
-  servings: number
-): any => {
-  const cleanedRecipe = {
-    title: recipe.title || "Delicious Recipe",
-    description:
-      recipe.description || "A flavorful dish made with fresh ingredients",
-    ingredients: recipe.ingredients || [],
-    instructions: recipe.instructions || [],
-    cookingTime: recipe.cookingTime || "30 minutes",
-    prepTime: recipe.prepTime || "15 minutes",
-    totalTime: recipe.totalTime || "45 minutes",
-    cuisine: recipe.cuisine || "International",
-    servings: recipe.servings || servings,
-  };
-
-  // Validate ingredients structure
-  if (Array.isArray(cleanedRecipe.ingredients)) {
-    cleanedRecipe.ingredients = cleanedRecipe.ingredients.map((ing: any) => ({
-      name: ing.name || ing,
-      quantity: ing.quantity || "1",
-      unit: ing.unit || "piece",
-    }));
-  } else {
-    cleanedRecipe.ingredients = originalIngredients.map((ing) => ({
-      name: ing,
-      quantity: "1",
-      unit: "piece",
-    }));
-  }
-
-  // Ensure all original ingredients are included
-  const includedIngredients = cleanedRecipe.ingredients.map((ing: any) =>
-    ing.name.toLowerCase()
-  );
-
-  originalIngredients.forEach((originalIng) => {
-    if (
-      !includedIngredients.some(
-        (included: string) =>
-          included.includes(originalIng.toLowerCase()) ||
-          originalIng.toLowerCase().includes(included)
-      )
-    ) {
-      cleanedRecipe.ingredients.push({
-        name: originalIng,
-        quantity: "1",
-        unit: "piece",
-      });
-    }
-  });
-
-  // Validate instructions
-  if (
-    !Array.isArray(cleanedRecipe.instructions) ||
-    cleanedRecipe.instructions.length === 0
-  ) {
-    cleanedRecipe.instructions = [
-      "Prepare all ingredients",
-      "Cook according to your preference",
-      "Serve hot and enjoy!",
-    ];
-  }
-
-  // Clean up time formats
-  cleanedRecipe.cookingTime = cleanTimeFormat(cleanedRecipe.cookingTime);
-  cleanedRecipe.prepTime = cleanTimeFormat(cleanedRecipe.prepTime);
-  cleanedRecipe.totalTime = cleanTimeFormat(cleanedRecipe.totalTime);
-
-  return cleanedRecipe;
-};
+// Usar la función centralizada de RecipeValidator
+const validateAndCleanRecipe = RecipeValidator.validateAndCleanRecipe;
 
 // Parse recipe response
 const parseRecipeResponse = (

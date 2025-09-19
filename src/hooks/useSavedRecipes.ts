@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuthUnified } from "@/hooks";
+import { StorageManager, STORAGE_KEYS } from "@/utils";
 
 // Tipo flexible para recetas en el frontend
 interface FrontendRecipe {
@@ -33,71 +34,57 @@ export const useSavedRecipes = () => {
       return;
     }
 
-    try {
-      const saved = localStorage.getItem(`savedRecipes_${user.id}`);
-      if (saved) {
-        setSavedRecipes(JSON.parse(saved));
-      } else {
-        setSavedRecipes([]);
-      }
-    } catch (error) {
-      console.error("Error loading saved recipes:", error);
-      setSavedRecipes([]);
-    } finally {
-      setLoading(false);
-    }
+    const savedRecipes = StorageManager.getJSON<FrontendRecipe[]>(
+      STORAGE_KEYS.SAVED_RECIPES(user.id)
+    );
+
+    setSavedRecipes(savedRecipes || []);
+    setLoading(false);
   }, [user]);
 
   // Guardar una receta
   const saveRecipe = (recipe: FrontendRecipe): boolean => {
     if (!user) return false;
 
-    try {
-      const recipeToSave = {
-        ...recipe,
-        id: recipe.id || Date.now().toString(),
-        savedAt: new Date().toISOString(),
-      };
+    const recipeToSave = {
+      ...recipe,
+      id: recipe.id || Date.now().toString(),
+      savedAt: new Date().toISOString(),
+    };
 
-      const updatedRecipes = [...savedRecipes, recipeToSave];
-      setSavedRecipes(updatedRecipes);
-      localStorage.setItem(
-        `savedRecipes_${user.id}`,
-        JSON.stringify(updatedRecipes)
+    const updatedRecipes = [...savedRecipes, recipeToSave];
+    setSavedRecipes(updatedRecipes);
+
+    const success = StorageManager.setJSON(
+      STORAGE_KEYS.SAVED_RECIPES(user.id),
+      updatedRecipes
+    );
+
+    // También guardar en localStorage para que la página de detalle pueda acceder
+    // Solo si no existe ya una entrada con este ID
+    if (!StorageManager.getItem(STORAGE_KEYS.RECIPE_CACHE(recipeToSave.id))) {
+      StorageManager.setJSON(
+        STORAGE_KEYS.RECIPE_CACHE(recipeToSave.id),
+        recipeToSave
       );
-
-      // También guardar en localStorage para que la página de detalle pueda acceder
-      // Solo si no existe ya una entrada con este ID
-      const existingKey = `recipe-${recipeToSave.id}`;
-      if (!localStorage.getItem(existingKey)) {
-        localStorage.setItem(existingKey, JSON.stringify(recipeToSave));
-      }
-
-      return true;
-    } catch (error) {
-      console.error("Error saving recipe:", error);
-      return false;
     }
+
+    return success;
   };
 
   // Remover una receta guardada
   const removeRecipe = (recipeId: string): boolean => {
     if (!user) return false;
 
-    try {
-      const updatedRecipes = savedRecipes.filter(
-        (recipe) => recipe.id !== recipeId
-      );
-      setSavedRecipes(updatedRecipes);
-      localStorage.setItem(
-        `savedRecipes_${user.id}`,
-        JSON.stringify(updatedRecipes)
-      );
-      return true;
-    } catch (error) {
-      console.error("Error removing recipe:", error);
-      return false;
-    }
+    const updatedRecipes = savedRecipes.filter(
+      (recipe) => recipe.id !== recipeId
+    );
+    setSavedRecipes(updatedRecipes);
+
+    return StorageManager.setJSON(
+      STORAGE_KEYS.SAVED_RECIPES(user.id),
+      updatedRecipes
+    );
   };
 
   // Verificar si una receta está guardada
