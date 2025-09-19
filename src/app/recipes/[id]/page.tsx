@@ -89,7 +89,7 @@ export default function RecipeDetailPage() {
               try {
                 const parsedSavedRecipes = JSON.parse(savedRecipes);
                 isActuallySaved = parsedSavedRecipes.some(
-                  (r: any) => r.id === recipeData.id
+                  (r: Record<string, unknown>) => r.id === recipeData.id
                 );
               } catch (error) {
                 console.error("Error parsing saved recipes:", error);
@@ -178,7 +178,7 @@ export default function RecipeDetailPage() {
             try {
               const parsedRecipes = JSON.parse(currentRecipes);
               const updatedRecipes = parsedRecipes.filter(
-                (r: any) => r.id !== recipe.id
+                (r: Record<string, unknown>) => r.id !== recipe.id
               );
               sessionStorage.setItem(
                 "currentRecipes",

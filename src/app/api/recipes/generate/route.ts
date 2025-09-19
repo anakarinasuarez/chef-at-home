@@ -12,11 +12,11 @@ import {
   generateRecipeImageWithOpenAI,
   isOpenAIImageServiceAvailable,
 } from "@/services/openaiImageService";
-import { 
-  generateRecipeRequestSchema, 
-  safeValidateSchema, 
+import {
+  generateRecipeRequestSchema,
+  safeValidateSchema,
   getFirstZodError,
-  GenerateRecipeRequest
+  GenerateRecipeRequest,
 } from "@/schemas";
 
 export async function POST(request: NextRequest) {
@@ -30,19 +30,28 @@ export async function POST(request: NextRequest) {
     const requestData = await request.json();
 
     // Validar los datos de entrada con Zod
-    const validation = safeValidateSchema(generateRecipeRequestSchema, requestData);
+    const validation = safeValidateSchema(
+      generateRecipeRequestSchema,
+      requestData
+    );
     if (!validation.success) {
       return NextResponse.json(
-        { 
+        {
           error: "Validation failed",
-          details: getFirstZodError(validation.error)
+          details: getFirstZodError(validation.error),
         },
         { status: 400 }
       );
     }
 
     const validatedData = validation.data as GenerateRecipeRequest;
-    ({ ingredients, servings, cuisine, count, title: customTitle } = validatedData);
+    ({
+      ingredients,
+      servings,
+      cuisine,
+      count,
+      title: customTitle,
+    } = validatedData);
 
     let recipes;
     let source = "gemini-fallback";
@@ -199,12 +208,29 @@ export async function POST(request: NextRequest) {
   }
 }
 
+interface FallbackRecipe {
+  title: string;
+  description: string;
+  ingredients: Array<{
+    name: string;
+    quantity: number | string;
+    unit: string;
+  }>;
+  instructions: string[];
+  cookingTime: string;
+  prepTime: string;
+  totalTime: string;
+  cuisine: string;
+  servings: number;
+  source: string;
+}
+
 function generateFallbackRecipes(
   ingredients: string[],
   servings: number,
   count: number = 1,
   customTitle?: string
-): any[] {
+): FallbackRecipe[] {
   const recipes = [];
 
   // Analizar los ingredientes para determinar el tipo de plato

@@ -82,11 +82,13 @@ export interface RecipeServiceResponse {
 }
 
 // Funciones de conversión entre tipos
-export const convertToUnifiedRecipe = (recipe: any): UnifiedRecipe => {
+export const convertToUnifiedRecipe = (
+  recipe: Record<string, unknown>
+): UnifiedRecipe => {
   return {
-    id: recipe.id || Date.now().toString(),
-    title: recipe.title || "Untitled Recipe",
-    description: recipe.description || "",
+    id: (recipe.id as string) || Date.now().toString(),
+    title: (recipe.title as string) || "Untitled Recipe",
+    description: (recipe.description as string) || "",
     ingredients: Array.isArray(recipe.ingredients)
       ? recipe.ingredients
       : typeof recipe.ingredients === "string"
@@ -97,14 +99,16 @@ export const convertToUnifiedRecipe = (recipe: any): UnifiedRecipe => {
       : typeof recipe.instructions === "string"
       ? JSON.parse(recipe.instructions)
       : [],
-    prepTime: recipe.prepTime || "15 minutes",
-    cookingTime: recipe.cookingTime || "30 minutes",
-    totalTime: recipe.totalTime || "45 minutes",
-    servings: recipe.servings || 4,
-    cuisine: recipe.cuisine || "international",
-    image: recipe.image || recipe.imageUrl,
-    source: recipe.source || "ai-generated",
-    optionalIngredients: recipe.optionalIngredients || [],
+    prepTime: (recipe.prepTime as string) || "15 minutes",
+    cookingTime: (recipe.cookingTime as string) || "30 minutes",
+    totalTime: (recipe.totalTime as string) || "45 minutes",
+    servings: (recipe.servings as number) || 4,
+    cuisine: (recipe.cuisine as string) || "international",
+    image: (recipe.image as string) || (recipe.imageUrl as string),
+    source: (recipe.source as string) || "ai-generated",
+    optionalIngredients:
+      (recipe.optionalIngredients as Array<{ name: string; reason: string }>) ||
+      [],
   };
 };
 

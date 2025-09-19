@@ -3,7 +3,7 @@ import { z } from "zod";
 // Esquema para respuestas de API exitosas
 export const apiSuccessSchema = z.object({
   success: z.literal(true),
-  data: z.any(),
+  data: z.unknown(),
   message: z.string().optional(),
 });
 
@@ -13,7 +13,7 @@ export const apiErrorSchema = z.object({
   error: z.object({
     code: z.string(),
     message: z.string(),
-    details: z.any().optional(),
+    details: z.unknown().optional(),
   }),
 });
 
@@ -40,7 +40,7 @@ export const paginationSchema = z.object({
 // Esquema para respuestas paginadas
 export const paginatedResponseSchema = z.object({
   success: z.literal(true),
-  data: z.array(z.any()),
+  data: z.array(z.unknown()),
   pagination: paginationSchema,
   message: z.string().optional(),
 });

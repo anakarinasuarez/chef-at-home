@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks";
 import { colors } from "@/design-system";
@@ -13,7 +13,7 @@ import {
   getFirstZodError,
 } from "@/schemas";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const [formData, setFormData] = useState({
     password: "",
     confirmPassword: "",
@@ -75,10 +75,12 @@ export default function ResetPasswordPage() {
       if (!validation.success) {
         // Procesar errores de validación
         const errors: Record<string, string> = {};
-        validation.error.errors.forEach((err: any) => {
-          const field = err.path[0] as string;
-          errors[field] = err.message;
-        });
+        validation.error.errors.forEach(
+          (err: { path: (string | number)[]; message: string }) => {
+            const field = err.path[0] as string;
+            errors[field] = err.message;
+          }
+        );
         setFieldErrors(errors);
 
         // Mostrar el primer error como mensaje general
@@ -110,9 +112,11 @@ export default function ResetPasswordPage() {
         setError(data.details || data.error || "An error occurred");
         showError(data.details || data.error || "An error occurred");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred");
-      showError(err.message || "An error occurred");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred";
+      setError(errorMessage);
+      showError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -241,5 +245,13 @@ export default function ResetPasswordPage() {
         </div>
       </form>
     </AuthLayout>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

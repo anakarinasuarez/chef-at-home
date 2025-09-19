@@ -7,8 +7,29 @@ import Nav from "@/components/Nav";
 import { colors, typography } from "@/design-system";
 import { useAuthUnified } from "@/hooks";
 import { useSavedRecipes, useToast } from "@/hooks";
+
+interface FrontendRecipe {
+  id?: string;
+  title: string;
+  servings: number;
+  cookingTime: string;
+  difficulty: string;
+  image?: string;
+  source: string;
+  ingredients?: Array<{
+    name: string;
+    quantity: number;
+    unit: string;
+  }>;
+  instructions?: string[];
+  description?: string;
+  savedAt?: string;
+}
 import { SuspenseWrapper } from "@/components/lazy/SuspenseWrapper";
-import { LazyRecipeCard, LazyDeleteConfirmationModal } from "@/components/lazy/LazyComponents";
+import {
+  LazyRecipeCard,
+  LazyDeleteConfirmationModal,
+} from "@/components/lazy/LazyComponents";
 
 export default function MyRecipesPage() {
   const { user, isLoading } = useAuthUnified();
@@ -17,7 +38,9 @@ export default function MyRecipesPage() {
   const { showSuccess } = useToast();
   const [activeIndex, setActiveIndex] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [recipeToDelete, setRecipeToDelete] = useState<any>(null);
+  const [recipeToDelete, setRecipeToDelete] = useState<FrontendRecipe | null>(
+    null
+  );
 
   // Detectar scroll automáticamente para actualizar el punto activo
   useEffect(() => {
@@ -70,13 +93,13 @@ export default function MyRecipesPage() {
     router.push("/");
   };
 
-  const handleDeleteClick = (recipe: any) => {
+  const handleDeleteClick = (recipe: FrontendRecipe) => {
     setRecipeToDelete(recipe);
     setShowDeleteModal(true);
   };
 
   const confirmDelete = () => {
-    if (recipeToDelete) {
+    if (recipeToDelete && recipeToDelete.id) {
       const success = removeRecipe(recipeToDelete.id);
       if (success) {
         showSuccess("Recipe deleted successfully!");
@@ -252,10 +275,17 @@ export default function MyRecipesPage() {
                           navigator.share({
                             title: recipe.title,
                             text: `Check out this recipe: ${recipe.title}`,
-                            url: window.location.href,
+                            url:
+                              typeof window !== "undefined"
+                                ? window.location.href
+                                : "",
                           });
                         } else {
-                          navigator.clipboard.writeText(window.location.href);
+                          navigator.clipboard.writeText(
+                            typeof window !== "undefined"
+                              ? window.location.href
+                              : ""
+                          );
                           showSuccess("Recipe link copied to clipboard!");
                         }
                       }}
