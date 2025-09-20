@@ -34,6 +34,12 @@ export default function RecipesPage() {
   const [error, setError] = useState<string | null>(null);
   const [hasLoadedRecipes, setHasLoadedRecipes] = useState(false);
   const [removingRecipeId, setRemovingRecipeId] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure we're on the client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Debug: Log recipes state changes
   useEffect(() => {
@@ -47,6 +53,8 @@ export default function RecipesPage() {
 
   // Generate recipes with AI when component mounts
   useEffect(() => {
+    if (!isClient) return;
+    
     console.log("🚀 useEffect triggered - hasLoadedRecipes:", hasLoadedRecipes);
     const generateRecipes = async () => {
       console.log("🔄 generateRecipes function called");
@@ -348,7 +356,7 @@ export default function RecipesPage() {
     };
 
     generateRecipes();
-  }, [hasLoadedRecipes]); // Solo ejecutar una vez al montar el componente
+  }, [hasLoadedRecipes, isClient]); // Solo ejecutar una vez al montar el componente
 
   // Memoizar el handler de save recipe
   const handleSaveRecipe = useCallback((recipeId: string) => {
@@ -403,6 +411,8 @@ export default function RecipesPage() {
   }, [router]);
 
   const clearAllCache = async () => {
+    if (!isClient) return;
+    
     try {
       // Limpiar sessionStorage
       sessionStorage.removeItem("currentRecipes");
@@ -445,6 +455,8 @@ export default function RecipesPage() {
 
   // Memoizar el handler de scroll to recipe
   const scrollToRecipe = useCallback((index: number) => {
+    if (!isClient) return;
+    
     const container = document.querySelector(".overflow-x-auto") as HTMLElement;
     if (container) {
       const recipeCard = container.children[index] as HTMLElement;
@@ -457,10 +469,12 @@ export default function RecipesPage() {
         setActiveIndex(index);
       }
     }
-  }, []);
+  }, [isClient]);
 
   // Detectar scroll automáticamente para actualizar el punto activo
   useEffect(() => {
+    if (!isClient) return;
+    
     const container = document.querySelector(".overflow-x-auto") as HTMLElement;
     if (!container) return;
 
@@ -496,7 +510,7 @@ export default function RecipesPage() {
 
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [recipes.length]);
+  }, [recipes.length, isClient]);
 
   if (!user) {
     router.push("/auth/login");

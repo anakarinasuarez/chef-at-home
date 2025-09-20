@@ -41,10 +41,16 @@ export default function MyRecipesPage() {
   const [recipeToDelete, setRecipeToDelete] = useState<FrontendRecipe | null>(
     null
   );
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure we're on the client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Detectar scroll automáticamente para actualizar el punto activo
   useEffect(() => {
-    if (savedRecipes.length === 0) return;
+    if (!isClient || savedRecipes.length === 0) return;
 
     const container = document.querySelector(".overflow-x-auto") as HTMLElement;
     if (!container) return;
@@ -81,7 +87,7 @@ export default function MyRecipesPage() {
 
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [savedRecipes.length]);
+  }, [savedRecipes.length, isClient]);
 
   // Si no está logueado, redirigir al login
   if (!user) {
@@ -115,6 +121,8 @@ export default function MyRecipesPage() {
   };
 
   const scrollToRecipe = (index: number) => {
+    if (!isClient) return;
+    
     const container = document.querySelector(".overflow-x-auto") as HTMLElement;
     if (container) {
       const recipeCard = container.children[index] as HTMLElement;
@@ -126,6 +134,21 @@ export default function MyRecipesPage() {
         });
         setActiveIndex(index);
       }
+    }
+  };
+
+  const handleShare = (recipe: FrontendRecipe) => {
+    if (!isClient) return;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: recipe.title,
+        text: `Check out this recipe: ${recipe.title}`,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      showSuccess("Recipe link copied to clipboard!");
     }
   };
 
@@ -270,25 +293,7 @@ export default function MyRecipesPage() {
                           handleDeleteClick(recipe);
                         }
                       }}
-                      onShare={(recipe) => {
-                        if (navigator.share) {
-                          navigator.share({
-                            title: recipe.title,
-                            text: `Check out this recipe: ${recipe.title}`,
-                            url:
-                              typeof window !== "undefined"
-                                ? window.location.href
-                                : "",
-                          });
-                        } else {
-                          navigator.clipboard.writeText(
-                            typeof window !== "undefined"
-                              ? window.location.href
-                              : ""
-                          );
-                          showSuccess("Recipe link copied to clipboard!");
-                        }
-                      }}
+                      onShare={handleShare}
                     />
                   </SuspenseWrapper>
                 </div>

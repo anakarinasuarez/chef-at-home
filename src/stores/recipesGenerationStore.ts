@@ -54,6 +54,9 @@ export const useRecipesGenerationStore = create<RecipesGenerationState>()(
       generateRecipes: async () => {
         console.log("🚀 generateRecipes function called");
 
+        // Solo ejecutar en el cliente
+        if (typeof window === "undefined") return;
+
         // Solo cargar desde sessionStorage si NO hay parámetros de generación
         const urlParams = new URLSearchParams(window.location.search);
         const forceGenerate = urlParams.get("force") === "true";
@@ -402,7 +405,9 @@ export const useRecipesGenerationStore = create<RecipesGenerationState>()(
           console.log("🧹 Cache cleared, reloading page...");
 
           // Recargar la página para generar nuevas recetas
-          window.location.reload();
+          if (typeof window !== "undefined") {
+            window.location.reload();
+          }
         } catch (error) {
           console.error("Error clearing cache:", error);
         }
