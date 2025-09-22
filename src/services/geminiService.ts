@@ -358,59 +358,16 @@ const parseRecipeResponse = (
   return generateFallbackRecipe(originalIngredients, servings);
 };
 
-// Generate fallback recipe
+// Importar utilidades de fallback
+import { buildFallbackRecipe } from "./utils/fallbackRecipeUtils";
+
+// Generate fallback recipe - Refactorizada usando funciones utilitarias
 const generateFallbackRecipe = (
   ingredients: string[],
   servings: number
 ): ParsedRecipe => {
-  const cuisineStyles = [
-    { cuisine: "Italian", style: "Rustic", method: "Sautéed" },
-    { cuisine: "Mexican", style: "Spicy", method: "Grilled" },
-    { cuisine: "Asian", style: "Fusion", method: "Stir-fried" },
-    { cuisine: "Mediterranean", style: "Fresh", method: "Roasted" },
-    { cuisine: "French", style: "Classic", method: "Braised" },
-    { cuisine: "Indian", style: "Aromatic", method: "Curried" },
-    { cuisine: "Thai", style: "Balanced", method: "Steamed" },
-    { cuisine: "Spanish", style: "Traditional", method: "Pan-seared" },
-  ];
-
-  const randomStyle =
-    cuisineStyles[Math.floor(Math.random() * cuisineStyles.length)];
-  const uniqueId = Math.random().toString(36).substr(2, 6);
-  const uniqueMethods = [
-    "Braised",
-    "Grilled",
-    "Sautéed",
-    "Roasted",
-    "Steamed",
-    "Fried",
-    "Baked",
-    "Smoked",
-  ];
-  const uniqueMethod =
-    uniqueMethods[Math.floor(Math.random() * uniqueMethods.length)];
-  const uniqueTitle = `${randomStyle.cuisine} ${uniqueMethod} ${ingredients[0]} ${randomStyle.style} Style`;
-
-  return {
-    title: uniqueTitle,
-    ingredients: ingredients.map((ing, index) => ({
-      name: ing,
-      quantity: Math.ceil(servings / 2) + (index % 3),
-      unit: index % 2 === 0 ? "pieces" : "gr",
-    })),
-    instructions: [
-      `Prepare and clean ${ingredients.join(", ")}`,
-      `${uniqueMethod.toLowerCase()} the ${ingredients[0]} until golden`,
-      `Add ${ingredients.slice(1).join(" and ")} and cook for 5-7 minutes`,
-      `Season with ${randomStyle.cuisine.toLowerCase()} spices and herbs`,
-      "Serve hot with garnish of your choice",
-    ],
-    cookingTime: `${20 + Math.floor(Math.random() * 20)} minutes`,
-    cuisine: randomStyle.cuisine,
-    servings: servings,
-    source: "gemini-fallback",
-    id: `fallback-${uniqueId}`,
-  };
+  console.log("🔄 Using fallback recipe generation");
+  return buildFallbackRecipe(ingredients, servings);
 };
 
 // Generate single recipe

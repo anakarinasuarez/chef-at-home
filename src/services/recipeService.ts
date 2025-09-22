@@ -456,116 +456,96 @@ const generateMultipleCustomRecipes = (
   return recipes;
 };
 
-// Generate single recipe
+// Importar utilidades de generación
+import {
+  generateWithOpenAI,
+  generateWithGemini,
+  addImageToRecipe,
+  generateFallbackRecipe,
+  RecipeGenerationParams,
+} from "./utils/recipeGenerationUtils";
+
+// Generate single recipe - Refactorizada usando funciones utilitarias
 export const generateRecipe = async (
   ingredients: string[],
   servings: number,
   cuisine: string = "international"
 ): Promise<CustomRecipe | null> => {
+  const params: RecipeGenerationParams = {
+    ingredients,
+    servings,
+    cuisine,
+  };
+
   try {
-    // Primero intentar con OpenAI GPT-4
-    if (isOpenAIServiceAvailable()) {
-      console.log("🎯 Using OpenAI GPT-4 for recipe generation");
-      const openaiResponse = await generateRecipeWithOpenAI({
+    // Intentar con OpenAI primero
+    const openaiResult = await generateWithOpenAI(params);
+    if (openaiResult.success && openaiResult.recipe) {
+      return await addImageToRecipe(
+        openaiResult.recipe,
         ingredients,
-        servings,
-        cuisine,
-        count: 1,
-      });
-
-      if (openaiResponse.recipes && openaiResponse.recipes.length > 0) {
-        const recipe = openaiResponse.recipes[0];
-        const image = await getRecipeImage(recipe.title, ingredients);
-
-        return {
-          ...recipe,
-          image,
-          source: "openai-gpt4",
-        };
-      }
+        "openai-gpt4"
+      );
     }
 
-    // Fallback a Gemini si OpenAI no está disponible
-    console.log("🔄 Falling back to Gemini for recipe generation");
-    const recipe = await generateRecipeWithGemini(
-      ingredients,
-      servings,
-      cuisine
-    );
-    const image = await getRecipeImage(recipe.title, ingredients);
+    // Fallback a Gemini
+    const geminiResult = await generateWithGemini(params);
+    if (geminiResult.success && geminiResult.recipe) {
+      return await addImageToRecipe(
+        geminiResult.recipe,
+        ingredients,
+        "gemini-fallback"
+      );
+    }
 
-    return {
-      ...recipe,
-      image,
-      source: "gemini-fallback",
-    };
+    // Fallback final a template
+    return await generateFallbackRecipe(params);
   } catch (error) {
     console.error("Error generating recipe:", error);
-    // Fallback to template
-    return generateCustomRecipe(ingredients, servings);
+    return await generateFallbackRecipe(params);
   }
 };
 
-// Generate multiple recipes
+// Importar utilidades adicionales para generación múltiple
+import {
+  generateMultipleWithOpenAI,
+  generateMultipleWithGemini,
+  generateMultipleFallbackRecipes,
+} from "./utils/recipeGenerationUtils";
+
+// Generate multiple recipes - Refactorizada usando funciones utilitarias
 export const generateMultipleRecipes = async (
   ingredients: string[],
   servings: number,
   count: number = 4
-): Promise<any[]> => {
+): Promise<CustomRecipe[]> => {
+  const params: RecipeGenerationParams & { count: number } = {
+    ingredients,
+    servings,
+    cuisine: "international",
+    count,
+  };
+
   try {
-    // Primero intentar con OpenAI GPT-4
-    if (isOpenAIServiceAvailable()) {
-      console.log("🎯 Using OpenAI GPT-4 for multiple recipe generation");
-      const openaiResponse = await generateRecipeWithOpenAI({
-        ingredients,
-        servings,
-        count,
-      });
-
-      if (openaiResponse.recipes && openaiResponse.recipes.length > 0) {
-        // Add images to each recipe
-        const recipesWithImages = await Promise.all(
-          openaiResponse.recipes.map(async (recipe) => {
-            try {
-              const image = await getRecipeImage(recipe.title, ingredients);
-              return { ...recipe, image, source: "openai-gpt4" };
-            } catch (error) {
-              console.error("Error getting image for recipe:", error);
-              return { ...recipe, image: null, source: "openai-gpt4" };
-            }
-          })
-        );
-
-        return recipesWithImages;
-      }
+    // Intentar con OpenAI primero
+    try {
+      return await generateMultipleWithOpenAI(params);
+    } catch (openaiError) {
+      console.log("OpenAI failed, trying Gemini:", openaiError);
     }
 
-    // Fallback a Gemini si OpenAI no está disponible
-    console.log("🔄 Falling back to Gemini for multiple recipe generation");
-    const recipes = await generateMultipleRecipesWithGemini(
-      ingredients,
-      servings,
-      count
-    );
+    // Fallback a Gemini
+    try {
+      return await generateMultipleWithGemini(params);
+    } catch (geminiError) {
+      console.log("Gemini failed, using fallback:", geminiError);
+    }
 
-    // Add images to each recipe
-    const recipesWithImages = await Promise.all(
-      recipes.map(async (recipe) => {
-        try {
-          const image = await getRecipeImage(recipe.title, ingredients);
-          return { ...recipe, image, source: "gemini-fallback" };
-        } catch (error) {
-          console.error("Error getting image for recipe:", error);
-          return { ...recipe, image: null, source: "gemini-fallback" };
-        }
-      })
-    );
-
-    return recipesWithImages;
+    // Fallback final a templates
+    return await generateMultipleFallbackRecipes(params);
   } catch (error) {
     console.error("Error generating multiple recipes:", error);
-    // Fallback to multiple templates
-    return generateMultipleCustomRecipes(ingredients, servings, count);
+    return await generateMultipleFallbackRecipes(params);
   }
 };
 
