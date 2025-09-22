@@ -1,12 +1,15 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
 import { buildUnifiedRecipePrompt, getSystemPrompt } from "@/lib/prompts";
 import { RecipeValidator } from "@/utils";
 
-// Create Gemini client
-const createGeminiClient = (): {
+// Definir tipos específicos para Gemini
+interface GeminiClient {
   genAI: GoogleGenerativeAI;
-  model: any;
-} | null => {
+  model: GenerativeModel;
+}
+
+// Create Gemini client
+const createGeminiClient = (): GeminiClient | null => {
   try {
     const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
     if (!apiKey) {
@@ -307,12 +310,27 @@ const cleanTimeFormat = RecipeValidator.cleanTimeFormat;
 // Usar la función centralizada de RecipeValidator
 const validateAndCleanRecipe = RecipeValidator.validateAndCleanRecipe;
 
+// Definir tipo para respuesta de receta parseada
+interface ParsedRecipe {
+  title: string;
+  description: string;
+  ingredients: Array<{ name: string; quantity: string; unit: string }>;
+  instructions: string[];
+  prepTime: string;
+  cookingTime: string;
+  totalTime: string;
+  servings: number;
+  cuisine: string;
+  image?: string;
+  source: string;
+}
+
 // Parse recipe response
 const parseRecipeResponse = (
   text: string,
   originalIngredients: string[],
   servings: number
-): any => {
+): ParsedRecipe | null => {
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
@@ -344,7 +362,7 @@ const parseRecipeResponse = (
 const generateFallbackRecipe = (
   ingredients: string[],
   servings: number
-): any => {
+): ParsedRecipe => {
   const cuisineStyles = [
     { cuisine: "Italian", style: "Rustic", method: "Sautéed" },
     { cuisine: "Mexican", style: "Spicy", method: "Grilled" },
@@ -400,7 +418,7 @@ export const generateRecipeWithGemini = async (
   ingredients: string[],
   servings: number,
   cuisine: string = "international"
-): Promise<any> => {
+): Promise<ParsedRecipe | null> => {
   const client = createGeminiClient();
 
   if (!client) {
@@ -430,7 +448,7 @@ export const generateMultipleRecipesWithGemini = async (
   ingredients: string[],
   servings: number,
   count: number = 4
-): Promise<any[]> => {
+): Promise<ParsedRecipe[]> => {
   try {
     const recipes = [];
 

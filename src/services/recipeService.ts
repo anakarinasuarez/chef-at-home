@@ -49,7 +49,7 @@ const convertPrismaRecipeToResponse = (recipe: unknown): RecipeResponse => {
     isPublic: r.isPublic as boolean,
     createdAt: r.createdAt as Date,
     updatedAt: r.updatedAt as Date,
-    user: r.user as any,
+    user: r.user as { id: string; name: string; email: string } | undefined,
   };
 };
 
@@ -372,8 +372,25 @@ const getRecipeImage = async (
   }
 };
 
+// Definir tipo para receta personalizada
+interface CustomRecipe {
+  title: string;
+  ingredients: Array<{ name: string; quantity: number; unit: string }>;
+  instructions: string[];
+  prepTime: string;
+  cookingTime: string;
+  totalTime: string;
+  servings: number;
+  cuisine: string;
+  image?: string;
+  source: string;
+}
+
 // Generate custom recipe fallback
-const generateCustomRecipe = (ingredients: string[], servings: number): any => {
+const generateCustomRecipe = (
+  ingredients: string[],
+  servings: number
+): CustomRecipe => {
   const cuisines = ["Italian", "Mexican", "Asian", "Mediterranean", "American"];
   const randomCuisine = cuisines[Math.floor(Math.random() * cuisines.length)];
 
@@ -401,7 +418,7 @@ const generateMultipleCustomRecipes = (
   ingredients: string[],
   servings: number,
   count: number
-): any[] => {
+): CustomRecipe[] => {
   const recipes = [];
   const cuisines = [
     "Italian",
@@ -444,7 +461,7 @@ export const generateRecipe = async (
   ingredients: string[],
   servings: number,
   cuisine: string = "international"
-): Promise<any> => {
+): Promise<CustomRecipe | null> => {
   try {
     // Primero intentar con OpenAI GPT-4
     if (isOpenAIServiceAvailable()) {

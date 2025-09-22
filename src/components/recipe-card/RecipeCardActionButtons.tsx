@@ -3,12 +3,13 @@ import { FaPencil } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
 import { BiShare } from "react-icons/bi";
 import { colors } from "@/design-system";
+import { RecipeCardData } from "@/types";
 
 interface RecipeCardActionButtonsProps {
-  recipe: any;
-  onEdit?: (recipe: any) => void;
+  recipe: RecipeCardData;
+  onEdit?: (recipe: RecipeCardData) => void;
   onDelete?: (recipeId: string) => void;
-  onShare?: (recipe: any) => void;
+  onShare?: (recipe: RecipeCardData) => void;
 }
 
 export default function RecipeCardActionButtons({

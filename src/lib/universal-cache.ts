@@ -2,7 +2,7 @@
  * Universal Cache Manager
  * Uses Enhanced localStorage for reliable client-side caching
  */
-import { 
+import {
   cacheRecipes,
   getCachedRecipes,
   cacheImage,
@@ -11,7 +11,7 @@ import {
   clearRecipesCache,
   clearImagesCache,
   getCacheStats,
-  cleanExpiredItems
+  cleanExpiredItems,
 } from "./localStorage-cache";
 
 export type CacheProvider = "localStorage";
@@ -25,19 +25,26 @@ export const initializeCache = async (): Promise<void> => {
   console.log("🚀 Universal Cache initialized with Enhanced localStorage");
 };
 
+// Definir tipo para recetas en cache
+interface CachedRecipe {
+  id: string;
+  title: string;
+  servings: number;
+  cookingTime: string;
+  image?: string;
+  source: string;
+  ingredients: string[];
+  instructions: string[];
+}
+
 // Cache recipes data
 export const cacheRecipesData = async (
   ingredients: string[],
   servings: number,
-  recipes: any[],
+  recipes: CachedRecipe[],
   ttlSeconds?: number
 ): Promise<void> => {
-  cacheRecipes(
-    ingredients,
-    servings,
-    recipes,
-    ttlSeconds || 3600
-  );
+  cacheRecipes(ingredients, servings, recipes, ttlSeconds || 3600);
 };
 
 // Get cached recipes
@@ -55,12 +62,7 @@ export const cacheImageData = async (
   imageUrl: string,
   ttlSeconds?: number
 ): Promise<void> => {
-  cacheImage(
-    recipeName,
-    ingredients,
-    imageUrl,
-    ttlSeconds || 86400
-  );
+  cacheImage(recipeName, ingredients, imageUrl, ttlSeconds || 86400);
 };
 
 // Get cached image URL
@@ -91,7 +93,7 @@ export const getCacheStatistics = async (): Promise<{
   provider: string;
   status: string;
   features: string[];
-  details?: any;
+  details?: Record<string, unknown>;
 }> => {
   const stats = getCacheStats();
   return {
@@ -132,7 +134,7 @@ export class UniversalCacheManager {
   static async cacheRecipes(
     ingredients: string[],
     servings: number,
-    recipes: any[],
+    recipes: CachedRecipe[],
     ttlSeconds?: number
   ): Promise<void> {
     return cacheRecipesData(ingredients, servings, recipes, ttlSeconds);
@@ -177,7 +179,7 @@ export class UniversalCacheManager {
     provider: string;
     status: string;
     features: string[];
-    details?: any;
+    details?: Record<string, unknown>;
   }> {
     return getCacheStatistics();
   }

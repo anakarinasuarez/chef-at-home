@@ -71,10 +71,22 @@ const getCacheItem = <T>(key: string): T | null => {
 };
 
 // Cache recipes data
+// Definir tipo para recetas en cache
+interface CachedRecipe {
+  id: string;
+  title: string;
+  servings: number;
+  cookingTime: string;
+  image?: string;
+  source: string;
+  ingredients: string[];
+  instructions: string[];
+}
+
 export const cacheRecipes = (
   ingredients: string[],
   servings: number,
-  recipes: any[],
+  recipes: CachedRecipe[],
   ttlSeconds: number = 3600 // 1 hour default
 ): void => {
   const cacheKey = getRecipeCacheKey(ingredients, servings);
@@ -85,9 +97,9 @@ export const cacheRecipes = (
 export const getCachedRecipes = (
   ingredients: string[],
   servings: number
-): any[] | null => {
+): CachedRecipe[] | null => {
   const cacheKey = getRecipeCacheKey(ingredients, servings);
-  return getCacheItem<any[]>(cacheKey);
+  return getCacheItem<CachedRecipe[]>(cacheKey);
 };
 
 // Cache image URL

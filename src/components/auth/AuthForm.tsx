@@ -63,10 +63,12 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
       if (!validation.success) {
         // Procesar errores de validación
         const errors: Record<string, string> = {};
-        validation.error.errors.forEach((err: any) => {
-          const field = err.path[0] as string;
-          errors[field] = err.message;
-        });
+        validation.error.errors.forEach(
+          (err: { path: (string | number)[]; message: string }) => {
+            const field = err.path[0] as string;
+            errors[field] = err.message;
+          }
+        );
         setFieldErrors(errors);
 
         // Mostrar el primer error como mensaje general
@@ -100,9 +102,11 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
           showError("Registration failed. Please try again.");
         }
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred");
-      showError(err.message || "An error occurred");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred";
+      setError(errorMessage);
+      showError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -181,9 +185,9 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
         <a
           href={type === "signup" ? "/auth/login" : "/auth/signup"}
           className="underline cursor-pointer"
-          style={{ 
+          style={{
             color: colors.brand.primary[500],
-            fontSize: "16px"
+            fontSize: "16px",
           }}
         >
           {type === "signup" ? "Sign in here" : "Sign up here"}
@@ -196,9 +200,9 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
           <a
             href="/auth/forgot-password"
             className="underline cursor-pointer hover:text-white transition-colors"
-            style={{ 
+            style={{
               color: colors.brand.primary[500],
-              fontSize: "16px"
+              fontSize: "16px",
             }}
           >
             Forgot your password?
