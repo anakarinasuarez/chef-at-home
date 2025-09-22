@@ -25,15 +25,54 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/hooks", () => ({
   useAuthUnified: () => mockAuthContext,
-  useSavedRecipes: () => ({
-    isRecipeSaved: mockIsRecipeSaved,
+  useSavedRecipesTransition: () => ({
+    savedRecipes: mockSavedRecipes,
+    loading: false,
+    error: null,
+    saveRecipe: mockSaveRecipe,
+    removeRecipe: mockRemoveRecipe,
+    updateRecipe: mockUpdateRecipe,
     toggleSaveRecipe: mockToggleSaveRecipe,
+    loadSavedRecipes: mockLoadSavedRecipes,
+    clearError: mockClearError,
   }),
-  useToast: () => mockToast,
+  useToast: () => ({
+    showSuccess: mockShowSuccess,
+    showError: mockShowError,
+    showWarning: mockShowWarning,
+    showInfo: mockShowInfo,
+  }),
 }));
 
+// Mock data
+const mockSavedRecipes = [
+  {
+    id: "recipe-1",
+    title: "Test Recipe 1",
+    servings: 4,
+    cookingTime: "30 minutes",
+    image: "https://example.com/image1.jpg",
+    source: "test-source",
+    ingredients: [
+      { name: "Ingredient 1", quantity: 1, unit: "cup" },
+      { name: "Ingredient 2", quantity: 2, unit: "tbsp" },
+    ],
+    instructions: ["Step 1", "Step 2"],
+  },
+];
+
+// Mock functions
 const mockIsRecipeSaved = vi.fn(() => false);
 const mockToggleSaveRecipe = vi.fn(() => true);
+const mockSaveRecipe = vi.fn().mockResolvedValue(true);
+const mockRemoveRecipe = vi.fn().mockResolvedValue(true);
+const mockUpdateRecipe = vi.fn().mockResolvedValue(true);
+const mockLoadSavedRecipes = vi.fn();
+const mockClearError = vi.fn();
+const mockShowSuccess = vi.fn();
+const mockShowError = vi.fn();
+const mockShowWarning = vi.fn();
+const mockShowInfo = vi.fn();
 
 // Mock toast notifications
 const mockToast = {

@@ -1,18 +1,12 @@
 "use client";
 
-import { useState, memo, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { BiTime, BiUser, BiStar, BiBookmark } from "react-icons/bi";
-import { FaPencil } from "react-icons/fa6";
-import { MdDelete } from "react-icons/md";
-import { BiShare } from "react-icons/bi";
-import { colors, typography } from "@/design-system";
-import { useAuthUnified } from "@/hooks";
-import Button from "@/components/Button";
-import { useSavedRecipesTransition, useToast } from "@/hooks";
-import ImagePlaceholder from "./ImagePlaceholder";
-import OptimizedImage from "./OptimizedImage";
+import { memo } from "react";
+import { colors } from "@/design-system";
 import { ErrorBoundaryAdvanced } from "./ErrorBoundaryAdvanced";
+import { useRecipeCard } from "@/hooks/useRecipeCard";
+import { RecipeInfo } from "./recipe/RecipeInfo";
+import { RecipeImage } from "./recipe/RecipeImage";
+import { RecipeActions } from "./recipe/RecipeActions";
 
 interface RecipeCardProps {
   recipe: {
@@ -32,6 +26,12 @@ interface RecipeCardProps {
   isRemoving?: boolean;
 }
 
+/**
+ * Componente RecipeCard refactorizado siguiendo el principio SRP
+ * Ahora solo se encarga de la composición y el layout
+ * La lógica de negocio está en el hook useRecipeCard
+ * Los sub-componentes manejan responsabilidades específicas
+ */
 function RecipeCard({
   recipe,
   variant = "save",
@@ -41,128 +41,27 @@ function RecipeCard({
   onRemoveFromList,
   isRemoving = false,
 }: RecipeCardProps) {
-  const router = useRouter();
-  const { user } = useAuthUnified();
-  const { savedRecipes, saveRecipe, removeRecipe } =
-    useSavedRecipesTransition();
-  const { showSuccess, showError } = useToast();
-  const [isSaving, setIsSaving] = useState(false);
-  const [imageError, setImageError] = useState(false);
-
-  // Memoizar el ID de la receta para evitar recálculos
-  const recipeId = useMemo(
-    () => recipe.id || Date.now().toString(),
-    [recipe.id]
-  );
-
-  // Memoizar la verificación de si la receta está guardada
-  const isSaved = useMemo(() => {
-    if (!user) return false;
-    return savedRecipes.some((r) => r.id === recipeId);
-  }, [user, recipeId, savedRecipes]);
+  // Usar el hook personalizado para toda la lógica de negocio
+  const {
+    isSaving,
+    imageError,
+    recipeId,
+    isSaved,
+    handleCardClick,
+    handleSaveClick,
+    handleImageError,
+  } = useRecipeCard({
+    recipe,
+    variant,
+    onRemoveFromList,
+  });
 
   console.log("🔍 RecipeCard DEBUG:", {
     recipeId,
     variant,
     isSaved,
     recipeTitle: recipe.title,
-    userId: user?.id,
   });
-
-  // Memoizar el handler de click de la tarjeta
-  const handleCardClick = useCallback(() => {
-    // Guardar los datos de la receta en localStorage para la página de detalle
-    localStorage.setItem(`recipe-${recipeId}`, JSON.stringify(recipe));
-
-    // Si es variant "my-recipes", pasar el parámetro from=my-recipes
-    if (variant === "my-recipes") {
-      router.push(`/recipes/${recipeId}?from=my-recipes`);
-    } else {
-      router.push(`/recipes/${recipeId}`);
-    }
-  }, [recipeId, recipe, variant, router]);
-
-  // Memoizar el handler de save
-  const handleSaveClick = useCallback(
-    (e: React.MouseEvent) => {
-      e?.stopPropagation?.(); // Evitar que se active el click de la tarjeta
-
-      if (!user) {
-        router.push("/auth/login");
-        return;
-      }
-
-      console.log("💾 Save clicked for recipe:", recipeId);
-      console.log("💾 Variant:", variant);
-      console.log("💾 onRemoveFromList function:", !!onRemoveFromList);
-
-      setIsSaving(true);
-
-      try {
-        let success = false;
-
-        if (isSaved) {
-          // Si ya está guardada, la removemos
-          success = removeRecipe(recipeId);
-          if (success) {
-            showSuccess("Recipe removed from favorites");
-          }
-        } else {
-          // Si no está guardada, la guardamos
-          success = saveRecipe({
-            ...recipe,
-            difficulty: recipe.difficulty || "medium",
-          });
-
-          if (success) {
-            showSuccess("Recipe saved to favorites");
-
-            // Si se guardó la receta desde Generated Recipes, eliminar de la lista
-            if (variant === "save" && onRemoveFromList) {
-              console.log("🗑️ Removing recipe from list:", recipeId);
-              onRemoveFromList(recipeId); // Esta función ya maneja la redirección
-            } else {
-              // Si se guardó desde otro lugar (no Generated Recipes), redirigir normalmente
-              setTimeout(() => {
-                router.push("/my-recipes");
-              }, 1000);
-            }
-          }
-        }
-
-        if (!success) {
-          showError("Error saving recipe");
-        }
-      } catch (error) {
-        console.error("Error saving recipe:", error);
-        showError("Error saving recipe");
-      } finally {
-        setIsSaving(false);
-      }
-    },
-    [
-      user,
-      router,
-      recipeId,
-      variant,
-      onRemoveFromList,
-      recipe,
-      saveRecipe,
-      removeRecipe,
-      isSaved,
-      showSuccess,
-      showError,
-    ]
-  );
-
-  // Memoizar el handler de delete
-  const handleDeleteClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onDelete?.(recipe.id || "");
-    },
-    [onDelete, recipe.id]
-  );
 
   return (
     <ErrorBoundaryAdvanced
@@ -180,147 +79,27 @@ function RecipeCard({
         }}
       >
         {/* Recipe Info - Above image */}
-        <div className="p-6">
-          {/* Title */}
-          <h3
-            className="mb-4 line-clamp-2"
-            style={{
-              color: colors.interface.text.primary,
-              fontSize: typography.styles["subtitle"].fontSize,
-              fontWeight: typography.styles["subtitle"].fontWeight,
-              lineHeight: typography.styles["subtitle"].lineHeight,
-              letterSpacing: typography.styles["subtitle"].letterSpacing,
-              minHeight: "3rem",
-              maxHeight: "3rem",
-            }}
-            title={recipe.title}
-          >
-            {recipe.title}
-          </h3>
-
-          {/* Recipe metadata - Two lines below title */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <BiUser style={{ color: colors.brand.primary[500] }} />
-              <span
-                style={{
-                  color: colors.interface.text.secondary,
-                  fontSize: typography.styles["caption"].fontSize,
-                  fontWeight: typography.styles["caption"].fontWeight,
-                  lineHeight: typography.styles["caption"].lineHeight,
-                  letterSpacing: typography.styles["caption"].letterSpacing,
-                }}
-              >
-                for {recipe.servings} people
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <BiTime style={{ color: colors.brand.primary[500] }} />
-              <span
-                style={{
-                  color: colors.interface.text.secondary,
-                  fontSize: typography.styles["caption"].fontSize,
-                  fontWeight: typography.styles["caption"].fontWeight,
-                  lineHeight: typography.styles["caption"].lineHeight,
-                  letterSpacing: typography.styles["caption"].letterSpacing,
-                }}
-              >
-                duration {recipe.cookingTime}
-              </span>
-            </div>
-          </div>
-        </div>
+        <RecipeInfo recipe={recipe} />
 
         {/* Recipe Image - Below info with padding */}
-        <div className="px-6">
-          <div className="relative h-48 overflow-hidden rounded-lg">
-            {recipe.image && !imageError ? (
-              <OptimizedImage
-                src={recipe.image}
-                alt={recipe.title}
-                width={400}
-                height={192}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                onError={() => setImageError(true)}
-                quality={80}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              />
-            ) : (
-              <ImagePlaceholder
-                title={recipe.title}
-                cuisine={
-                  recipe.source === "fallback-enhanced"
-                    ? "Italian"
-                    : "International"
-                }
-                className="h-48"
-                ingredients={[]}
-              />
-            )}
-          </div>
-        </div>
+        <RecipeImage
+          recipe={recipe}
+          imageError={imageError}
+          onImageError={handleImageError}
+        />
 
         {/* Action Buttons - Bottom right */}
-        <div className="p-6 flex justify-end">
-          {variant === "save" ? (
-            // Save Button for Generated Recipes
-            <Button
-              variant={isSaved ? "secondary" : "primary"}
-              onClick={() => handleSaveClick({} as React.MouseEvent)}
-              disabled={isSaving || isRemoving}
-              className="px-6 py-3 flex items-center gap-2"
-            >
-              {isRemoving ? (
-                <span className="text-lg animate-pulse">✓</span>
-              ) : isSaving ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-              ) : isSaved ? (
-                <span className="text-lg">✓</span>
-              ) : (
-                <span className="text-lg">+</span>
-              )}
-              {isRemoving
-                ? "Saved!"
-                : isSaving
-                ? "Saving..."
-                : isSaved
-                ? "Saved"
-                : "Save"}
-            </Button>
-          ) : (
-            // Edit, Delete, Share Buttons for My Recipes (Icon only)
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                onClick={(e) => {
-                  e?.stopPropagation();
-                  onEdit?.(recipe);
-                }}
-                className="p-3 flex items-center justify-center"
-              >
-                <FaPencil className="text-lg" data-testid="fa-pencil" />
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={(e) => e && handleDeleteClick(e)}
-                className="p-3 flex items-center justify-center hover:bg-red-500 hover:text-white hover:border-red-500"
-              >
-                <MdDelete className="text-lg" data-testid="md-delete" />
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={(e) => {
-                  e?.stopPropagation();
-                  onShare?.(recipe);
-                }}
-                className="p-3 flex items-center justify-center"
-              >
-                <BiShare className="text-lg" data-testid="bi-share" />
-              </Button>
-            </div>
-          )}
-        </div>
+        <RecipeActions
+          variant={variant}
+          recipe={recipe}
+          isSaved={isSaved}
+          isSaving={isSaving}
+          isRemoving={isRemoving}
+          onSaveClick={handleSaveClick}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onShare={onShare}
+        />
       </div>
     </ErrorBoundaryAdvanced>
   );

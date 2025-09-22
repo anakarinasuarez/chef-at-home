@@ -1,6 +1,9 @@
 import "@testing-library/jest-dom";
 import { vi } from "vitest";
 
+// Import all mocks
+import "./mocks";
+
 // Mock Next.js router
 const mockPush = vi.fn();
 const mockReplace = vi.fn();

@@ -5,6 +5,9 @@ export { useRecipesGenerationTransition } from "./useRecipesGenerationTransition
 export { useErrorHandlerTransition } from "./useErrorHandlerTransition";
 export { useToastTransition } from "./useToastTransition";
 
+// Hooks personalizados para componentes
+export { useRecipeCard } from "./useRecipeCard";
+
 // Hooks tradicionales (para compatibilidad)
 export { useRecipesNavigation } from "./useRecipesNavigation";
 export { useToast } from "./useToast";
