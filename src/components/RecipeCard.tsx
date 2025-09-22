@@ -7,21 +7,14 @@ import { useRecipeCard } from "@/hooks/useRecipeCard";
 import { RecipeInfo } from "./recipe/RecipeInfo";
 import { RecipeImage } from "./recipe/RecipeImage";
 import { RecipeActions } from "./recipe/RecipeActions";
+import { RecipeCardData } from "@/types";
 
 interface RecipeCardProps {
-  recipe: {
-    id?: string;
-    title: string;
-    servings: number;
-    cookingTime: string;
-    image?: string;
-    source: string;
-    difficulty?: string;
-  };
+  recipe: RecipeCardData;
   variant?: "save" | "my-recipes";
-  onEdit?: (recipe: any) => void;
+  onEdit?: (recipe: RecipeCardData) => void;
   onDelete?: (recipeId: string) => void;
-  onShare?: (recipe: any) => void;
+  onShare?: (recipe: RecipeCardData) => void;
   onRemoveFromList?: (recipeId: string) => void;
   isRemoving?: boolean;
 }

@@ -2,27 +2,18 @@ import { FaPencil } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
 import { BiShare } from "react-icons/bi";
 import Button from "../Button";
-
-interface Recipe {
-  id?: string;
-  title: string;
-  servings: number;
-  cookingTime: string;
-  image?: string;
-  source: string;
-  difficulty?: string;
-}
+import { RecipeCardData } from "@/types";
 
 interface RecipeActionsProps {
   variant: "save" | "my-recipes";
-  recipe: Recipe;
+  recipe: RecipeCardData;
   isSaved: boolean;
   isSaving: boolean;
   isRemoving: boolean;
   onSaveClick: (e: React.MouseEvent) => void;
-  onEdit?: (recipe: Recipe) => void;
+  onEdit?: (recipe: RecipeCardData) => void;
   onDelete?: (recipeId: string) => void;
-  onShare?: (recipe: Recipe) => void;
+  onShare?: (recipe: RecipeCardData) => void;
 }
 
 /**

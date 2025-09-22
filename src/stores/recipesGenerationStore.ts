@@ -290,18 +290,21 @@ export const useRecipesGenerationStore = create<RecipesGenerationState>()(
 
           // Convert API response to Recipe format
           const aiRecipes = data.recipes.map(
-            (aiRecipe: any, index: number) => ({
-              id: `recipe_${Date.now()}_${index}_${Math.random()
-                .toString(36)
-                .substr(2, 9)}`,
-              title: aiRecipe.title || `Recipe ${index + 1}`,
-              servings: aiRecipe.servings || servings,
-              cookingTime: aiRecipe.cookingTime || "30 minutes",
-              image: aiRecipe.image || null,
-              source: aiRecipe.source || "gemini",
-              ingredients: aiRecipe.ingredients || [],
-              instructions: aiRecipe.instructions || [],
-            })
+            (aiRecipe: unknown, index: number) => {
+              const recipe = aiRecipe as Record<string, unknown>;
+              return {
+                id: `recipe_${Date.now()}_${index}_${Math.random()
+                  .toString(36)
+                  .substr(2, 9)}`,
+                title: (recipe.title as string) || `Recipe ${index + 1}`,
+                servings: (recipe.servings as number) || servings,
+                cookingTime: (recipe.cookingTime as string) || "30 minutes",
+                image: (recipe.image as string) || null,
+                source: (recipe.source as string) || "gemini",
+                ingredients: (recipe.ingredients as string[]) || [],
+                instructions: (recipe.instructions as string[]) || [],
+              };
+            }
           );
 
           console.log("Processed recipes:", aiRecipes);

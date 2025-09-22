@@ -6,10 +6,11 @@ import { colors, typography, spacingSystem } from "@/design-system";
 import Button from "@/components/Button";
 import MainLayout from "@/components/layouts/MainLayout";
 import { useSavedRecipesTransition } from "@/hooks";
+import { User } from "@/types";
 
 interface CreateRecipePageProps {
   userName: string;
-  user: any;
+  user: User;
 }
 
 export default function CreateRecipePage({
@@ -52,9 +53,9 @@ export default function CreateRecipePage({
           // Cargar ingredientes
           if (parsedData.ingredients && parsedData.ingredients.length > 0) {
             const formattedIngredients = parsedData.ingredients.map(
-              (ing: any) => ({
+              (ing: string | { name: string }) => ({
                 id: Date.now().toString() + Math.random(),
-                name: ing.name || ing,
+                name: typeof ing === "string" ? ing : ing.name,
               })
             );
             setIngredients(formattedIngredients);

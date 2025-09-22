@@ -1,6 +1,7 @@
 import { useAuthStore } from "./authStore";
 import { useRecipesStore } from "./recipesStore";
 import { useSavedRecipesStore } from "./savedRecipesStore";
+import { User } from "@/types";
 
 /**
  * Store Coordinador - Conecta todos los stores especializados
@@ -10,7 +11,7 @@ import { useSavedRecipesStore } from "./savedRecipesStore";
  */
 
 // Función para sincronizar el usuario entre stores
-export const syncUserAcrossStores = (user: any) => {
+export const syncUserAcrossStores = (user: User | null) => {
   useAuthStore.getState().setUser(user);
 
   // Si el usuario cambia, limpiar datos relacionados

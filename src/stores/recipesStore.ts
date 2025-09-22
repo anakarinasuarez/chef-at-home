@@ -96,7 +96,7 @@ export const useRecipesStore = create<RecipesState>()(
           }
 
           // Convertir a UnifiedRecipe
-          const unifiedRecipes = data.recipes.map((recipe: any) =>
+          const unifiedRecipes = data.recipes.map((recipe: unknown) =>
             convertToUnifiedRecipe(recipe)
           );
 
@@ -109,8 +109,11 @@ export const useRecipesStore = create<RecipesState>()(
           );
         } catch (error) {
           console.error("Error generating recipes:", error);
-          set({ 
-            error: error instanceof Error ? error.message : "Failed to generate recipes"
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to generate recipes",
           });
         } finally {
           set({ isLoading: false });

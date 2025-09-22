@@ -2,19 +2,10 @@ import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthUnified } from "@/hooks";
 import { useSavedRecipesTransition, useToast } from "@/hooks";
-
-interface Recipe {
-  id?: string;
-  title: string;
-  servings: number;
-  cookingTime: string;
-  image?: string;
-  source: string;
-  difficulty?: string;
-}
+import { RecipeCardData } from "@/types";
 
 interface UseRecipeCardProps {
-  recipe: Recipe;
+  recipe: RecipeCardData;
   variant?: "save" | "my-recipes";
   onRemoveFromList?: (recipeId: string) => void;
 }
