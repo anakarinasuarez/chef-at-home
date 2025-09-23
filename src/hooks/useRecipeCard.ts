@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthUnified } from "@/hooks";
-import { useSavedRecipesTransition, useToastTransition } from "@/hooks";
+import { useSavedRecipesStore, useToastStore } from "@/stores";
 import { RecipeCardData } from "@/types";
 
 interface UseRecipeCardProps {
@@ -34,9 +34,11 @@ export const useRecipeCard = ({
 }: UseRecipeCardProps): UseRecipeCardReturn => {
   const router = useRouter();
   const { user } = useAuthUnified();
-  const { savedRecipes, saveRecipe, removeRecipe } =
-    useSavedRecipesTransition();
-  const { showSuccess, showError } = useToastTransition();
+  const savedRecipes = useSavedRecipesStore((state) => state.savedRecipes);
+  const saveRecipe = useSavedRecipesStore((state) => state.saveRecipe);
+  const removeRecipe = useSavedRecipesStore((state) => state.removeRecipe);
+  const showSuccess = useToastStore((state) => state.showSuccess);
+  const showError = useToastStore((state) => state.showError);
 
   // Estado local
   const [isSaving, setIsSaving] = useState(false);
@@ -88,16 +90,19 @@ export const useRecipeCard = ({
 
         if (isSaved) {
           // Si ya está guardada, la removemos
-          success = removeRecipe(recipeId);
+          success = removeRecipe(recipeId, user.id);
           if (success) {
             showSuccess("Recipe removed from favorites");
           }
         } else {
           // Si no está guardada, la guardamos
-          success = saveRecipe({
-            ...recipe,
-            difficulty: recipe.difficulty || "medium",
-          });
+          success = saveRecipe(
+            {
+              ...recipe,
+              difficulty: recipe.difficulty || "medium",
+            },
+            user.id
+          );
 
           if (success) {
             showSuccess("Recipe saved to favorites");

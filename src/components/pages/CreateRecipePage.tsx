@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { colors, typography, spacingSystem } from "@/design-system";
 import Button from "@/components/Button";
 import MainLayout from "@/components/layouts/MainLayout";
-import { useSavedRecipesTransition } from "@/hooks";
+import { useSavedRecipesStore } from "@/stores";
 import { User } from "@/types";
 
 interface CreateRecipePageProps {
@@ -30,7 +30,7 @@ export default function CreateRecipePage({
   const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [recipeTitle, setRecipeTitle] = useState("");
-  const { updateRecipe } = useSavedRecipesTransition();
+  const updateRecipe = useSavedRecipesStore((state) => state.updateRecipe);
 
   // Cargar datos de edición si existe
   useEffect(() => {
@@ -154,7 +154,7 @@ export default function CreateRecipePage({
       };
 
       // Actualizar la receta existente
-      const success = updateRecipe(editingRecipeId, updatedRecipeData);
+      const success = updateRecipe(editingRecipeId, updatedRecipeData, user.id);
 
       if (success) {
         console.log("✅ Receta editada guardada exitosamente");

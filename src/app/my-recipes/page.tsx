@@ -6,7 +6,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import Nav from "@/components/Nav";
 import { colors, typography } from "@/design-system";
 import { useAuthUnified } from "@/hooks";
-import { useSavedRecipesTransition, useToastTransition } from "@/hooks";
+import { useSavedRecipesStore, useToastStore } from "@/stores";
 
 interface FrontendRecipe {
   id?: string;
@@ -34,8 +34,12 @@ import {
 export default function MyRecipesPage() {
   const { user, isLoading } = useAuthUnified();
   const router = useRouter();
-  const { savedRecipes, loading, removeRecipe } = useSavedRecipesTransition();
-  const { showSuccess } = useToastTransition();
+  
+  // Usar stores de Zustand directamente
+  const savedRecipes = useSavedRecipesStore((state) => state.savedRecipes);
+  const loading = useSavedRecipesStore((state) => state.isLoading);
+  const removeRecipeAction = useSavedRecipesStore((state) => state.removeRecipe);
+  const showSuccess = useToastStore((state) => state.showSuccess);
   const [activeIndex, setActiveIndex] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recipeToDelete, setRecipeToDelete] = useState<FrontendRecipe | null>(
@@ -105,8 +109,8 @@ export default function MyRecipesPage() {
   };
 
   const confirmDelete = () => {
-    if (recipeToDelete && recipeToDelete.id) {
-      const success = removeRecipe(recipeToDelete.id);
+    if (recipeToDelete && recipeToDelete.id && user?.id) {
+      const success = removeRecipeAction(recipeToDelete.id, user.id);
       if (success) {
         showSuccess("Recipe deleted successfully!");
       }

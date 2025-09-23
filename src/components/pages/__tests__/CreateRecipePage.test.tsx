@@ -20,9 +20,12 @@ vi.mock("next/navigation", () => ({
 // Mock hooks
 const mockUpdateRecipe = vi.fn();
 
-vi.mock("@/hooks", () => ({
-  useSavedRecipesTransition: () => ({
-    updateRecipe: mockUpdateRecipe,
+vi.mock("@/stores", () => ({
+  useSavedRecipesStore: vi.fn((selector) => {
+    const state = {
+      updateRecipe: mockUpdateRecipe,
+    };
+    return selector ? selector(state) : state;
   }),
 }));
 

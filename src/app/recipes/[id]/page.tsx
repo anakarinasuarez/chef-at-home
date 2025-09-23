@@ -14,7 +14,7 @@ import Button from "@/components/Button";
 import { colors } from "@/design-system";
 import { typography } from "@/design-system";
 import { useAuthUnified } from "@/hooks";
-import { useSavedRecipesTransition, useToastTransition } from "@/hooks";
+import { useSavedRecipesStore, useToastStore } from "@/stores";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 
@@ -39,9 +39,11 @@ export default function RecipeDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthUnified();
-  const { savedRecipes, removeRecipe, saveRecipe } =
-    useSavedRecipesTransition();
-  const { showSuccess, showError } = useToastTransition();
+  const savedRecipes = useSavedRecipesStore((state) => state.savedRecipes);
+  const saveRecipe = useSavedRecipesStore((state) => state.saveRecipe);
+  const removeRecipe = useSavedRecipesStore((state) => state.removeRecipe);
+  const showSuccess = useToastStore((state) => state.showSuccess);
+  const showError = useToastStore((state) => state.showError);
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFromMyRecipes, setIsFromMyRecipes] = useState(false);
@@ -159,14 +161,14 @@ export default function RecipeDetailPage() {
 
       if (isRecipeSavedState) {
         // Si ya está guardada, la removemos
-        success = removeRecipe(recipe.id);
+        success = removeRecipe(recipe.id, user.id);
         if (success) {
           setIsRecipeSavedState(false);
           showSuccess("Recipe removed from favorites!");
         }
       } else {
         // Si no está guardada, la guardamos
-        success = saveRecipe(recipe);
+        success = saveRecipe(recipe, user.id);
         if (success) {
           setIsRecipeSavedState(true);
           showSuccess("Recipe saved to favorites!");
@@ -236,8 +238,8 @@ export default function RecipeDetailPage() {
   };
 
   const confirmDelete = () => {
-    if (!recipe) return;
-    removeRecipe(recipe.id);
+    if (!recipe || !user) return;
+    removeRecipe(recipe.id, user.id);
     setShowDeleteModal(false);
     router.push("/my-recipes");
   };

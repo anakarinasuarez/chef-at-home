@@ -29,9 +29,15 @@ vi.mock("@/hooks", () => ({
     login: mockLogin,
     register: mockRegister,
   }),
-  useToastTransition: () => ({
-    showSuccess: mockShowSuccess,
-    showError: mockShowError,
+}));
+
+vi.mock("@/stores", () => ({
+  useToastStore: vi.fn((selector) => {
+    const state = {
+      showSuccess: mockShowSuccess,
+      showError: mockShowError,
+    };
+    return selector ? selector(state) : state;
   }),
 }));
 

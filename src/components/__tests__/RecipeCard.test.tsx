@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RecipeCard from "../RecipeCard";
 import { mockAuthContext } from "../../test/mocks/contexts";
-import { useSavedRecipesTransition } from "@/hooks";
+import { useSavedRecipesStore, useToastStore } from "@/stores";
 
 // Mock all dependencies
 const mockPush = vi.fn();
@@ -37,22 +37,31 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/hooks", () => ({
   useAuthUnified: () => mockAuthContext,
-  useSavedRecipesTransition: () => ({
-    savedRecipes: mockSavedRecipes,
-    loading: false,
-    error: null,
-    saveRecipe: mockSaveRecipe,
-    removeRecipe: mockRemoveRecipe,
-    updateRecipe: mockUpdateRecipe,
-    toggleSaveRecipe: mockToggleSaveRecipe,
-    loadSavedRecipes: mockLoadSavedRecipes,
-    clearError: mockClearError,
+}));
+
+vi.mock("@/stores", () => ({
+  useSavedRecipesStore: vi.fn((selector) => {
+    const state = {
+      savedRecipes: mockSavedRecipes,
+      loading: false,
+      error: null,
+      saveRecipe: mockSaveRecipe,
+      removeRecipe: mockRemoveRecipe,
+      updateRecipe: mockUpdateRecipe,
+      toggleSaveRecipe: mockToggleSaveRecipe,
+      loadSavedRecipes: mockLoadSavedRecipes,
+      clearError: mockClearError,
+    };
+    return selector ? selector(state) : state;
   }),
-  useToastTransition: () => ({
-    showSuccess: mockShowSuccess,
-    showError: mockShowError,
-    showWarning: mockShowWarning,
-    showInfo: mockShowInfo,
+  useToastStore: vi.fn((selector) => {
+    const state = {
+      showSuccess: mockShowSuccess,
+      showError: mockShowError,
+      showWarning: mockShowWarning,
+      showInfo: mockShowInfo,
+    };
+    return selector ? selector(state) : state;
   }),
 }));
 

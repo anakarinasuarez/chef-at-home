@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useToastTransition } from "@/hooks";
+import { useToastStore } from "@/stores";
 import {
   loginSchema,
   registerSchema,
@@ -11,7 +11,8 @@ import {
 } from "@/schemas";
 
 export default function TestValidationPage() {
-  const { showSuccess, showError } = useToastTransition();
+  const showSuccess = useToastStore((state) => state.showSuccess);
+  const showError = useToastStore((state) => state.showError);
   const [testResults, setTestResults] = useState<string[]>([]);
 
   const addResult = (message: string) => {

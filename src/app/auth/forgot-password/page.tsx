@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useToastTransition } from "@/hooks";
+import { useToastStore } from "@/stores";
 import { colors } from "@/design-system";
 import Button from "@/components/Button";
 import FormField from "@/components/auth/FormField";
@@ -19,7 +19,8 @@ export default function ForgotPasswordPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const { showSuccess, showError } = useToastTransition();
+  const showSuccess = useToastStore((state) => state.showSuccess);
+  const showError = useToastStore((state) => state.showError);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

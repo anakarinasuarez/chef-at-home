@@ -32,6 +32,11 @@ export interface SavedRecipesState {
   loadSavedRecipes: (userId: string) => void;
   saveRecipe: (recipe: FrontendRecipe, userId: string) => boolean;
   removeRecipe: (recipeId: string, userId: string) => boolean;
+  updateRecipe: (
+    recipeId: string,
+    updatedRecipe: FrontendRecipe,
+    userId: string
+  ) => boolean;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
@@ -125,6 +130,54 @@ export const useSavedRecipesStore = create<SavedRecipesState>()(
           set({
             error:
               error instanceof Error ? error.message : "Error removing recipe",
+          });
+          return false;
+        }
+      },
+
+      updateRecipe: (
+        recipeId: string,
+        updatedRecipe: FrontendRecipe,
+        userId: string
+      ) => {
+        try {
+          const currentRecipes = get().savedRecipes;
+          const recipeIndex = currentRecipes.findIndex(
+            (recipe) => recipe.id === recipeId
+          );
+
+          if (recipeIndex === -1) {
+            set({
+              error: "Recipe not found",
+            });
+            return false;
+          }
+
+          const updatedRecipes = [...currentRecipes];
+          updatedRecipes[recipeIndex] = {
+            ...updatedRecipe,
+            id: recipeId,
+            savedAt: currentRecipes[recipeIndex].savedAt, // Mantener la fecha original
+          };
+
+          set({ savedRecipes: updatedRecipes, error: null });
+
+          const success = StorageManager.setJSON(
+            STORAGE_KEYS.SAVED_RECIPES(userId),
+            updatedRecipes
+          );
+
+          // Actualizar cache individual de la receta
+          StorageManager.setJSON(
+            STORAGE_KEYS.RECIPE_CACHE(recipeId),
+            updatedRecipes[recipeIndex]
+          );
+
+          return success;
+        } catch (error) {
+          set({
+            error:
+              error instanceof Error ? error.message : "Error updating recipe",
           });
           return false;
         }
