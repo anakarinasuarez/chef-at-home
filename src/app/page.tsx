@@ -18,7 +18,7 @@ export default function HomePage() {
       {/* Si el usuario está logueado, mostrar la interfaz de crear recetas con lazy loading */}
       {user ? (
         <SuspenseWrapper minHeight="600px">
-          <LazyCreateRecipePage userName={user.name} user={user} />
+          <LazyCreateRecipePage userName={user.name} user={user as any} />
         </SuspenseWrapper>
       ) : (
         <LandingPage />

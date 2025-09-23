@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { UserResponse } from "@/types/auth";
 
-interface AuthState {
+export interface AuthState {
   // Estado
   user: UserResponse | null;
   isLoading: boolean;

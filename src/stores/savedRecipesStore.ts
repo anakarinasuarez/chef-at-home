@@ -21,7 +21,7 @@ interface FrontendRecipe {
   savedAt?: string;
 }
 
-interface SavedRecipesState {
+export interface SavedRecipesState {
   // Estado
   savedRecipes: FrontendRecipe[];
   isLoading: boolean;
@@ -157,7 +157,7 @@ export const useSavedRecipesLoading = () =>
   useSavedRecipesStore((state) => state.isLoading);
 export const useSavedRecipesError = () =>
   useSavedRecipesStore((state) => state.error);
-export const useRemovingRecipeId = () =>
+export const useSavedRecipesRemovingId = () =>
   useSavedRecipesStore((state) => state.removingRecipeId);
 export const useSavedRecipesActions = () =>
   useSavedRecipesStore((state) => ({

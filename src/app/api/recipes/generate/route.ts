@@ -122,7 +122,9 @@ export async function POST(request: NextRequest) {
         try {
           // Si hay un título personalizado y es la primera receta, usarlo
           const finalTitle =
-            customTitle && index === 0 ? customTitle : recipe.title;
+            customTitle && index === 0
+              ? customTitle
+              : recipe?.title || "Generated Recipe";
 
           console.log(`🎨 Generating image for: ${finalTitle}`);
 
@@ -143,12 +145,17 @@ export async function POST(request: NextRequest) {
           };
         } catch (error) {
           console.error(
-            `❌ Error getting image for recipe: ${recipe.title}`,
+            `❌ Error getting image for recipe: ${
+              recipe?.title || "Unknown Recipe"
+            }`,
             error
           );
           return {
             ...recipe,
-            title: customTitle && index === 0 ? customTitle : recipe.title, // Usar el título final
+            title:
+              customTitle && index === 0
+                ? customTitle
+                : recipe?.title || "Generated Recipe", // Usar el título final
             image: "/images/plate.png",
             imageSource: "fallback",
           };

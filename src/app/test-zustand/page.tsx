@@ -139,7 +139,11 @@ export default function TestZustandPage() {
         createdAt: new Date(),
         updatedAt: new Date(),
         user: undefined,
-      };
+        prepTime: "15 minutes",
+        totalTime: "45 minutes",
+        cuisine: "international",
+        source: "test",
+      } as any;
 
       actions.recipes.addRecipe(testRecipe);
 
@@ -302,7 +306,7 @@ export default function TestZustandPage() {
                 <div>
                   Usuario:{" "}
                   {getCurrentState().auth.user
-                    ? getCurrentState().auth.user.name
+                    ? getCurrentState().auth.user?.name
                     : "No logueado"}
                 </div>
                 <div>
@@ -356,15 +360,23 @@ export default function TestZustandPage() {
                 🤖 Generación de Recetas
               </h3>
               <div className="space-y-2 text-sm">
-                <div>Cantidad: {getCurrentState().recipesGeneration.recipes.length}</div>
                 <div>
-                  Loading: {getCurrentState().recipesGeneration.isLoading ? "Sí" : "No"}
+                  Cantidad: {getCurrentState().recipesGeneration.recipes.length}
+                </div>
+                <div>
+                  Loading:{" "}
+                  {getCurrentState().recipesGeneration.isLoading ? "Sí" : "No"}
                 </div>
                 <div>
                   Cargadas:{" "}
-                  {getCurrentState().recipesGeneration.hasLoadedRecipes ? "Sí" : "No"}
+                  {getCurrentState().recipesGeneration.hasLoadedRecipes
+                    ? "Sí"
+                    : "No"}
                 </div>
-                <div>Error: {getCurrentState().recipesGeneration.error || "Ninguno"}</div>
+                <div>
+                  Error:{" "}
+                  {getCurrentState().recipesGeneration.error || "Ninguno"}
+                </div>
               </div>
             </div>
 

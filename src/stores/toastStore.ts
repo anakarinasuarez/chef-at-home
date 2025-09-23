@@ -13,7 +13,7 @@ export interface Toast {
   dismissible?: boolean;
 }
 
-interface ToastState {
+export interface ToastState {
   // Estado
   toasts: Toast[];
   maxToasts: number;
@@ -29,7 +29,7 @@ interface ToastState {
   showError: (message: string, options?: Partial<Toast>) => void;
   showWarning: (message: string, options?: Partial<Toast>) => void;
   showInfo: (message: string, options?: Partial<Toast>) => void;
-  
+
   // Utilidades
   getToastsByType: (type: Toast["type"]) => Toast[];
   dismissToast: (toastId: string) => void;
@@ -52,7 +52,7 @@ export const useToastStore = create<ToastState>((set, get) => ({
 
     set((state) => {
       const newToasts = [...state.toasts, toast];
-      
+
       // Mantener solo el número máximo de toasts
       if (newToasts.length > state.maxToasts) {
         newToasts.splice(0, newToasts.length - state.maxToasts);
@@ -152,7 +152,7 @@ export const useToastActions = () =>
 export const useToast = () => {
   const toasts = useToasts();
   const actions = useToastActions();
-  
+
   return {
     toasts,
     ...actions,

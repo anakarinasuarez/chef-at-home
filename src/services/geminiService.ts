@@ -311,7 +311,7 @@ const cleanTimeFormat = RecipeValidator.cleanTimeFormat;
 const validateAndCleanRecipe = RecipeValidator.validateAndCleanRecipe;
 
 // Definir tipo para respuesta de receta parseada
-interface ParsedRecipe {
+export interface ParsedRecipe {
   title: string;
   description: string;
   ingredients: Array<{ name: string; quantity: string; unit: string }>;
@@ -346,9 +346,8 @@ const parseRecipeResponse = (
       return {
         ...cleanedRecipe,
         source: "gemini",
-        originalIngredients,
         servings,
-      };
+      } as any;
     }
   } catch (error) {
     console.error("Error parsing Gemini response:", error);
@@ -424,7 +423,7 @@ export const generateMultipleRecipesWithGemini = async (
       }
     }
 
-    return recipes;
+    return recipes.filter((recipe): recipe is ParsedRecipe => recipe !== null);
   } catch (error) {
     console.error("Error generating multiple recipes:", error);
     throw error;

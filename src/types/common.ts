@@ -3,8 +3,10 @@
  * Centraliza las definiciones de tipos para evitar duplicación
  */
 
-// Tipo para usuario
-export interface User {
+import { Recipe } from "./recipe";
+
+// Tipo para usuario básico
+export interface BasicUser {
   id: string;
   name: string;
   email: string;
@@ -28,9 +30,19 @@ export interface Ingredient {
 }
 
 // Tipo para receta completa (con ingredientes e instrucciones)
-export interface FullRecipe extends Recipe {
+export interface FullRecipe {
+  id?: string;
+  title: string;
+  description?: string;
   ingredients: string[];
   instructions: string[];
+  prepTime?: string;
+  cookingTime: string;
+  totalTime?: string;
+  servings: number;
+  cuisine?: string;
+  image?: string;
+  source?: string;
 }
 
 // Tipo para respuesta de API

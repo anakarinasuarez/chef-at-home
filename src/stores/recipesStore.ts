@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { UnifiedRecipe, convertToUnifiedRecipe } from "@/types/recipe";
 
-interface RecipesState {
+export interface RecipesState {
   // Estado
   recipes: UnifiedRecipe[];
   isLoading: boolean;
@@ -97,7 +97,7 @@ export const useRecipesStore = create<RecipesState>()(
 
           // Convertir a UnifiedRecipe
           const unifiedRecipes = data.recipes.map((recipe: unknown) =>
-            convertToUnifiedRecipe(recipe)
+            convertToUnifiedRecipe(recipe as Record<string, unknown>)
           );
 
           set({ recipes: unifiedRecipes, hasLoadedRecipes: true });

@@ -347,7 +347,7 @@ export const deleteRecipe = async (
 };
 
 // Generate recipe image
-const getRecipeImage = async (
+export const getRecipeImage = async (
   recipeTitle: string,
   ingredients: string[]
 ): Promise<string | null> => {
@@ -373,7 +373,7 @@ const getRecipeImage = async (
 };
 
 // Definir tipo para receta personalizada
-interface CustomRecipe {
+export interface CustomRecipe {
   title: string;
   ingredients: Array<{ name: string; quantity: number; unit: string }>;
   instructions: string[];
@@ -382,12 +382,12 @@ interface CustomRecipe {
   totalTime: string;
   servings: number;
   cuisine: string;
-  image?: string;
+  image?: string | null;
   source: string;
 }
 
 // Generate custom recipe fallback
-const generateCustomRecipe = (
+export const generateCustomRecipe = (
   ingredients: string[],
   servings: number
 ): CustomRecipe => {
@@ -407,6 +407,8 @@ const generateCustomRecipe = (
       "Serve hot and enjoy!",
     ],
     cookingTime: "25 minutes",
+    prepTime: "10 minutes",
+    totalTime: "35 minutes",
     cuisine: randomCuisine,
     servings: servings,
     source: "template",
@@ -414,7 +416,7 @@ const generateCustomRecipe = (
 };
 
 // Generate multiple custom recipes fallback
-const generateMultipleCustomRecipes = (
+export const generateMultipleCustomRecipes = (
   ingredients: string[],
   servings: number,
   count: number
@@ -447,6 +449,8 @@ const generateMultipleCustomRecipes = (
         "Garnish and serve",
       ],
       cookingTime: `${20 + i * 5} minutes`,
+      prepTime: "10 minutes",
+      totalTime: `${30 + i * 5} minutes`,
       cuisine: randomCuisine,
       servings: servings,
       source: "template",
@@ -481,28 +485,28 @@ export const generateRecipe = async (
     // Intentar con OpenAI primero
     const openaiResult = await generateWithOpenAI(params);
     if (openaiResult.success && openaiResult.recipe) {
-      return await addImageToRecipe(
-        openaiResult.recipe,
+      return (await addImageToRecipe(
+        openaiResult.recipe as any,
         ingredients,
         "openai-gpt4"
-      );
+      )) as any;
     }
 
     // Fallback a Gemini
     const geminiResult = await generateWithGemini(params);
     if (geminiResult.success && geminiResult.recipe) {
-      return await addImageToRecipe(
-        geminiResult.recipe,
+      return (await addImageToRecipe(
+        geminiResult.recipe as any,
         ingredients,
         "gemini-fallback"
-      );
+      )) as any;
     }
 
     // Fallback final a template
-    return await generateFallbackRecipe(params);
+    return (await generateFallbackRecipe(params)) as any;
   } catch (error) {
     console.error("Error generating recipe:", error);
-    return await generateFallbackRecipe(params);
+    return (await generateFallbackRecipe(params)) as any;
   }
 };
 
@@ -529,23 +533,23 @@ export const generateMultipleRecipes = async (
   try {
     // Intentar con OpenAI primero
     try {
-      return await generateMultipleWithOpenAI(params);
+      return (await generateMultipleWithOpenAI(params)) as any;
     } catch (openaiError) {
       console.log("OpenAI failed, trying Gemini:", openaiError);
     }
 
     // Fallback a Gemini
     try {
-      return await generateMultipleWithGemini(params);
+      return (await generateMultipleWithGemini(params)) as any;
     } catch (geminiError) {
       console.log("Gemini failed, using fallback:", geminiError);
     }
 
     // Fallback final a templates
-    return await generateMultipleFallbackRecipes(params);
+    return (await generateMultipleFallbackRecipes(params)) as any;
   } catch (error) {
     console.error("Error generating multiple recipes:", error);
-    return await generateMultipleFallbackRecipes(params);
+    return (await generateMultipleFallbackRecipes(params)) as any;
   }
 };
 

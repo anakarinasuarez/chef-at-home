@@ -16,15 +16,13 @@ const mockSavedRecipes = [
     instructions: ["Step 1", "Step 2"],
   },
   {
-    id: "recipe-2", 
+    id: "recipe-2",
     title: "Test Recipe 2",
     servings: 2,
     cookingTime: "20 minutes",
     image: "https://example.com/image2.jpg",
     source: "test-source",
-    ingredients: [
-      { name: "Ingredient 3", quantity: 3, unit: "cups" },
-    ],
+    ingredients: [{ name: "Ingredient 3", quantity: 3, unit: "cups" }],
     instructions: ["Step 1"],
   },
 ];
@@ -116,16 +114,20 @@ export const mockUseRecipesNavigation = () => ({
 });
 
 // Mock all hooks
-vi.mock("@/hooks", () => ({
-  // Transition hooks (Zustand)
-  useSavedRecipesTransition: mockUseSavedRecipesTransition,
-  useRecipesTransition: mockUseRecipesTransition,
-  useRecipesGenerationTransition: mockUseRecipesGenerationTransition,
-  useErrorHandlerTransition: mockUseErrorHandlerTransition,
-  useToastTransition: mockUseToastTransition,
-  
-  // Traditional hooks (for compatibility)
-  useToast: mockUseToast,
-  useRecipesNavigation: mockUseRecipesNavigation,
-  useAuthUnified: mockUseAuthUnified,
-}));
+vi.mock("@/hooks", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    // Transition hooks (Zustand)
+    useSavedRecipesTransition: mockUseSavedRecipesTransition,
+    useRecipesTransition: mockUseRecipesTransition,
+    useRecipesGenerationTransition: mockUseRecipesGenerationTransition,
+    useErrorHandlerTransition: mockUseErrorHandlerTransition,
+    useToastTransition: mockUseToastTransition,
+
+    // Traditional hooks (for compatibility)
+    useToast: mockUseToast,
+    useRecipesNavigation: mockUseRecipesNavigation,
+    useAuthUnified: mockUseAuthUnified,
+  };
+});

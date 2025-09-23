@@ -13,7 +13,7 @@ export interface AppError {
   stack?: string;
 }
 
-interface ErrorState {
+export interface ErrorState {
   // Estado
   errors: AppError[];
   currentError: AppError | null;
@@ -72,7 +72,7 @@ export const useErrorStore = create<ErrorState>()(
       removeError: (errorId) => {
         set((state) => ({
           errors: state.errors.filter((error) => error.id !== errorId),
-          currentError: 
+          currentError:
             state.currentError?.id === errorId ? null : state.currentError,
         }));
       },
@@ -133,7 +133,10 @@ export const useErrorStore = create<ErrorState>()(
         // Determine severity based on error type
         if (errorCode.includes("NETWORK") || errorCode.includes("FETCH")) {
           severity = "high";
-        } else if (errorCode.includes("AUTH") || errorCode.includes("PERMISSION")) {
+        } else if (
+          errorCode.includes("AUTH") ||
+          errorCode.includes("PERMISSION")
+        ) {
           severity = "critical";
         } else if (errorCode.includes("VALIDATION")) {
           severity = "low";
@@ -150,7 +153,7 @@ export const useErrorStore = create<ErrorState>()(
 
       retry: () => {
         const state = get();
-        
+
         if (state.retryCount >= state.maxRetries) {
           get().addError({
             message: "Maximum retry attempts reached",
@@ -182,8 +185,8 @@ export const useErrorStore = create<ErrorState>()(
       },
 
       getRecentErrors: (limit = 10) => {
-        return get().errors
-          .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+        return get()
+          .errors.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
           .slice(0, limit);
       },
     }),
@@ -199,7 +202,8 @@ export const useErrorStore = create<ErrorState>()(
 
 // Selectores para facilitar el uso
 export const useErrors = () => useErrorStore((state) => state.errors);
-export const useCurrentError = () => useErrorStore((state) => state.currentError);
+export const useCurrentError = () =>
+  useErrorStore((state) => state.currentError);
 export const useIsRetrying = () => useErrorStore((state) => state.isRetrying);
 export const useRetryCount = () => useErrorStore((state) => state.retryCount);
 export const useErrorActions = () =>

@@ -34,5 +34,5 @@ export default function CreatePage() {
   }
 
   // Renderizar la página de crear receta
-  return <CreateRecipePage userName={user.name} user={user} />;
+  return <CreateRecipePage userName={user.name} user={user as any} />;
 }

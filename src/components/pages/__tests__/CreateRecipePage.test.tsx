@@ -21,7 +21,7 @@ vi.mock("next/navigation", () => ({
 const mockUpdateRecipe = vi.fn();
 
 vi.mock("@/hooks", () => ({
-  useSavedRecipes: () => ({
+  useSavedRecipesTransition: () => ({
     updateRecipe: mockUpdateRecipe,
   }),
 }));

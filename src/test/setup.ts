@@ -1,8 +1,9 @@
 import "@testing-library/jest-dom";
 import { vi } from "vitest";
 
-// Import all mocks
-import "./mocks";
+// Import all mocks except services (let individual tests handle service mocks)
+import "./mocks/contexts";
+import "./mocks/hooks";
 
 // Mock Next.js router
 const mockPush = vi.fn();

@@ -122,7 +122,7 @@ export default function MyRecipesPage() {
 
   const scrollToRecipe = (index: number) => {
     if (!isClient) return;
-    
+
     const container = document.querySelector(".overflow-x-auto") as HTMLElement;
     if (container) {
       const recipeCard = container.children[index] as HTMLElement;
@@ -139,7 +139,7 @@ export default function MyRecipesPage() {
 
   const handleShare = (recipe: FrontendRecipe) => {
     if (!isClient) return;
-    
+
     if (navigator.share) {
       navigator.share({
         title: recipe.title,
@@ -269,12 +269,12 @@ export default function MyRecipesPage() {
                         // Guardar los datos de la receta en localStorage para editarlos
                         const editData = {
                           title: recipe.title,
-                          ingredients: recipe.ingredients || [],
+                          ingredients: (recipe as any).ingredients || [],
                           servings: recipe.servings,
                           cookingTime: recipe.cookingTime,
                           difficulty: recipe.difficulty || "medium",
                           cuisine: "international",
-                          instructions: recipe.instructions || [],
+                          instructions: (recipe as any).instructions || [],
                           isEditing: true,
                           originalId: recipe.id,
                         };
@@ -293,7 +293,7 @@ export default function MyRecipesPage() {
                           handleDeleteClick(recipe);
                         }
                       }}
-                      onShare={handleShare}
+                      onShare={(recipe) => handleShare(recipe as any)}
                     />
                   </SuspenseWrapper>
                 </div>

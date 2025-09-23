@@ -17,7 +17,7 @@ interface Recipe {
   instructions: string[];
 }
 
-interface RecipesGenerationState {
+export interface RecipesGenerationState {
   // Estado
   recipes: Recipe[];
   isLoading: boolean;
@@ -31,6 +31,7 @@ interface RecipesGenerationState {
   clearError: () => void;
   setHasLoadedRecipes: (loaded: boolean) => void;
   generateRecipes: () => Promise<void>;
+  clearRecipes: () => void;
   clearCache: () => Promise<void>;
 }
 
@@ -49,6 +50,7 @@ export const useRecipesGenerationStore = create<RecipesGenerationState>()(
       setError: (error) => set({ error }),
       clearError: () => set({ error: null }),
       setHasLoadedRecipes: (hasLoadedRecipes) => set({ hasLoadedRecipes }),
+      clearRecipes: () => set({ recipes: [], hasLoadedRecipes: false }),
 
       // Generar recetas
       generateRecipes: async () => {
@@ -443,5 +445,5 @@ export const useRecipesGenerationActions = () =>
     clearError: state.clearError,
     setHasLoadedRecipes: state.setHasLoadedRecipes,
     generateRecipes: state.generateRecipes,
-    clearCache: state.clearCache,
+    clearRecipes: state.clearRecipes,
   }));
