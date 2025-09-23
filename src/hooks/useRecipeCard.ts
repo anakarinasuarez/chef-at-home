@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthUnified } from "@/hooks";
-import { useSavedRecipesTransition, useToast } from "@/hooks";
+import { useSavedRecipesTransition, useToastTransition } from "@/hooks";
 import { RecipeCardData } from "@/types";
 
 interface UseRecipeCardProps {
@@ -36,7 +36,7 @@ export const useRecipeCard = ({
   const { user } = useAuthUnified();
   const { savedRecipes, saveRecipe, removeRecipe } =
     useSavedRecipesTransition();
-  const { showSuccess, showError } = useToast();
+  const { showSuccess, showError } = useToastTransition();
 
   // Estado local
   const [isSaving, setIsSaving] = useState(false);

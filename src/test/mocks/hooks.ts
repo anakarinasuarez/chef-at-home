@@ -75,13 +75,16 @@ export const mockUseErrorHandlerTransition = () => ({
 // Mock useToastTransition
 export const mockUseToastTransition = () => ({
   toasts: [],
-  showToast: vi.fn(),
-  hideToast: vi.fn(),
-  clearAllToasts: vi.fn(),
   showSuccess: vi.fn(),
   showError: vi.fn(),
   showWarning: vi.fn(),
   showInfo: vi.fn(),
+  addToast: vi.fn(),
+  removeToast: vi.fn(),
+  clearToasts: vi.fn(),
+  updateToast: vi.fn(),
+  dismissToast: vi.fn(),
+  getToastsByType: vi.fn().mockReturnValue([]),
 });
 
 // Mock useAuthUnified
@@ -98,24 +101,9 @@ export const mockUseAuthUnified = () => ({
   logout: vi.fn().mockResolvedValue(true),
 });
 
-// Mock useToast (traditional)
-export const mockUseToast = () => ({
-  showSuccess: vi.fn(),
-  showError: vi.fn(),
-  showWarning: vi.fn(),
-  showInfo: vi.fn(),
-});
-
-// Mock useRecipesNavigation
-export const mockUseRecipesNavigation = () => ({
-  navigateToRecipe: vi.fn(),
-  navigateToRecipes: vi.fn(),
-  navigateToMyRecipes: vi.fn(),
-});
-
 // Mock all hooks
 vi.mock("@/hooks", async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal() as Record<string, unknown>;
   return {
     ...actual,
     // Transition hooks (Zustand)
@@ -125,9 +113,7 @@ vi.mock("@/hooks", async (importOriginal) => {
     useErrorHandlerTransition: mockUseErrorHandlerTransition,
     useToastTransition: mockUseToastTransition,
 
-    // Traditional hooks (for compatibility)
-    useToast: mockUseToast,
-    useRecipesNavigation: mockUseRecipesNavigation,
+    // Unified auth hook
     useAuthUnified: mockUseAuthUnified,
   };
 });

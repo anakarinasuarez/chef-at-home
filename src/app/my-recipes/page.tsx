@@ -6,7 +6,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import Nav from "@/components/Nav";
 import { colors, typography } from "@/design-system";
 import { useAuthUnified } from "@/hooks";
-import { useSavedRecipesTransition, useToast } from "@/hooks";
+import { useSavedRecipesTransition, useToastTransition } from "@/hooks";
 
 interface FrontendRecipe {
   id?: string;
@@ -35,7 +35,7 @@ export default function MyRecipesPage() {
   const { user, isLoading } = useAuthUnified();
   const router = useRouter();
   const { savedRecipes, loading, removeRecipe } = useSavedRecipesTransition();
-  const { showSuccess } = useToast();
+  const { showSuccess } = useToastTransition();
   const [activeIndex, setActiveIndex] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recipeToDelete, setRecipeToDelete] = useState<FrontendRecipe | null>(

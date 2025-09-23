@@ -1,26 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { useToast } from "@/hooks";
-import { 
-  loginSchema, 
-  registerSchema, 
+import { useToastTransition } from "@/hooks";
+import {
+  loginSchema,
+  registerSchema,
   generateRecipeRequestSchema,
-  safeValidateSchema, 
-  getFirstZodError 
+  safeValidateSchema,
+  getFirstZodError,
 } from "@/schemas";
 
 export default function TestValidationPage() {
-  const { showSuccess, showError } = useToast();
+  const { showSuccess, showError } = useToastTransition();
   const [testResults, setTestResults] = useState<string[]>([]);
 
   const addResult = (message: string) => {
-    setTestResults(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+    setTestResults((prev) => [
+      ...prev,
+      `${new Date().toLocaleTimeString()}: ${message}`,
+    ]);
   };
 
   const testLoginValidation = () => {
     addResult("Testing login validation...");
-    
+
     // Test valid data
     const validLogin = { email: "test@example.com", password: "password123" };
     const validResult = safeValidateSchema(loginSchema, validLogin);
@@ -34,7 +37,11 @@ export default function TestValidationPage() {
     const invalidEmail = { email: "invalid-email", password: "password123" };
     const emailResult = safeValidateSchema(loginSchema, invalidEmail);
     if (!emailResult.success) {
-      addResult(`✅ Invalid email correctly rejected: ${getFirstZodError(emailResult.error)}`);
+      addResult(
+        `✅ Invalid email correctly rejected: ${getFirstZodError(
+          emailResult.error
+        )}`
+      );
     } else {
       addResult("❌ Invalid email was accepted");
     }
@@ -43,7 +50,11 @@ export default function TestValidationPage() {
     const shortPassword = { email: "test@example.com", password: "123" };
     const passwordResult = safeValidateSchema(loginSchema, shortPassword);
     if (!passwordResult.success) {
-      addResult(`✅ Short password correctly rejected: ${getFirstZodError(passwordResult.error)}`);
+      addResult(
+        `✅ Short password correctly rejected: ${getFirstZodError(
+          passwordResult.error
+        )}`
+      );
     } else {
       addResult("❌ Short password was accepted");
     }
@@ -51,12 +62,12 @@ export default function TestValidationPage() {
 
   const testRegisterValidation = () => {
     addResult("Testing register validation...");
-    
+
     // Test valid data
-    const validRegister = { 
-      name: "John Doe", 
-      email: "john@example.com", 
-      password: "Password123" 
+    const validRegister = {
+      name: "John Doe",
+      email: "john@example.com",
+      password: "Password123",
     };
     const validResult = safeValidateSchema(registerSchema, validRegister);
     if (validResult.success) {
@@ -66,27 +77,35 @@ export default function TestValidationPage() {
     }
 
     // Test invalid name (numbers)
-    const invalidName = { 
-      name: "John123", 
-      email: "john@example.com", 
-      password: "Password123" 
+    const invalidName = {
+      name: "John123",
+      email: "john@example.com",
+      password: "Password123",
     };
     const nameResult = safeValidateSchema(registerSchema, invalidName);
     if (!nameResult.success) {
-      addResult(`✅ Invalid name correctly rejected: ${getFirstZodError(nameResult.error)}`);
+      addResult(
+        `✅ Invalid name correctly rejected: ${getFirstZodError(
+          nameResult.error
+        )}`
+      );
     } else {
       addResult("❌ Invalid name was accepted");
     }
 
     // Test weak password
-    const weakPassword = { 
-      name: "John Doe", 
-      email: "john@example.com", 
-      password: "password" 
+    const weakPassword = {
+      name: "John Doe",
+      email: "john@example.com",
+      password: "password",
     };
     const passwordResult = safeValidateSchema(registerSchema, weakPassword);
     if (!passwordResult.success) {
-      addResult(`✅ Weak password correctly rejected: ${getFirstZodError(passwordResult.error)}`);
+      addResult(
+        `✅ Weak password correctly rejected: ${getFirstZodError(
+          passwordResult.error
+        )}`
+      );
     } else {
       addResult("❌ Weak password was accepted");
     }
@@ -94,16 +113,19 @@ export default function TestValidationPage() {
 
   const testRecipeGenerationValidation = () => {
     addResult("Testing recipe generation validation...");
-    
+
     // Test valid data
     const validRecipe = {
       ingredients: ["chicken", "rice", "vegetables"],
       servings: 4,
       cuisine: "Asian",
       count: 2,
-      title: "Delicious Chicken Rice"
+      title: "Delicious Chicken Rice",
     };
-    const validResult = safeValidateSchema(generateRecipeRequestSchema, validRecipe);
+    const validResult = safeValidateSchema(
+      generateRecipeRequestSchema,
+      validRecipe
+    );
     if (validResult.success) {
       addResult("✅ Valid recipe data passed validation");
     } else {
@@ -115,11 +137,18 @@ export default function TestValidationPage() {
       ingredients: [],
       servings: 4,
       cuisine: "Asian",
-      count: 1
+      count: 1,
     };
-    const ingredientsResult = safeValidateSchema(generateRecipeRequestSchema, emptyIngredients);
+    const ingredientsResult = safeValidateSchema(
+      generateRecipeRequestSchema,
+      emptyIngredients
+    );
     if (!ingredientsResult.success) {
-      addResult(`✅ Empty ingredients correctly rejected: ${getFirstZodError(ingredientsResult.error)}`);
+      addResult(
+        `✅ Empty ingredients correctly rejected: ${getFirstZodError(
+          ingredientsResult.error
+        )}`
+      );
     } else {
       addResult("❌ Empty ingredients was accepted");
     }
@@ -129,11 +158,18 @@ export default function TestValidationPage() {
       ingredients: Array(25).fill("ingredient"),
       servings: 4,
       cuisine: "Asian",
-      count: 1
+      count: 1,
     };
-    const manyResult = safeValidateSchema(generateRecipeRequestSchema, tooManyIngredients);
+    const manyResult = safeValidateSchema(
+      generateRecipeRequestSchema,
+      tooManyIngredients
+    );
     if (!manyResult.success) {
-      addResult(`✅ Too many ingredients correctly rejected: ${getFirstZodError(manyResult.error)}`);
+      addResult(
+        `✅ Too many ingredients correctly rejected: ${getFirstZodError(
+          manyResult.error
+        )}`
+      );
     } else {
       addResult("❌ Too many ingredients was accepted");
     }
@@ -146,7 +182,9 @@ export default function TestValidationPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Zod Validation Testing</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">
+          Zod Validation Testing
+        </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow">
@@ -190,10 +228,12 @@ export default function TestValidationPage() {
               Clear Results
             </button>
           </div>
-          
+
           <div className="bg-gray-100 p-4 rounded-lg max-h-96 overflow-y-auto">
             {testResults.length === 0 ? (
-              <p className="text-gray-500">No tests run yet. Click a test button above.</p>
+              <p className="text-gray-500">
+                No tests run yet. Click a test button above.
+              </p>
             ) : (
               <div className="space-y-2">
                 {testResults.map((result, index) => (

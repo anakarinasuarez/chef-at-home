@@ -14,7 +14,7 @@ import Button from "@/components/Button";
 import { colors } from "@/design-system";
 import { typography } from "@/design-system";
 import { useAuthUnified } from "@/hooks";
-import { useSavedRecipesTransition, useToast } from "@/hooks";
+import { useSavedRecipesTransition, useToastTransition } from "@/hooks";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 
@@ -41,7 +41,7 @@ export default function RecipeDetailPage() {
   const { user } = useAuthUnified();
   const { savedRecipes, removeRecipe, saveRecipe } =
     useSavedRecipesTransition();
-  const { showSuccess, showError } = useToast();
+  const { showSuccess, showError } = useToastTransition();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFromMyRecipes, setIsFromMyRecipes] = useState(false);

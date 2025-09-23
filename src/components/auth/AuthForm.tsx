@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthUnified } from "@/hooks";
-import { useToast } from "@/hooks";
+import { useToastTransition } from "@/hooks";
 import { colors } from "@/design-system";
 import Button from "@/components/Button";
 import FormField from "./FormField";
@@ -30,7 +30,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { login, register } = useAuthUnified();
-  const { showSuccess, showError } = useToast();
+  const { showSuccess, showError } = useToastTransition();
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

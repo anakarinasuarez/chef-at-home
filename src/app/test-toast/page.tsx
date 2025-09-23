@@ -1,9 +1,9 @@
 "use client";
 
-import { useToast } from "@/hooks";
+import { useToastTransition } from "@/hooks";
 
 export default function TestToastPage() {
-  const { showSuccess, showError, showLoading, dismiss } = useToast();
+  const { showSuccess, showError, showInfo, dismissToast } = useToastTransition();
 
   const testSuccess = () => {
     showSuccess("Operation completed successfully!");
@@ -14,9 +14,8 @@ export default function TestToastPage() {
   };
 
   const testLoading = () => {
-    const toastId = showLoading("Processing your request...");
+    showInfo("Processing your request...");
     setTimeout(() => {
-      dismiss(toastId);
       showSuccess("Operation completed!");
     }, 2000);
   };

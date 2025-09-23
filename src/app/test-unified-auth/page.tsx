@@ -1,13 +1,13 @@
 "use client";
 
 import { useAuthUnified } from "@/hooks";
-import { useToast } from "@/hooks";
+import { useToastTransition } from "@/hooks";
 import Button from "@/components/Button";
 import MainLayout from "@/components/layouts/MainLayout";
 
 export default function TestUnifiedAuthPage() {
   const { user, isLoading, error, login, register, logout } = useAuthUnified();
-  const { showSuccess, showError } = useToast();
+  const { showSuccess, showError } = useToastTransition();
 
   const handleTestLogin = async () => {
     const success = await login("test@example.com", "password123");

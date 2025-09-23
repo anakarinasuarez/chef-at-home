@@ -29,7 +29,7 @@ vi.mock("@/hooks", () => ({
     login: mockLogin,
     register: mockRegister,
   }),
-  useToast: () => ({
+  useToastTransition: () => ({
     showSuccess: mockShowSuccess,
     showError: mockShowError,
   }),

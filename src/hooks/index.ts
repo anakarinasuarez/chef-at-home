@@ -8,9 +8,5 @@ export { useToastTransition } from "./useToastTransition";
 // Hooks personalizados para componentes
 export { useRecipeCard } from "./useRecipeCard";
 
-// Hooks tradicionales (para compatibilidad)
-export { useRecipesNavigation } from "./useRecipesNavigation";
-export { useToast } from "./useToast";
-
 // Unified auth hook (compatible with AuthContext)
 export { useAuthUnified } from "./useAuthUnified";

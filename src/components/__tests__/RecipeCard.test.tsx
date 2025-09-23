@@ -48,7 +48,7 @@ vi.mock("@/hooks", () => ({
     loadSavedRecipes: mockLoadSavedRecipes,
     clearError: mockClearError,
   }),
-  useToast: () => ({
+  useToastTransition: () => ({
     showSuccess: mockShowSuccess,
     showError: mockShowError,
     showWarning: mockShowWarning,

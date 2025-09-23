@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useToast } from "@/hooks";
+import { useToastTransition } from "@/hooks";
 import { colors } from "@/design-system";
 import Button from "@/components/Button";
 import FormField from "@/components/auth/FormField";
@@ -23,7 +23,7 @@ function ResetPasswordContent() {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [token, setToken] = useState<string | null>(null);
-  const { showSuccess, showError } = useToast();
+  const { showSuccess, showError } = useToastTransition();
   const router = useRouter();
   const searchParams = useSearchParams();
 
