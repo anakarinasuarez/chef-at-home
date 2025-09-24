@@ -4,7 +4,7 @@ import React, { useState, useEffect, memo, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthUnified } from "@/hooks";
 import Nav from "@/components/Nav";
-import { FiArrowLeft } from "react-icons/fi";
+import { IoIosArrowBack } from "react-icons/io";
 import { colors } from "@/design-system";
 import { UniversalCacheManager } from "@/lib/universal-cache";
 import { SuspenseWrapper } from "@/components/lazy/SuspenseWrapper";
@@ -54,7 +54,7 @@ export default function RecipesPage() {
   // Generate recipes with AI when component mounts
   useEffect(() => {
     if (!isClient) return;
-    
+
     console.log("🚀 useEffect triggered - hasLoadedRecipes:", hasLoadedRecipes);
     const generateRecipes = async () => {
       console.log("🔄 generateRecipes function called");
@@ -412,7 +412,7 @@ export default function RecipesPage() {
 
   const clearAllCache = async () => {
     if (!isClient) return;
-    
+
     try {
       // Limpiar sessionStorage
       sessionStorage.removeItem("currentRecipes");
@@ -454,27 +454,32 @@ export default function RecipesPage() {
   };
 
   // Memoizar el handler de scroll to recipe
-  const scrollToRecipe = useCallback((index: number) => {
-    if (!isClient) return;
-    
-    const container = document.querySelector(".overflow-x-auto") as HTMLElement;
-    if (container) {
-      const recipeCard = container.children[index] as HTMLElement;
-      if (recipeCard) {
-        recipeCard.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-          inline: "start",
-        });
-        setActiveIndex(index);
+  const scrollToRecipe = useCallback(
+    (index: number) => {
+      if (!isClient) return;
+
+      const container = document.querySelector(
+        ".overflow-x-auto"
+      ) as HTMLElement;
+      if (container) {
+        const recipeCard = container.children[index] as HTMLElement;
+        if (recipeCard) {
+          recipeCard.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: "start",
+          });
+          setActiveIndex(index);
+        }
       }
-    }
-  }, [isClient]);
+    },
+    [isClient]
+  );
 
   // Detectar scroll automáticamente para actualizar el punto activo
   useEffect(() => {
     if (!isClient) return;
-    
+
     const container = document.querySelector(".overflow-x-auto") as HTMLElement;
     if (!container) return;
 
@@ -566,7 +571,7 @@ export default function RecipesPage() {
                 colors.interface.background.secondary;
             }}
           >
-            <FiArrowLeft className="text-xl" />
+            <IoIosArrowBack className="text-xl" />
           </button>
           <div className="flex-1">
             <h1

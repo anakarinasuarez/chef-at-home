@@ -1,5 +1,5 @@
 import React from "react";
-import { FiArrowLeft } from "react-icons/fi";
+import { IoIosArrowBack } from "react-icons/io";
 import { colors } from "@/design-system";
 
 interface RecipesPageHeaderProps {
@@ -34,7 +34,7 @@ export default function RecipesPageHeader({
             colors.interface.background.secondary;
         }}
       >
-        <FiArrowLeft className="text-xl" />
+        <IoIosArrowBack className="text-xl" />
       </button>
       <div className="flex-1">
         <h1

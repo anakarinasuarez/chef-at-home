@@ -333,7 +333,7 @@ export default function RecipeDetailPage() {
               <Button
                 variant="tertiary"
                 onClick={() => router.back()}
-                className="p-2 mt-1"
+                className="mt-1 !p-0"
               >
                 <IoIosArrowBack className="text-xl" />
               </Button>
@@ -370,7 +370,7 @@ export default function RecipeDetailPage() {
                     onClick={() => handleEditRecipe()}
                     className="px-6 py-3 flex items-center gap-2"
                   >
-                    <FaPencil className="text-lg" />
+                    <IoIosArrowBack className="text-lg" />
                     Edit
                   </Button>
                   <Button
