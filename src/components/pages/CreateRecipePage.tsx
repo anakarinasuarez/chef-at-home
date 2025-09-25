@@ -1,44 +1,40 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { colors, typography, spacingSystem } from "@/design-system";
-import Button from "@/components/Button";
-import MainLayout from "@/components/layouts/MainLayout";
-import { useSavedRecipesStore } from "@/stores";
-import { User } from "@/types";
+import Button from '@/components/Button';
+import MainLayout from '@/components/layouts/MainLayout';
+import { colors, typography } from '@/design-system';
+import { useSavedRecipesStore } from '@/stores';
+import { User } from '@/types';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface CreateRecipePageProps {
   userName: string;
   user: User;
 }
 
-export default function CreateRecipePage({
-  userName,
-  user,
-}: CreateRecipePageProps) {
+export default function CreateRecipePage({ userName, user }: CreateRecipePageProps) {
   const router = useRouter();
-  const [ingredients, setIngredients] = useState<
-    Array<{ id: string; name: string }>
-  >([]);
-  const [newIngredient, setNewIngredient] = useState("");
+  const [ingredients, setIngredients] = useState<Array<{ id: string; name: string }>>([]);
+  const [newIngredient, setNewIngredient] = useState('');
   const [selectedServings, setSelectedServings] = useState<number | null>(null);
   const [customServings, setCustomServings] = useState<number[]>([]);
   const [showCustomInput, setShowCustomInput] = useState(false);
-  const [newCustomServing, setNewCustomServing] = useState("");
+  const [newCustomServing, setNewCustomServing] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [recipeTitle, setRecipeTitle] = useState("");
-  const updateRecipe = useSavedRecipesStore((state) => state.updateRecipe);
+  const [recipeTitle, setRecipeTitle] = useState('');
+  const [originalImage, setOriginalImage] = useState<string | null>(null); // ✅ Para preservar la imagen original
+  const updateRecipe = useSavedRecipesStore(state => state.updateRecipe);
 
   // Cargar datos de edición si existe
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const isEditMode = urlParams.get("edit") === "true";
+    const isEditMode = urlParams.get('edit') === 'true';
 
     if (isEditMode) {
-      const editData = localStorage.getItem("editRecipeData");
+      const editData = localStorage.getItem('editRecipeData');
       if (editData) {
         try {
           const parsedData = JSON.parse(editData);
@@ -55,7 +51,7 @@ export default function CreateRecipePage({
             const formattedIngredients = parsedData.ingredients.map(
               (ing: string | { name: string }) => ({
                 id: Date.now().toString() + Math.random(),
-                name: typeof ing === "string" ? ing : ing.name,
+                name: typeof ing === 'string' ? ing : ing.name,
               })
             );
             setIngredients(formattedIngredients);
@@ -66,10 +62,15 @@ export default function CreateRecipePage({
             setSelectedServings(parsedData.servings);
           }
 
+          // Cargar imagen original
+          if (parsedData.image) {
+            setOriginalImage(parsedData.image);
+          }
+
           // Limpiar localStorage después de cargar
-          localStorage.removeItem("editRecipeData");
+          localStorage.removeItem('editRecipeData');
         } catch (error) {
-          console.error("Error loading edit data:", error);
+          console.error('Error loading edit data:', error);
         }
       }
     }
@@ -82,18 +83,18 @@ export default function CreateRecipePage({
         name: newIngredient.trim(),
       };
       setIngredients([...ingredients, newIngredientObj]);
-      setNewIngredient("");
+      setNewIngredient('');
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       handleAddIngredient();
     }
   };
 
   const handleRemoveIngredient = (id: string) => {
-    setIngredients(ingredients.filter((ingredient) => ingredient.id !== id));
+    setIngredients(ingredients.filter(ingredient => ingredient.id !== id));
   };
 
   const handleServingsChange = (servings: number) => {
@@ -107,29 +108,29 @@ export default function CreateRecipePage({
       if (!isNaN(customValue) && customValue > 0) {
         setSelectedServings(customValue);
         setShowCustomInput(false);
-        setNewCustomServing("");
+        setNewCustomServing('');
       }
     }
   };
 
   const handleSaveRecipe = async () => {
     if (ingredients.length === 0) {
-      alert("Please add at least one ingredient");
+      alert('Please add at least one ingredient');
       return;
     }
 
     if (!selectedServings) {
-      alert("Please select the number of servings");
+      alert('Please select the number of servings');
       return;
     }
 
     if (!recipeTitle.trim()) {
-      alert("Please enter a recipe title");
+      alert('Please enter a recipe title');
       return;
     }
 
     if (!editingRecipeId) {
-      alert("No recipe ID found for editing");
+      alert('No recipe ID found for editing');
       return;
     }
 
@@ -139,33 +140,32 @@ export default function CreateRecipePage({
       // Crear los datos actualizados de la receta
       const updatedRecipeData = {
         title: recipeTitle.trim(),
-        ingredients: ingredients.map((ing) => ({
+        ingredients: ingredients.map(ing => ({
           name: ing.name,
           quantity: 1, // Valor por defecto
-          unit: "unit", // Valor por defecto
+          unit: 'unit', // Valor por defecto
         })),
         servings: selectedServings,
-        cookingTime: "30 minutes", // Valor por defecto
-        difficulty: "medium", // Valor por defecto
-        source: "user-edited",
-        instructions: [
-          "Instructions will be updated when you regenerate the recipe.",
-        ], // Placeholder
+        cookingTime: '30 minutes', // Valor por defecto
+        difficulty: 'medium', // Valor por defecto
+        source: 'user-edited',
+        image: originalImage || undefined, // ✅ Convertir null a undefined
+        instructions: ['Instructions will be updated when you regenerate the recipe.'], // Placeholder
       };
 
       // Actualizar la receta existente
       const success = updateRecipe(editingRecipeId, updatedRecipeData, user.id);
 
       if (success) {
-        console.log("✅ Receta editada guardada exitosamente");
+        console.log('✅ Receta editada guardada exitosamente');
         // Redirigir a my-recipes después de guardar
-        router.push("/my-recipes");
+        router.push('/my-recipes');
       } else {
-        throw new Error("Failed to update recipe");
+        throw new Error('Failed to update recipe');
       }
     } catch (error) {
-      console.error("Error saving recipe:", error);
-      alert("Error saving recipe. Please try again.");
+      console.error('Error saving recipe:', error);
+      alert('Error saving recipe. Please try again.');
     } finally {
       setIsCreating(false);
     }
@@ -173,65 +173,63 @@ export default function CreateRecipePage({
 
   const handleCreateRecipe = async () => {
     if (ingredients.length === 0) {
-      alert("Please add at least one ingredient");
+      alert('Please add at least one ingredient');
       return;
     }
 
     if (!selectedServings) {
-      alert("Please select the number of servings");
+      alert('Please select the number of servings');
       return;
     }
 
     setIsCreating(true);
 
     try {
-      const response = await fetch("/api/recipes/generate", {
-        method: "POST",
+      const response = await fetch('/api/recipes/generate', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ingredients: ingredients.map((ing) => ing.name),
+          ingredients: ingredients.map(ing => ing.name),
           servings: selectedServings,
           count: 4, // Generar 4 recetas para nueva creación
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate recipes");
+        throw new Error('Failed to generate recipes');
       }
 
       const data = await response.json();
-      console.log("Recetas generadas:", data);
-      console.log("Número de recetas recibidas:", data.recipes?.length || 0);
+      console.log('Recetas generadas:', data);
+      console.log('Número de recetas recibidas:', data.recipes?.length || 0);
 
       if (!data.recipes || data.recipes.length === 0) {
-        throw new Error("No recipes were generated");
+        throw new Error('No recipes were generated');
       }
 
       // Redirigir a la página de recetas múltiples
-      const ingredientsParam = encodeURIComponent(
-        JSON.stringify(ingredients.map((ing) => ing.name))
-      );
+      const ingredientsParam = encodeURIComponent(JSON.stringify(ingredients.map(ing => ing.name)));
       const redirectUrl = `/recipes?force=true&ingredients=${ingredientsParam}&servings=${selectedServings}`;
-      console.log("Redirigiendo a página de recetas múltiples:", redirectUrl);
+      console.log('Redirigiendo a página de recetas múltiples:', redirectUrl);
       router.push(redirectUrl);
     } catch (error) {
-      console.error("Error generating recipes:", error);
-      alert("Error generating recipes. Please try again.");
+      console.error('Error generating recipes:', error);
+      alert('Error generating recipes. Please try again.');
     } finally {
       setIsCreating(false);
     }
   };
 
   return (
-    <MainLayout showMenu={true} userName={userName} currentPage="create">
+    <MainLayout showMenu={true} userName={userName} currentPage='create'>
       {/* Mensaje de Bienvenida */}
       <h2
-        className="mb-4 text-white"
+        className='mb-4 text-white'
         style={{
-          fontSize: typography.styles["body-large"].fontSize,
-          fontWeight: typography.styles["body-large"].fontWeight,
+          fontSize: typography.styles['body-large'].fontSize,
+          fontWeight: typography.styles['body-large'].fontWeight,
           color: colors.interface.text.primary,
         }}
       >
@@ -240,51 +238,51 @@ export default function CreateRecipePage({
 
       {/* Título Principal */}
       <h1
-        className="mb-6 text-center lg:text-left leading-tight"
+        className='mb-6 text-center lg:text-left leading-tight'
         style={{
-          fontSize: typography.styles["title-1"].fontSize,
-          fontWeight: typography.styles["title-1"].fontWeight,
-          lineHeight: typography.styles["title-1"].lineHeight,
-          letterSpacing: typography.styles["title-1"].letterSpacing,
+          fontSize: typography.styles['title-1'].fontSize,
+          fontWeight: typography.styles['title-1'].fontWeight,
+          lineHeight: typography.styles['title-1'].lineHeight,
+          letterSpacing: typography.styles['title-1'].letterSpacing,
           color: colors.interface.text.primary,
         }}
       >
-        {isEditing ? "Edit your recipe" : "Create your perfect recipe"}
+        {isEditing ? 'Edit your recipe' : 'Create your perfect recipe'}
       </h1>
 
       {/* Campo de Título de la Receta - Solo en modo edición */}
       {isEditing && (
-        <div className="mb-8">
+        <div className='mb-8'>
           <h3
-            className="mb-4"
+            className='mb-4'
             style={{
-              fontSize: typography.styles["title-3"].fontSize,
-              fontWeight: typography.styles["title-3"].fontWeight,
+              fontSize: typography.styles['title-3'].fontSize,
+              fontWeight: typography.styles['title-3'].fontWeight,
               color: colors.interface.text.primary,
             }}
           >
             Recipe Title
           </h3>
           <input
-            type="text"
+            type='text'
             value={recipeTitle}
-            onChange={(e) => setRecipeTitle(e.target.value)}
-            placeholder="Enter recipe title..."
-            className="w-full max-w-md px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
+            onChange={e => setRecipeTitle(e.target.value)}
+            placeholder='Enter recipe title...'
+            className='w-full max-w-md px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200'
             style={{
-              fontSize: typography.styles["body"].fontSize,
+              fontSize: typography.styles['body'].fontSize,
             }}
           />
         </div>
       )}
 
       {/* Sección de Ingredientes */}
-      <div className="mb-8">
+      <div className='mb-8'>
         <h3
-          className="mb-4"
+          className='mb-4'
           style={{
-            fontSize: typography.styles["title-3"].fontSize,
-            fontWeight: typography.styles["title-3"].fontWeight,
+            fontSize: typography.styles['title-3'].fontSize,
+            fontWeight: typography.styles['title-3'].fontWeight,
             color: colors.interface.text.primary,
           }}
         >
@@ -292,47 +290,40 @@ export default function CreateRecipePage({
         </h3>
 
         {/* Input para agregar ingredientes */}
-        <div className="flex gap-2 mb-4">
+        <div className='flex gap-2 mb-4'>
           <input
-            type="text"
+            type='text'
             value={newIngredient}
-            onChange={(e) => setNewIngredient(e.target.value)}
+            onChange={e => setNewIngredient(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Add an ingredient..."
-            className="w-80 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
+            placeholder='Add an ingredient...'
+            className='w-80 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200'
             style={{
-              fontSize: typography.styles["body"].fontSize,
+              fontSize: typography.styles['body'].fontSize,
             }}
           />
-          <Button
-            variant="secondary"
-            onClick={handleAddIngredient}
-            className="px-6"
-          >
+          <Button variant='secondary' onClick={handleAddIngredient} className='px-6'>
             +
           </Button>
         </div>
 
         {/* Lista de ingredientes */}
         {ingredients.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {ingredients.map((ingredient) => (
+          <div className='flex flex-wrap gap-2 mb-4'>
+            {ingredients.map(ingredient => (
               <div
                 key={ingredient.id}
-                className="group relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors duration-200"
+                className='group relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors duration-200'
                 style={{
                   backgroundColor: colors.interface.background.secondary,
                 }}
               >
-                <span
-                  className="text-sm text-center"
-                  style={{ color: colors.brand.primary[500] }}
-                >
+                <span className='text-sm text-center' style={{ color: colors.brand.primary[500] }}>
                   {ingredient.name}
                 </span>
                 <button
                   onClick={() => handleRemoveIngredient(ingredient.id)}
-                  className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 bg-red-500 text-white hover:bg-red-600"
+                  className='absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 bg-red-500 text-white hover:bg-red-600'
                 >
                   ×
                 </button>
@@ -343,12 +334,12 @@ export default function CreateRecipePage({
       </div>
 
       {/* Sección de Servings */}
-      <div className="mb-8">
+      <div className='mb-8'>
         <h3
-          className="mb-4"
+          className='mb-4'
           style={{
-            fontSize: typography.styles["title-3"].fontSize,
-            fontWeight: typography.styles["title-3"].fontWeight,
+            fontSize: typography.styles['title-3'].fontSize,
+            fontWeight: typography.styles['title-3'].fontWeight,
             color: colors.interface.text.primary,
           }}
         >
@@ -357,23 +348,21 @@ export default function CreateRecipePage({
 
         {/* Botones de selección rápida - solo se muestran si no está en modo custom */}
         {!showCustomInput && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {[1, 2, 4, 6, 8].map((servings) => (
+          <div className='flex flex-wrap gap-2 mb-4'>
+            {[1, 2, 4, 6, 8].map(servings => (
               <Button
                 key={servings}
-                variant={
-                  selectedServings === servings ? "primary" : "secondary"
-                }
+                variant={selectedServings === servings ? 'primary' : 'secondary'}
                 onClick={() => handleServingsChange(servings)}
-                className="px-4 py-2"
+                className='px-4 py-2'
               >
                 {servings}
               </Button>
             ))}
             <Button
-              variant="secondary"
+              variant='secondary'
               onClick={() => setShowCustomInput(true)}
-              className="px-4 py-2"
+              className='px-4 py-2'
             >
               +
             </Button>
@@ -382,26 +371,26 @@ export default function CreateRecipePage({
 
         {/* Input personalizado - solo se muestra cuando está en modo custom */}
         {showCustomInput && (
-          <div className="flex gap-2">
+          <div className='flex gap-2'>
             <input
-              type="number"
+              type='number'
               value={newCustomServing}
-              onChange={(e) => setNewCustomServing(e.target.value)}
-              placeholder="Add numberts"
-              className="w-40 px-3 py-2 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
-              min="1"
+              onChange={e => setNewCustomServing(e.target.value)}
+              placeholder='Add numberts'
+              className='w-40 px-3 py-2 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500'
+              min='1'
             />
             <Button
-              variant="secondary"
+              variant='secondary'
               onClick={() => setShowCustomInput(false)}
-              className="w-10 h-10 flex items-center justify-center"
+              className='w-10 h-10 flex items-center justify-center'
             >
               ×
             </Button>
             <Button
-              variant="secondary"
+              variant='secondary'
               onClick={handleCustomServings}
-              className="w-10 h-10 flex items-center justify-center"
+              className='w-10 h-10 flex items-center justify-center'
             >
               +
             </Button>
@@ -410,9 +399,9 @@ export default function CreateRecipePage({
       </div>
 
       {/* Botón de Crear/Guardar Receta */}
-      <div className="flex gap-4">
+      <div className='flex gap-4'>
         <Button
-          variant="primary"
+          variant='primary'
           onClick={isEditing ? handleSaveRecipe : handleCreateRecipe}
           disabled={
             isCreating ||
@@ -420,20 +409,20 @@ export default function CreateRecipePage({
             !selectedServings ||
             (isEditing && !recipeTitle.trim())
           }
-          className="px-8 py-3"
+          className='px-8 py-3'
         >
           {isCreating
             ? isEditing
-              ? "Saving recipe..."
-              : "Creating recipe..."
+              ? 'Saving recipe...'
+              : 'Creating recipe...'
             : isEditing
-            ? "Save Recipe"
-            : "Create Recipe"}
+              ? 'Save Recipe'
+              : 'Create Recipe'}
         </Button>
         <Button
-          variant="secondary"
-          onClick={() => router.push("/my-recipes")}
-          className="px-6 py-3"
+          variant='secondary'
+          onClick={() => router.push('/my-recipes')}
+          className='px-6 py-3'
         >
           My Recipes
         </Button>

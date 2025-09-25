@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BiPlus, BiShare, BiShareAlt, BiTime, BiUser } from 'react-icons/bi';
+import { FaPencil } from 'react-icons/fa6';
 import { IoIosArrowBack } from 'react-icons/io';
 import { MdDelete } from 'react-icons/md';
 
@@ -215,6 +216,7 @@ export default function RecipeDetailPage() {
       difficulty: recipe.difficulty || 'medium',
       cuisine: 'international',
       instructions: recipe.instructions || [],
+      image: recipe.image, // ✅ Preservar la imagen original
       isEditing: true,
       originalId: recipe.id,
     };
@@ -347,7 +349,7 @@ export default function RecipeDetailPage() {
                     onClick={() => handleEditRecipe()}
                     className='px-6 py-3 flex items-center gap-2'
                   >
-                    <IoIosArrowBack className='text-lg' />
+                    <FaPencil className='text-lg' />
                     Edit
                   </Button>
                   <Button

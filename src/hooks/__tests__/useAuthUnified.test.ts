@@ -1,31 +1,31 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
-import { useAuthUnified } from "../useAuthUnified";
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { useAuthUnified } from '../useAuthUnified';
 
 // Mock the Zustand store
 const mockStore = {
-  user: null,
+  user: null as any,
   isLoading: false,
-  error: null,
+  error: null as any,
   login: vi.fn(),
   register: vi.fn(),
   logout: vi.fn(),
 };
 
-vi.mock("@/stores/appStore", () => ({
-  useAppStore: vi.fn((selector) => {
-    if (typeof selector === "function") {
+vi.mock('@/stores/authStore', () => ({
+  useAuthStore: vi.fn(selector => {
+    if (typeof selector === 'function') {
       return selector(mockStore);
     }
     return mockStore[selector as keyof typeof mockStore];
   }),
 }));
 
-describe("useAuthUnified", () => {
+describe('useAuthUnified', () => {
   const mockUser = {
-    id: "test-user-id",
-    name: "Test User",
-    email: "test@example.com",
+    id: 'test-user-id',
+    name: 'Test User',
+    email: 'test@example.com',
   };
 
   beforeEach(() => {
@@ -49,8 +49,8 @@ describe("useAuthUnified", () => {
     vi.restoreAllMocks();
   });
 
-  describe("Initial State", () => {
-    it("initializes with null user and loading false", () => {
+  describe('Initial State', () => {
+    it('initializes with null user and loading false', () => {
       const { result } = renderHook(() => useAuthUnified());
 
       expect(result.current.user).toBe(null);
@@ -58,70 +58,60 @@ describe("useAuthUnified", () => {
       expect(result.current.error).toBe(null);
     });
 
-    it("provides login, register, and logout functions", () => {
+    it('provides login, register, and logout functions', () => {
       const { result } = renderHook(() => useAuthUnified());
 
-      expect(typeof result.current.login).toBe("function");
-      expect(typeof result.current.register).toBe("function");
-      expect(typeof result.current.logout).toBe("function");
+      expect(typeof result.current.login).toBe('function');
+      expect(typeof result.current.register).toBe('function');
+      expect(typeof result.current.logout).toBe('function');
     });
   });
 
-  describe("Login", () => {
-    it("calls store login function", async () => {
+  describe('Login', () => {
+    it('calls store login function', async () => {
       mockStore.login.mockResolvedValue(true);
 
       const { result } = renderHook(() => useAuthUnified());
 
       await act(async () => {
-        await result.current.login("test@example.com", "password123");
+        await result.current.login('test@example.com', 'password123');
       });
 
-      expect(mockStore.login).toHaveBeenCalledWith(
-        "test@example.com",
-        "password123"
-      );
+      expect(mockStore.login).toHaveBeenCalledWith('test@example.com', 'password123');
     });
 
-    it("returns login result from store", async () => {
+    it('returns login result from store', async () => {
       mockStore.login.mockResolvedValue(false);
 
       const { result } = renderHook(() => useAuthUnified());
 
       let loginResult: boolean;
       await act(async () => {
-        loginResult = await result.current.login(
-          "test@example.com",
-          "wrongpassword"
-        );
+        loginResult = await result.current.login('test@example.com', 'wrongpassword');
       });
 
       expect(loginResult!).toBe(false);
     });
   });
 
-  describe("Register", () => {
-    it("calls store register function", async () => {
+  describe('Register', () => {
+    it('calls store register function', async () => {
       mockStore.register.mockResolvedValue(true);
 
       const { result } = renderHook(() => useAuthUnified());
 
       await act(async () => {
-        await result.current.register(
-          "Test User",
-          "test@example.com",
-          "password123"
-        );
+        await result.current.register('Test User', 'test@example.com', 'password123');
       });
 
       expect(mockStore.register).toHaveBeenCalledWith(
-        "Test User",
-        "test@example.com",
-        "password123"
+        'Test User',
+        'test@example.com',
+        'password123'
       );
     });
 
-    it("returns register result from store", async () => {
+    it('returns register result from store', async () => {
       mockStore.register.mockResolvedValue(false);
 
       const { result } = renderHook(() => useAuthUnified());
@@ -129,9 +119,9 @@ describe("useAuthUnified", () => {
       let registerResult: boolean;
       await act(async () => {
         registerResult = await result.current.register(
-          "Test User",
-          "test@example.com",
-          "password123"
+          'Test User',
+          'test@example.com',
+          'password123'
         );
       });
 
@@ -139,8 +129,8 @@ describe("useAuthUnified", () => {
     });
   });
 
-  describe("Logout", () => {
-    it("calls store logout function", () => {
+  describe('Logout', () => {
+    it('calls store logout function', () => {
       const { result } = renderHook(() => useAuthUnified());
 
       act(() => {
@@ -151,8 +141,8 @@ describe("useAuthUnified", () => {
     });
   });
 
-  describe("State Updates", () => {
-    it("reflects user state changes from store", () => {
+  describe('State Updates', () => {
+    it('reflects user state changes from store', () => {
       const { result, rerender } = renderHook(() => useAuthUnified());
 
       expect(result.current.user).toBe(null);
@@ -164,7 +154,7 @@ describe("useAuthUnified", () => {
       expect(result.current.user).toEqual(mockUser);
     });
 
-    it("reflects loading state changes from store", () => {
+    it('reflects loading state changes from store', () => {
       const { result, rerender } = renderHook(() => useAuthUnified());
 
       expect(result.current.isLoading).toBe(false);
@@ -176,21 +166,21 @@ describe("useAuthUnified", () => {
       expect(result.current.isLoading).toBe(true);
     });
 
-    it("reflects error state changes from store", () => {
+    it('reflects error state changes from store', () => {
       const { result, rerender } = renderHook(() => useAuthUnified());
 
       expect(result.current.error).toBe(null);
 
       // Simulate store state change
-      mockStore.error = "Test error";
+      mockStore.error = 'Test error';
       rerender();
 
-      expect(result.current.error).toBe("Test error");
+      expect(result.current.error).toBe('Test error');
     });
   });
 
-  describe("Performance", () => {
-    it("does not cause unnecessary re-renders", () => {
+  describe('Performance', () => {
+    it('does not cause unnecessary re-renders', () => {
       const { result } = renderHook(() => useAuthUnified());
 
       const initialUser = result.current.user;

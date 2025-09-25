@@ -3,7 +3,6 @@
 import MainLayout from '@/components/layouts/MainLayout';
 import { colors } from '@/design-system/colors';
 import { useAuthStore } from '@/stores/authStore';
-import { useRecipesGenerationStore } from '@/stores/recipesGenerationStore';
 import { useRecipesStore } from '@/stores/recipesStore';
 import { useSavedRecipesStore } from '@/stores/savedRecipesStore';
 import { useCallback, useState } from 'react';
@@ -28,10 +27,10 @@ export default function TestZustandPage() {
         activeIndex: useRecipesStore.getState().activeIndex,
       },
       recipesGeneration: {
-        recipes: useRecipesGenerationStore.getState().recipes,
-        isLoading: useRecipesGenerationStore.getState().isLoading,
-        error: useRecipesGenerationStore.getState().error,
-        hasLoadedRecipes: useRecipesGenerationStore.getState().hasLoadedRecipes,
+        recipes: useRecipesStore.getState().recipes,
+        isLoading: useRecipesStore.getState().isLoading,
+        error: useRecipesStore.getState().error,
+        hasLoadedRecipes: useRecipesStore.getState().hasLoadedRecipes,
       },
       savedRecipes: {
         savedRecipes: useSavedRecipesStore.getState().savedRecipes,
@@ -57,8 +56,8 @@ export default function TestZustandPage() {
         generateRecipes: useRecipesStore.getState().generateRecipes,
       },
       recipesGeneration: {
-        generateRecipes: useRecipesGenerationStore.getState().generateRecipes,
-        clearCache: useRecipesGenerationStore.getState().clearCache,
+        generateRecipes: useRecipesStore.getState().generateRecipes,
+        clearCache: useRecipesStore.getState().clearCache,
       },
       savedRecipes: {
         saveRecipe: useSavedRecipesStore.getState().saveRecipe,
@@ -207,7 +206,7 @@ export default function TestZustandPage() {
       // Test 11: Generar recetas con IA
       addTestResult('🔄 Test 11: Simulando generación de recetas...');
       try {
-        await actions.recipesGeneration.generateRecipes();
+        await actions.recipesGeneration.generateRecipes(['test-ingredient'], 2);
         await new Promise(resolve => setTimeout(resolve, 200));
         const stateAfterGeneration = getCurrentState();
         if (stateAfterGeneration.recipesGeneration.recipes.length > 0) {
