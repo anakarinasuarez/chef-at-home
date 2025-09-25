@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { UnifiedRecipe, convertToUnifiedRecipe } from "@/types/recipe";
+import { UnifiedRecipe } from "@/types/recipe";
+import { recipeGenerationService } from "@/services/recipeGenerationService";
 
 export interface RecipesState {
   // Estado
@@ -66,47 +67,32 @@ export const useRecipesStore = create<RecipesState>()(
           removingRecipeId: null,
         }),
 
-      // Generar recetas
+      // Generar recetas - Ahora usa el servicio externo
       generateRecipes: async (ingredients: string[], servings: number) => {
-        set({ isLoading: true });
-        set({ error: null });
+        set({ isLoading: true, error: null });
 
         try {
-          const response = await fetch("/api/recipes/generate", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              ingredients,
-              servings,
-              count: 4,
-            }),
+          const result = await recipeGenerationService.generateRecipes({
+            ingredients,
+            servings,
+            count: 4,
           });
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+          if (result.success && result.recipes) {
+            set({
+              recipes: result.recipes,
+              hasLoadedRecipes: true,
+              isLoading: false,
+            });
+
+            // Guardar en sessionStorage usando el servicio
+            recipeGenerationService.saveRecipesToSession(result.recipes);
+          } else {
+            set({
+              error: result.error || "No recipes generated",
+              isLoading: false,
+            });
           }
-
-          const data = await response.json();
-          console.log("Number of recipes received:", data.recipes?.length || 0);
-
-          if (!data.recipes || data.recipes.length === 0) {
-            throw new Error("No recipes generated");
-          }
-
-          // Convertir a UnifiedRecipe
-          const unifiedRecipes = data.recipes.map((recipe: unknown) =>
-            convertToUnifiedRecipe(recipe as Record<string, unknown>)
-          );
-
-          set({ recipes: unifiedRecipes, hasLoadedRecipes: true });
-
-          // Guardar en sessionStorage
-          sessionStorage.setItem(
-            "currentRecipes",
-            JSON.stringify(unifiedRecipes)
-          );
         } catch (error) {
           console.error("Error generating recipes:", error);
           set({
@@ -114,9 +100,8 @@ export const useRecipesStore = create<RecipesState>()(
               error instanceof Error
                 ? error.message
                 : "Failed to generate recipes",
+            isLoading: false,
           });
-        } finally {
-          set({ isLoading: false });
         }
       },
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { loginUser } from "@/services";
+import { authBackendService } from "@/services/authBackendService";
 import { loginSchema, safeValidateSchema, getFirstZodError } from "@/schemas";
 
 export async function POST(request: NextRequest) {
@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
       password: string;
     };
 
-    // Usar el servicio de autenticación
-    const result = await loginUser({ email, password });
+    // Usar el servicio de autenticación backend
+    const result = await authBackendService.login({ email, password });
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 401 });

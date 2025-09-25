@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { registerUser } from "@/services";
+import { authBackendService } from "@/services/authBackendService";
 import {
   registerSchema,
   safeValidateSchema,
@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
       password: string;
     };
 
-    // Usar el servicio de autenticación
-    const result = await registerUser({ name, email, password });
+    // Usar el servicio de autenticación backend
+    const result = await authBackendService.register({ name, email, password });
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });

@@ -1,161 +1,163 @@
-import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
-import { RegisterData, LoginData, UserResponse, AuthResponse } from "@/types";
+import { UserResponse } from "@/types/auth";
 
-// Register a new user
-export const registerUser = async (data: RegisterData): Promise<{
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
   success: boolean;
   user?: UserResponse;
   error?: string;
-}> => {
-  try {
-    // Validaciones
-    if (!data.name || !data.email || !data.password) {
-      return {
-        success: false,
-        error: "All fields are required",
-      };
+}
+
+/**
+ * Servicio para manejar la autenticación de usuarios
+ * Maneja toda la lógica de negocio relacionada con login, registro y logout
+ */
+export class AuthService {
+  private static instance: AuthService;
+
+  private constructor() {}
+
+  public static getInstance(): AuthService {
+    if (!AuthService.instance) {
+      AuthService.instance = new AuthService();
     }
-
-    if (data.password.length < 6) {
-      return {
-        success: false,
-        error: "Password must be at least 6 characters",
-      };
-    }
-
-    // Verificar si el usuario ya existe
-    const existingUser = await prisma.user.findUnique({
-      where: { email: data.email },
-    });
-
-    if (existingUser) {
-      return {
-        success: false,
-        error: "Email is already registered",
-      };
-    }
-
-    // Hash de la contraseña
-    const hashedPassword = await bcrypt.hash(data.password, 12);
-
-    // Crear el usuario
-    const user = await prisma.user.create({
-      data: {
-        name: data.name,
-        email: data.email,
-        password: hashedPassword,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-      },
-    });
-
-    return {
-      success: true,
-      user,
-    };
-  } catch (error) {
-    console.error("Error in user registration:", error);
-    return {
-      success: false,
-      error: "Internal server error",
-    };
+    return AuthService.instance;
   }
+
+  /**
+   * Realiza el login del usuario
+   */
+  public async login(request: LoginRequest): Promise<AuthResponse> {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || "Login failed",
+        };
+      }
+
+      return {
+        success: true,
+        user: data.user,
+      };
+    } catch (error) {
+      console.error("Login error:", error);
+      return {
+        success: false,
+        error: "An unexpected error occurred",
+      };
+    }
+  }
+
+  /**
+   * Registra un nuevo usuario
+   */
+  public async register(request: RegisterRequest): Promise<AuthResponse> {
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || "Registration failed",
+        };
+      }
+
+      return {
+        success: true,
+        user: data.user,
+      };
+    } catch (error) {
+      console.error("Registration error:", error);
+      return {
+        success: false,
+        error: "An unexpected error occurred",
+      };
+    }
+  }
+
+  /**
+   * Guarda el usuario en localStorage
+   */
+  public saveUserToStorage(user: UserResponse): void {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+  }
+
+  /**
+   * Recupera el usuario desde localStorage
+   */
+  public getUserFromStorage(): UserResponse | null {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    try {
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      console.error("Error parsing stored user:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Elimina el usuario del localStorage
+   */
+  public removeUserFromStorage(): void {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("user");
+    }
+  }
+
+  /**
+   * Verifica si hay un usuario guardado
+   */
+  public hasStoredUser(): boolean {
+    return this.getUserFromStorage() !== null;
+  }
+}
+
+// Exportar instancia singleton
+export const authService = AuthService.getInstance();
+
+// Funciones de conveniencia para compatibilidad con el código existente
+export const loginUser = async (
+  request: LoginRequest
+): Promise<AuthResponse> => {
+  return authService.login(request);
 };
 
-// Authenticate an existing user
-export const loginUser = async (data: LoginData): Promise<{
-  success: boolean;
-  user?: UserResponse;
-  error?: string;
-}> => {
-  try {
-    // Validaciones
-    if (!data.email || !data.password) {
-      return {
-        success: false,
-        error: "Email and password are required",
-      };
-    }
-
-    // Buscar usuario por email
-    const user = await prisma.user.findUnique({
-      where: { email: data.email },
-    });
-
-    if (!user) {
-      return {
-        success: false,
-        error: "Invalid credentials",
-      };
-    }
-
-    // Verificar contraseña
-    const isPasswordValid = await bcrypt.compare(
-      data.password,
-      user.password
-    );
-
-    if (!isPasswordValid) {
-      return {
-        success: false,
-        error: "Invalid credentials",
-      };
-    }
-
-    // Retornar usuario sin contraseña
-    const { password, ...userWithoutPassword } = user;
-
-    return {
-      success: true,
-      user: userWithoutPassword,
-    };
-  } catch (error) {
-    console.error("Error in user login:", error);
-    return {
-      success: false,
-      error: "Internal server error",
-    };
-  }
-};
-
-// Get user by ID
-export const getUserById = async (userId: string): Promise<{
-  success: boolean;
-  user?: UserResponse;
-  error?: string;
-}> => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-      },
-    });
-
-    if (!user) {
-      return {
-        success: false,
-        error: "User not found",
-      };
-    }
-
-    return {
-      success: true,
-      user,
-    };
-  } catch (error) {
-    console.error("Error getting user by ID:", error);
-    return {
-      success: false,
-      error: "Internal server error",
-    };
-  }
+export const registerUser = async (
+  request: RegisterRequest
+): Promise<AuthResponse> => {
+  return authService.register(request);
 };

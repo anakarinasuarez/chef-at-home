@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { UserResponse } from "@/types";
+import { authService } from "@/services/authService";
 
 // Types
 interface User {
@@ -87,33 +88,23 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       ...initialState,
 
-      // Auth actions (compatible with AuthContext)
+      // Auth actions (compatible with AuthContext) - Ahora usa el servicio externo
       login: async (email: string, password: string): Promise<boolean> => {
         try {
           set({ isLoading: true, error: null });
 
-          const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
-          });
+          const result = await authService.login({ email, password });
 
-          const data = await response.json();
-
-          if (!response.ok) {
-            set({ error: data.error || "Login failed", isLoading: false });
+          if (result.success && result.user) {
+            set({ user: result.user, isLoading: false });
+            authService.saveUserToStorage(result.user);
+            return true;
+          } else {
+            set({ error: result.error || "Login failed", isLoading: false });
             return false;
           }
-
-          // Guardar usuario en estado y localStorage
-          set({ user: data.user, isLoading: false });
-          if (typeof window !== "undefined") {
-            localStorage.setItem("user", JSON.stringify(data.user));
-          }
-          return true;
-        } catch {
+        } catch (error) {
+          console.error("Login error:", error);
           set({ error: "An unexpected error occurred", isLoading: false });
           return false;
         }
@@ -127,28 +118,20 @@ export const useAppStore = create<AppState>()(
         try {
           set({ isLoading: true, error: null });
 
-          const response = await fetch("/api/auth/register", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ name, email, password }),
-          });
+          const result = await authService.register({ name, email, password });
 
-          const data = await response.json();
-
-          if (!response.ok) {
+          if (result.success) {
+            set({ isLoading: false });
+            return true;
+          } else {
             set({
-              error: data.error || "Registration failed",
+              error: result.error || "Registration failed",
               isLoading: false,
             });
             return false;
           }
-
-          // No logueamos automáticamente después del registro
-          set({ isLoading: false });
-          return true;
-        } catch {
+        } catch (error) {
+          console.error("Registration error:", error);
           set({ error: "An unexpected error occurred", isLoading: false });
           return false;
         }
@@ -156,9 +139,7 @@ export const useAppStore = create<AppState>()(
 
       logout: () => {
         set({ user: null });
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("user");
-        }
+        authService.removeUserFromStorage();
       },
 
       // User actions
