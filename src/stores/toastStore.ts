@@ -13,6 +13,12 @@ export interface Toast {
   dismissible?: boolean;
 }
 
+// Estado inicial estandarizado
+const initialState = {
+  toasts: [] as Toast[],
+  maxToasts: 5,
+};
+
 export interface ToastState {
   // Estado
   toasts: Toast[];
@@ -37,8 +43,7 @@ export interface ToastState {
 
 export const useToastStore = create<ToastState>((set, get) => ({
   // Estado inicial
-  toasts: [],
-  maxToasts: 5,
+  ...initialState,
 
   // Acciones básicas
   addToast: (toastData) => {
@@ -132,8 +137,11 @@ export const useToastStore = create<ToastState>((set, get) => ({
   },
 }));
 
-// Selectores para facilitar el uso
+// Selectores estandarizados para evitar renders innecesarios
 export const useToasts = () => useToastStore((state) => state.toasts);
+export const useMaxToasts = () => useToastStore((state) => state.maxToasts);
+
+// Selector de acciones
 export const useToastActions = () =>
   useToastStore((state) => ({
     addToast: state.addToast,

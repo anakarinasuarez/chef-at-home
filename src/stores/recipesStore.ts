@@ -2,6 +2,17 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { UnifiedRecipe } from "@/types/recipe";
 import { recipeGenerationService } from "@/services/recipeGenerationService";
+import { UniversalCacheManager } from "@/lib/universal-cache";
+
+// Estado inicial estandarizado
+const initialState = {
+  recipes: [] as UnifiedRecipe[],
+  isLoading: false,
+  error: null as string | null,
+  hasLoadedRecipes: false,
+  activeIndex: 0,
+  removingRecipeId: null as string | null,
+};
 
 export interface RecipesState {
   // Estado
@@ -24,50 +35,37 @@ export interface RecipesState {
   setRemovingRecipeId: (id: string | null) => void;
   clearRecipes: () => void;
 
-  // Acciones específicas de useRecipes
+  // Acciones específicas de generación
   generateRecipes: (ingredients: string[], servings: number) => Promise<void>;
   scrollToRecipe: (index: number) => void;
+  clearCache: () => Promise<void>;
 }
 
 export const useRecipesStore = create<RecipesState>()(
   persist(
     (set, get) => ({
       // Estado inicial
-      recipes: [],
-      isLoading: true,
-      error: null,
-      hasLoadedRecipes: false,
-      activeIndex: 0,
-      removingRecipeId: null,
+      ...initialState,
 
       // Acciones básicas
       setRecipes: (recipes) => set({ recipes, error: null }),
-      addRecipe: (recipe) =>
-        set((state) => ({
-          recipes: [...state.recipes, recipe],
-          error: null,
-        })),
-      removeRecipe: (recipeId) =>
-        set((state) => ({
-          recipes: state.recipes.filter((r) => r.id !== recipeId),
-          error: null,
-        })),
+      addRecipe: (recipe) => {
+        const { recipes } = get();
+        set({ recipes: [...recipes, recipe] });
+      },
+      removeRecipe: (recipeId) => {
+        const { recipes } = get();
+        set({ recipes: recipes.filter((r) => r.id !== recipeId) });
+      },
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),
       clearError: () => set({ error: null }),
       setHasLoadedRecipes: (hasLoadedRecipes) => set({ hasLoadedRecipes }),
       setActiveIndex: (activeIndex) => set({ activeIndex }),
       setRemovingRecipeId: (removingRecipeId) => set({ removingRecipeId }),
-      clearRecipes: () =>
-        set({
-          recipes: [],
-          hasLoadedRecipes: false,
-          activeIndex: 0,
-          error: null,
-          removingRecipeId: null,
-        }),
+      clearRecipes: () => set({ recipes: [], hasLoadedRecipes: false }),
 
-      // Generar recetas - Ahora usa el servicio externo
+      // Generar recetas - Usa el servicio externo
       generateRecipes: async (ingredients: string[], servings: number) => {
         set({ isLoading: true, error: null });
 
@@ -105,12 +103,46 @@ export const useRecipesStore = create<RecipesState>()(
         }
       },
 
-      // Scroll a receta
+      // Scroll a receta específica
       scrollToRecipe: (index: number) => {
-        const element = document.getElementById(`recipe-${index}`);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "center" });
-          set({ activeIndex: index });
+        set({ activeIndex: index });
+        // Scroll logic se maneja en el componente
+      },
+
+      // Limpiar cache
+      clearCache: async () => {
+        try {
+          // Limpiar sessionStorage
+          recipeGenerationService.clearRecipesFromSession();
+
+          // Limpiar cache usando UniversalCacheManager
+          await UniversalCacheManager.clearAllCache();
+
+          // Limpiar localStorage relacionado con recetas
+          const keysToRemove: string[] = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (
+              key &&
+              (key.startsWith("recipes_") ||
+                key.startsWith("image_") ||
+                key.includes("cache"))
+            ) {
+              keysToRemove.push(key);
+            }
+          }
+          keysToRemove.forEach((key) => localStorage.removeItem(key));
+
+          // Limpiar estado
+          set({
+            recipes: [],
+            hasLoadedRecipes: false,
+            isLoading: false,
+          });
+
+          console.log("🧹 Cache cleared successfully");
+        } catch (error) {
+          console.error("Error clearing cache:", error);
         }
       },
     }),
@@ -125,17 +157,19 @@ export const useRecipesStore = create<RecipesState>()(
   )
 );
 
-// Selectores para facilitar el uso
+// Selectores estandarizados para evitar renders innecesarios
 export const useRecipes = () => useRecipesStore((state) => state.recipes);
 export const useRecipesLoading = () =>
   useRecipesStore((state) => state.isLoading);
 export const useRecipesError = () => useRecipesStore((state) => state.error);
 export const useHasLoadedRecipes = () =>
   useRecipesStore((state) => state.hasLoadedRecipes);
-export const useActiveIndex = () =>
+export const useActiveRecipeIndex = () =>
   useRecipesStore((state) => state.activeIndex);
 export const useRemovingRecipeId = () =>
   useRecipesStore((state) => state.removingRecipeId);
+
+// Selector de acciones
 export const useRecipesActions = () =>
   useRecipesStore((state) => ({
     setRecipes: state.setRecipes,
@@ -150,4 +184,5 @@ export const useRecipesActions = () =>
     clearRecipes: state.clearRecipes,
     generateRecipes: state.generateRecipes,
     scrollToRecipe: state.scrollToRecipe,
+    clearCache: state.clearCache,
   }));

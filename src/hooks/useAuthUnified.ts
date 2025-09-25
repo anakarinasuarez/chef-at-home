@@ -1,18 +1,18 @@
 "use client";
 
-import { useAppStore } from "@/stores/appStore";
+import { useAuthStore } from "@/stores/authStore";
 
 /**
  * Hook unificado que proporciona la misma interfaz que AuthContext
  * pero usando Zustand store. Permite migración gradual sin romper funcionalidad.
  */
 export const useAuthUnified = () => {
-  const user = useAppStore((state) => state.user);
-  const isLoading = useAppStore((state) => state.isLoading);
-  const error = useAppStore((state) => state.error);
-  const login = useAppStore((state) => state.login);
-  const register = useAppStore((state) => state.register);
-  const logout = useAppStore((state) => state.logout);
+  const user = useAuthStore((state) => state.user);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const error = useAuthStore((state) => state.error);
+  const login = useAuthStore((state) => state.login);
+  const register = useAuthStore((state) => state.register);
+  const logout = useAuthStore((state) => state.logout);
 
   return {
     user,

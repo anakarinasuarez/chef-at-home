@@ -21,6 +21,14 @@ interface FrontendRecipe {
   savedAt?: string;
 }
 
+// Estado inicial estandarizado
+const initialState = {
+  savedRecipes: [] as FrontendRecipe[],
+  isLoading: false,
+  error: null as string | null,
+  removingRecipeId: null as string | null,
+};
+
 export interface SavedRecipesState {
   // Estado
   savedRecipes: FrontendRecipe[];
@@ -28,7 +36,14 @@ export interface SavedRecipesState {
   error: string | null;
   removingRecipeId: string | null;
 
-  // Acciones
+  // Acciones básicas
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  clearError: () => void;
+  setRemovingRecipeId: (id: string | null) => void;
+  clearSavedRecipes: () => void;
+
+  // Acciones específicas de recetas guardadas
   loadSavedRecipes: (userId: string) => void;
   saveRecipe: (recipe: FrontendRecipe, userId: string) => boolean;
   removeRecipe: (recipeId: string, userId: string) => boolean;
@@ -37,21 +52,13 @@ export interface SavedRecipesState {
     updatedRecipe: FrontendRecipe,
     userId: string
   ) => boolean;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-  clearError: () => void;
-  setRemovingRecipeId: (id: string | null) => void;
-  clearSavedRecipes: () => void;
 }
 
 export const useSavedRecipesStore = create<SavedRecipesState>()(
   persist(
     (set, get) => ({
       // Estado inicial
-      savedRecipes: [],
-      isLoading: false,
-      error: null,
-      removingRecipeId: null,
+      ...initialState,
 
       // Acciones
       loadSavedRecipes: (userId: string) => {
@@ -203,7 +210,7 @@ export const useSavedRecipesStore = create<SavedRecipesState>()(
   )
 );
 
-// Selectores para facilitar el uso
+// Selectores estandarizados para evitar renders innecesarios
 export const useSavedRecipes = () =>
   useSavedRecipesStore((state) => state.savedRecipes);
 export const useSavedRecipesLoading = () =>
@@ -212,11 +219,14 @@ export const useSavedRecipesError = () =>
   useSavedRecipesStore((state) => state.error);
 export const useSavedRecipesRemovingId = () =>
   useSavedRecipesStore((state) => state.removingRecipeId);
+
+// Selector de acciones
 export const useSavedRecipesActions = () =>
   useSavedRecipesStore((state) => ({
     loadSavedRecipes: state.loadSavedRecipes,
     saveRecipe: state.saveRecipe,
     removeRecipe: state.removeRecipe,
+    updateRecipe: state.updateRecipe,
     setLoading: state.setLoading,
     setError: state.setError,
     clearError: state.clearError,

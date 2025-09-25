@@ -13,6 +13,15 @@ export interface AppError {
   stack?: string;
 }
 
+// Estado inicial estandarizado
+const initialState = {
+  errors: [] as AppError[],
+  currentError: null as AppError | null,
+  isRetrying: false,
+  retryCount: 0,
+  maxRetries: 3,
+};
+
 export interface ErrorState {
   // Estado
   errors: AppError[];
@@ -42,11 +51,7 @@ export const useErrorStore = create<ErrorState>()(
   persist(
     (set, get) => ({
       // Estado inicial
-      errors: [],
-      currentError: null,
-      isRetrying: false,
-      retryCount: 0,
-      maxRetries: 3,
+      ...initialState,
 
       // Acciones básicas
       addError: (errorData) => {
