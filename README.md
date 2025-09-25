@@ -1,190 +1,265 @@
 # Chef at Home 🍳
 
-Una aplicación web moderna para crear recetas deliciosas con IA. Convierte ingredientes cotidianos en obras maestras gourmet.
+A modern web application for creating delicious recipes with AI. Transform everyday ingredients into gourmet masterpieces.
 
-## 🚀 Características
+## 🚀 Features
 
-- **Creación de Recetas con IA**: Genera recetas personalizadas basadas en ingredientes disponibles
-- **Sistema de Autenticación**: Registro e inicio de sesión de usuarios
-- **Guardado de Recetas**: Guarda tus recetas favoritas para acceder más tarde
-- **Interfaz Moderna**: Diseño elegante y responsive con sistema de diseño consistente
-- **Navegación Intuitiva**: Menú lateral con acceso rápido a todas las funciones
+- **AI Recipe Generation**: Generate personalized recipes based on available ingredients
+- **User Authentication**: Secure user registration and login system
+- **Recipe Management**: Save, edit, and organize your favorite recipes
+- **Modern UI/UX**: Elegant and responsive design with consistent design system
+- **Intuitive Navigation**: Sidebar menu with quick access to all functions
+- **Image Generation**: AI-powered recipe images using DALL-E
+- **Multi-AI Support**: OpenAI GPT-4 with Google Gemini fallback
+- **Real-time Validation**: Form validation with user-friendly error messages
+- **Responsive Design**: Mobile-first approach with desktop optimization
 
-## 📱 Estructura de Navegación
+## 📱 Navigation Structure
 
-### Para Usuarios No Autenticados:
+### For Unauthenticated Users:
+- **Home**: Landing page with application information
+- **Login**: User authentication
+- **Signup**: New user registration
 
-- **Home**: Página de landing con información sobre la aplicación
-- **Login**: Inicio de sesión
-- **Signup**: Registro de nuevos usuarios
+### For Authenticated Users:
+- **Create Recipe** (Home): Main interface for recipe creation
+- **Generated Recipes**: View AI-generated recipes
+- **My Recipes**: User's saved recipes
+- **Log Out**: Sign out functionality
 
-### Para Usuarios Autenticados:
+## 🛠️ Technology Stack
 
-- **Create Recipe** (Home): Interfaz principal para crear recetas
-- **Generated Recipes**: Ver recetas generadas por IA
-- **My Recipes**: Recetas guardadas por el usuario
-- **Log Out**: Cerrar sesión
+### Frontend
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + Custom Design System
+- **State Management**: Zustand
+- **UI Components**: Custom component library
+- **Testing**: Vitest + React Testing Library
+- **Code Quality**: ESLint + Prettier
 
-## 🛠️ Tecnologías
+### Backend
+- **Runtime**: Node.js
+- **Framework**: Next.js API Routes
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: bcryptjs + JWT
+- **AI Services**: OpenAI GPT-4 + Google Gemini
+- **Image Generation**: OpenAI DALL-E
 
-- **Frontend**: Next.js 14, React, TypeScript
-- **Estilos**: Tailwind CSS, CSS Modules
-- **Autenticación**: Context API con localStorage
-- **IA**: OpenAI API + Google Gemini API (fallback)
-- **Imágenes**: OpenAI DALL-E (IA generativa)
-- **Base de Datos**: Prisma con SQLite
-- **Testing**: Vitest con React Testing Library
+### Development Tools
+- **Package Manager**: npm
+- **Version Control**: Git
+- **Code Formatting**: Prettier
+- **Linting**: ESLint
+- **Type Checking**: TypeScript
+- **Database Management**: Prisma Studio
 
-## 🏗️ Estructura del Proyecto
+## 🏗️ Project Structure
 
 ```
-src/
-├── app/                    # Páginas de la aplicación
-│   ├── auth/              # Páginas de autenticación
-│   ├── recipes/           # Páginas de recetas
-│   ├── my-recipes/        # Página de recetas guardadas
-│   └── api/               # API routes
-├── components/            # Componentes reutilizables
-├── contexts/              # Contextos de React
-├── hooks/                 # Hooks personalizados
-├── services/              # Servicios de API (OpenAI, Gemini)
-├── types/                 # Definiciones de tipos TypeScript
-├── utils/                 # Utilidades
-├── lib/                   # Librerías y utilidades
-└── design-system/         # Sistema de diseño
+chef-at-home/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── api/               # API Routes
+│   │   ├── auth/              # Authentication pages
+│   │   ├── create/            # Recipe creation page
+│   │   ├── my-recipes/        # User recipes page
+│   │   ├── recipes/           # Recipe pages
+│   │   └── globals.css        # Global styles
+│   ├── components/            # React components
+│   │   ├── auth/              # Authentication components
+│   │   ├── layouts/           # Layout components
+│   │   ├── pages/             # Page components
+│   │   └── ui/                # UI components
+│   ├── hooks/                 # Custom React hooks
+│   ├── lib/                   # Utility libraries
+│   ├── schemas/               # Zod validation schemas
+│   ├── services/              # Business logic services
+│   ├── stores/                # Zustand state stores
+│   ├── types/                 # TypeScript type definitions
+│   └── utils/                 # Utility functions
+├── docs/                      # Documentation
+├── prisma/                    # Database schema and migrations
+└── public/                    # Static assets
 ```
 
-## 🎨 Sistema de Diseño
+## 🚀 Quick Start
 
-La aplicación utiliza un sistema de diseño consistente con:
+### Prerequisites
+- Node.js 18+ and npm
+- PostgreSQL database
+- OpenAI API key
+- Google Gemini API key (optional, for fallback)
 
-- **Colores**: Paleta de colores definida con variantes
-- **Tipografía**: Sistema de fuentes con tamaños y pesos predefinidos
-- **Espaciado**: Sistema de espaciado consistente
-- **Componentes**: Botones, tarjetas y elementos UI reutilizables
+### Installation
 
-## 🔧 Instalación
-
-1. **Clonar el repositorio**:
-
+1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/your-username/chef-at-home.git
    cd chef-at-home
    ```
 
-2. **Instalar dependencias**:
-
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Configurar variables de entorno**:
-
+3. **Set up environment variables**
    ```bash
    cp .env.example .env.local
    ```
-
-   Editar `.env.local` con tus claves de API:
-
+   
+   Fill in the required environment variables:
+   ```env
+   DATABASE_URL="postgresql://username:password@localhost:5432/chef_at_home"
+   NEXTAUTH_SECRET="your-secret-key"
+   NEXTAUTH_URL="http://localhost:3000"
+   OPENAI_API_KEY="your-openai-api-key"
+   GOOGLE_GEMINI_API_KEY="your-gemini-api-key"
    ```
-   GEMINI_API_KEY=tu_clave_de_gemini
-   UNSPLASH_ACCESS_KEY=tu_clave_de_unsplash
-   ```
 
-4. **Configurar la base de datos**:
-
+4. **Set up the database**
    ```bash
-   npx prisma generate
-   npx prisma db push
+   npx prisma migrate dev
+   npx prisma db seed
    ```
 
-5. **Ejecutar en desarrollo**:
-
+5. **Start the development server**
    ```bash
    npm run dev
    ```
 
-6. **Ejecutar tests**:
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-   ```bash
-   # Ejecutar todos los tests
-   npm test
+## 📚 Documentation
 
-   # Ejecutar tests con UI
-   npm run test:ui
+Comprehensive documentation is available in the `docs/` directory:
 
-   # Ejecutar tests una vez (CI)
-   npm run test:run
-
-   # Ejecutar tests con coverage
-   npm run test:coverage
-   ```
-
-## 🚀 Uso
-
-### Flujo Principal:
-
-1. **Registro/Login**: Los usuarios se registran o inician sesión
-2. **Crear Receta**: En el home, los usuarios agregan ingredientes y especifican comensales
-3. **Generación**: La IA genera múltiples recetas basadas en los ingredientes
-4. **Guardar**: Los usuarios pueden guardar sus recetas favoritas
-5. **Acceder**: Las recetas guardadas están disponibles en "My Recipes"
-
-### Funcionalidades del Menú:
-
-- **Create Recipe**: Navega al home para crear nuevas recetas
-- **Generated Recipes**: Ver recetas generadas recientemente
-- **My Recipes**: Acceder a recetas guardadas y gestionarlas
-- **Log Out**: Cerrar sesión y volver a la página de landing
-
-## 📊 Estado de la Aplicación
-
-- **Autenticación**: ✅ Implementada con Context API
-- **Creación de Recetas**: ✅ Integración con Gemini AI
-- **Guardado de Recetas**: ✅ Sistema de favoritos con localStorage
-- **Navegación**: ✅ Menú lateral con estado activo
-- **Notificaciones**: ✅ Sistema de notificaciones global
-- **Responsive**: ✅ Diseño adaptativo para móviles y desktop
+- **[API Documentation](docs/API.md)**: Complete API reference
+- **[Architecture Guide](docs/ARCHITECTURE.md)**: Technical architecture overview
+- **[Component Documentation](docs/COMPONENTS.md)**: React component reference
+- **[State Management](docs/STATE_MANAGEMENT.md)**: Zustand store documentation
+- **[Contributing Guide](docs/CONTRIBUTING.md)**: Development guidelines
 
 ## 🧪 Testing
 
-Esta aplicación incluye un suite completo de tests unitarios:
+The project includes comprehensive testing setup:
 
-- **Componentes**: Tests para ImagePlaceholder y RecipeCard
-- **Hooks**: Tests para useAuth y useSavedRecipes
-- **API**: Tests para endpoints de generación de imágenes
-- **Mocks**: Servicios externos completamente mockeados
-- **Coverage**: Reportes de cobertura de código
+```bash
+# Run all tests
+npm run test
 
-Ver [src/test/README.md](./src/test/README.md) para documentación detallada.
+# Run tests in watch mode
+npm run test:watch
 
-## 🔮 Próximas Mejoras
+# Run tests with coverage
+npm run test:coverage
 
-- [x] Testing automatizado con Vitest
-- [ ] Sistema de categorías de recetas
-- [ ] Filtros y búsqueda avanzada
-- [ ] Compartir recetas
-- [ ] Modo offline
-- [ ] PWA (Progressive Web App)
-- [ ] CI/CD pipeline
-- [ ] Integración con Stable Diffusion para imágenes IA
+# Run specific test files
+npm run test -- --grep "auth"
+```
 
-## 🤝 Contribuir
+### Test Coverage
+- **Unit Tests**: Individual functions and components
+- **Integration Tests**: API routes and service interactions
+- **Component Tests**: React component behavior
+- **E2E Tests**: Complete user workflows
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+## 🔧 Development Scripts
 
-## 📄 Licencia
+```bash
+# Development
+npm run dev              # Start development server
+npm run build           # Build for production
+npm run start           # Start production server
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+# Code Quality
+npm run lint:check      # Check for linting errors
+npm run lint:fix        # Fix linting errors
+npm run format          # Format code with Prettier
+npm run type-check      # Run TypeScript type checking
+npm run quality         # Run all quality checks
 
-## 👨‍🍳 Autor
+# Database
+npm run db:migrate      # Run database migrations
+npm run db:seed         # Seed database with sample data
+npm run db:studio       # Open Prisma Studio
+```
 
-**Chef at Home Team**
+## 🏛️ Architecture
+
+### State Management
+- **Zustand**: Lightweight state management
+- **Domain Separation**: Each store handles a specific domain
+- **Persistence**: Critical state persisted to localStorage
+- **Error Handling**: Centralized error management
+
+### Component Architecture
+- **Functional Components**: React hooks-based components
+- **Custom Hooks**: Reusable logic extraction
+- **Error Boundaries**: Graceful error handling
+- **Design System**: Consistent UI components
+
+### API Architecture
+- **Next.js API Routes**: Serverless API endpoints
+- **Zod Validation**: Type-safe request validation
+- **Error Handling**: Consistent error responses
+- **Rate Limiting**: API protection
+
+## 🔒 Security
+
+- **Password Hashing**: bcryptjs with salt rounds
+- **Input Validation**: Zod schemas for all inputs
+- **SQL Injection Prevention**: Prisma ORM protection
+- **CSRF Protection**: Built-in Next.js protection
+- **Rate Limiting**: API abuse prevention
+
+## 🚀 Deployment
+
+### Environment Setup
+1. Set up PostgreSQL database
+2. Configure environment variables
+3. Run database migrations
+4. Build the application
+5. Deploy to your hosting platform
+
+### Recommended Platforms
+- **Vercel**: Optimized for Next.js
+- **Netlify**: Static site hosting
+- **Railway**: Full-stack deployment
+- **DigitalOcean**: VPS hosting
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details.
+
+### Development Workflow
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Write tests
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **OpenAI**: For GPT-4 and DALL-E APIs
+- **Google**: For Gemini API
+- **Next.js Team**: For the amazing framework
+- **Vercel**: For deployment platform
+- **Tailwind CSS**: For the utility-first CSS framework
+
+## 📞 Support
+
+- **Documentation**: Check the `docs/` directory
+- **Issues**: Report bugs via GitHub Issues
+- **Discussions**: Use GitHub Discussions for questions
+- **Email**: Contact us at support@chefathome.com
 
 ---
 
-¡Disfruta creando deliciosas recetas con IA! 🍽️
+Made with ❤️ by the Chef at Home team
