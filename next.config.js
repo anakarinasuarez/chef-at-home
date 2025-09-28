@@ -1,42 +1,49 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // 🐳 Configuración para Docker
-  output: "standalone", // Necesario para Docker
+  output: 'standalone', // Necesario para Docker
 
   // 🖼️ Optimización de imágenes - Configuración para OpenAI DALL-E
   images: {
     unoptimized: false, // Habilitar optimización de imágenes
     // Permitir importaciones desde src/assets
     dangerouslyAllowSVG: true,
-    contentDispositionType: "attachment",
+    contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       // OpenAI DALL-E URLs
       {
-        protocol: "https",
-        hostname: "oaidalleapiprodscus.blob.core.windows.net",
-        port: "",
-        pathname: "/**",
+        protocol: 'https',
+        hostname: 'oaidalleapiprodscus.blob.core.windows.net',
+        port: '',
+        pathname: '/**',
       },
       {
-        protocol: "https",
-        hostname: "oaidalleapiprodscus.blob.core.windows.net",
-        port: "",
-        pathname: "/**",
+        protocol: 'https',
+        hostname: 'oaidalleapiprodscus.blob.core.windows.net',
+        port: '',
+        pathname: '/**',
       },
       // URLs de OpenAI API (backup)
       {
-        protocol: "https",
-        hostname: "api.openai.com",
-        port: "",
-        pathname: "/**",
+        protocol: 'https',
+        hostname: 'api.openai.com',
+        port: '',
+        pathname: '/**',
       },
       // URLs de fallback (Unsplash como backup)
       {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-        port: "",
-        pathname: "/**",
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      // Picsum para imágenes de placeholder
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**',
       },
     ],
   },
@@ -52,19 +59,19 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: "/(.*)",
+        source: '/(.*)',
         headers: [
           {
-            key: "X-Frame-Options",
-            value: "DENY",
+            key: 'X-Frame-Options',
+            value: 'DENY',
           },
           {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
           },
           {
-            key: "Referrer-Policy",
-            value: "origin-when-cross-origin",
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
           },
         ],
       },

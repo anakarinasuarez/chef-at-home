@@ -185,38 +185,15 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
     setIsCreating(true);
 
     try {
-      const response = await fetch('/api/recipes/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ingredients: ingredients.map(ing => ing.name),
-          servings: selectedServings,
-          count: 4, // Generar 4 recetas para nueva creación
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate recipes');
-      }
-
-      const data = await response.json();
-      console.log('Recetas generadas:', data);
-      console.log('Número de recetas recibidas:', data.recipes?.length || 0);
-
-      if (!data.recipes || data.recipes.length === 0) {
-        throw new Error('No recipes were generated');
-      }
-
-      // Redirigir a la página de recetas múltiples
+      // 🚀 SOLUCIÓN: Solo redirigir, no hacer request aquí
+      // El RecipesPage se encargará de hacer el request único
       const ingredientsParam = encodeURIComponent(JSON.stringify(ingredients.map(ing => ing.name)));
-      const redirectUrl = `/recipes?force=true&ingredients=${ingredientsParam}&servings=${selectedServings}`;
+      const redirectUrl = `/recipes?ingredients=${ingredientsParam}&servings=${selectedServings}`;
       console.log('Redirigiendo a página de recetas múltiples:', redirectUrl);
       router.push(redirectUrl);
     } catch (error) {
-      console.error('Error generating recipes:', error);
-      alert('Error generating recipes. Please try again.');
+      console.error('Error redirecting to recipes page:', error);
+      alert('Error redirecting to recipes page. Please try again.');
     } finally {
       setIsCreating(false);
     }
