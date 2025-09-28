@@ -137,28 +137,86 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
     setIsCreating(true);
 
     try {
-      // Crear los datos actualizados de la receta
+      // 🚀 NUEVA LÓGICA: Si se cambiaron ingredientes, generar nuevas recetas
+      // Obtener la receta original para comparar
+      const originalRecipe = localStorage.getItem(`recipe-${editingRecipeId}`);
+      let shouldGenerateNew = false;
+
+      if (originalRecipe) {
+        try {
+          const originalData = JSON.parse(originalRecipe);
+          const originalIngredients =
+            originalData.ingredients?.map((ing: any) =>
+              typeof ing === 'string' ? ing : ing.name
+            ) || [];
+          const currentIngredients = ingredients.map(ing => ing.name);
+
+          // Comparar ingredientes (orden independiente)
+          const originalSorted = originalIngredients.sort();
+          const currentSorted = currentIngredients.sort();
+
+          shouldGenerateNew =
+            JSON.stringify(originalSorted) !== JSON.stringify(currentSorted) ||
+            originalData.servings !== selectedServings;
+
+          console.log('🔍 Ingredient comparison:', {
+            original: originalSorted,
+            current: currentSorted,
+            shouldGenerateNew,
+          });
+        } catch (error) {
+          console.error('Error comparing ingredients:', error);
+          shouldGenerateNew = true; // Si no se puede comparar, generar nuevas
+        }
+      } else {
+        shouldGenerateNew = true; // Si no hay receta original, generar nuevas
+      }
+
+      if (shouldGenerateNew) {
+        console.log('🔄 Ingredients changed, generating new recipes...');
+
+        // Limpiar cache para forzar nueva generación
+        try {
+          const { UniversalCacheManager } = await import('@/lib/universal-cache');
+          await UniversalCacheManager.clearAllCache();
+          sessionStorage.removeItem('currentRecipes');
+          console.log('🧹 Cache cleared for new recipe generation');
+        } catch (error) {
+          console.error('Error clearing cache:', error);
+        }
+
+        // Redirigir a generar nuevas recetas con los ingredientes actualizados
+        const ingredientsParam = encodeURIComponent(
+          JSON.stringify(ingredients.map(ing => ing.name))
+        );
+        const redirectUrl = `/recipes?ingredients=${ingredientsParam}&servings=${selectedServings}&force=true&editMode=true&originalId=${editingRecipeId}&recipeTitle=${encodeURIComponent(recipeTitle.trim())}`;
+        console.log('🔄 Redirecting to generate new recipes:', redirectUrl);
+        router.push(redirectUrl);
+        return;
+      }
+
+      // Si no se cambiaron ingredientes, solo actualizar la receta existente
+      console.log('📝 No ingredient changes, updating existing recipe...');
+
       const updatedRecipeData = {
         title: recipeTitle.trim(),
         ingredients: ingredients.map(ing => ({
           name: ing.name,
-          quantity: 1, // Valor por defecto
-          unit: 'unit', // Valor por defecto
+          quantity: 1,
+          unit: 'unit',
         })),
         servings: selectedServings,
-        cookingTime: '30 minutes', // Valor por defecto
-        difficulty: 'medium', // Valor por defecto
+        cookingTime: '30 minutes',
+        difficulty: 'medium',
         source: 'user-edited',
-        image: originalImage || undefined, // ✅ Convertir null a undefined
-        instructions: ['Instructions will be updated when you regenerate the recipe.'], // Placeholder
+        image: originalImage || undefined,
+        instructions: ['Instructions will be updated when you regenerate the recipe.'],
       };
 
-      // Actualizar la receta existente
       const success = updateRecipe(editingRecipeId, updatedRecipeData, user.id);
 
       if (success) {
         console.log('✅ Receta editada guardada exitosamente');
-        // Redirigir a my-recipes después de guardar
         router.push('/my-recipes');
       } else {
         throw new Error('Failed to update recipe');

@@ -66,6 +66,9 @@ export default function RecipesPage() {
       const forceGenerate = urlParams.get('force') === 'true';
       const ingredientsParam = urlParams.get('ingredients');
       const servingsParam = urlParams.get('servings');
+      const editMode = urlParams.get('editMode') === 'true';
+      const originalId = urlParams.get('originalId');
+      const recipeTitle = urlParams.get('recipeTitle');
 
       const hasSpecificParams = ingredientsParam || servingsParam || forceGenerate;
 
@@ -299,6 +302,27 @@ export default function RecipesPage() {
         // Guardar en sessionStorage para mantenerlas al navegar
         sessionStorage.setItem('currentRecipes', JSON.stringify(aiRecipes));
         console.log('Recipes saved to sessionStorage');
+
+        // 🚀 MODO EDICIÓN: Si estamos en modo edición, actualizar la receta original
+        if (editMode && originalId && recipeTitle) {
+          console.log('🔄 Edit mode detected, updating original recipe...');
+          try {
+            const { useSavedRecipesStore } = await import('@/stores/savedRecipesStore');
+            const updateRecipe = useSavedRecipesStore.getState().updateRecipe;
+
+            // Actualizar la receta original con el primer resultado
+            const updatedRecipe = {
+              ...aiRecipes[0],
+              title: decodeURIComponent(recipeTitle),
+              id: originalId, // Mantener el ID original
+            };
+
+            updateRecipe(originalId, updatedRecipe, user?.id || '');
+            console.log('✅ Original recipe updated in edit mode');
+          } catch (error) {
+            console.error('❌ Error updating original recipe:', error);
+          }
+        }
 
         // Cache the recipes using UniversalCacheManager
         try {
