@@ -1,4 +1,3 @@
-import { UniversalCacheManager } from '@/lib/universal-cache';
 import {
   GenerateRecipeRequest,
   generateRecipeRequestSchema,
@@ -12,6 +11,11 @@ import {
 import { generateRecipeImageWithOpenAI } from '@/services/openaiImageService';
 import { generateRecipeWithOpenAI, isOpenAIServiceAvailable } from '@/services/openaiRecipeService';
 import { NextRequest, NextResponse } from 'next/server';
+
+// Declarar tipo para el cache global del servidor
+declare global {
+  var serverCache: Map<string, any> | undefined;
+}
 
 export async function POST(request: NextRequest) {
   let ingredients: string[] = [];
@@ -38,20 +42,25 @@ export async function POST(request: NextRequest) {
     const validatedData = validation.data as GenerateRecipeRequest;
     ({ ingredients, servings, cuisine, count, title: customTitle } = validatedData);
 
-    // 🚀 CACHE CHECK: Verificar si ya tenemos recetas en cache
-    console.log('🔍 Checking cache for ingredients:', ingredients, 'servings:', servings);
-    try {
-      const cachedRecipes = await UniversalCacheManager.getCachedRecipes(ingredients, servings);
-      if (cachedRecipes && cachedRecipes.length > 0) {
-        console.log('✅ Using cached recipes:', cachedRecipes.length, 'recipes');
-        return NextResponse.json({
-          recipes: cachedRecipes,
-          count: cachedRecipes.length,
-          source: 'cache',
-        });
-      }
-    } catch (error) {
-      console.log('❌ Cache check failed:', error);
+    // 🚀 CACHE CHECK: Verificar si ya tenemos recetas en cache (servidor)
+    console.log('🔍 Checking server cache for ingredients:', ingredients, 'servings:', servings);
+    const cacheKey = `recipes_${ingredients.sort().join(',')}_${servings}`;
+
+    // Cache simple en memoria del servidor
+    if (!global.serverCache) {
+      global.serverCache = new Map();
+    }
+
+    const cachedRecipes = global.serverCache.get(cacheKey);
+    if (cachedRecipes && cachedRecipes.length > 0) {
+      console.log('✅ Using server cached recipes:', cachedRecipes.length, 'recipes');
+      return NextResponse.json({
+        recipes: cachedRecipes,
+        count: cachedRecipes.length,
+        source: 'server-cache',
+      });
+    } else {
+      console.log('❌ No server cached recipes found, will generate new ones');
     }
 
     let recipes;
@@ -145,9 +154,9 @@ export async function POST(request: NextRequest) {
       throw new Error('No recipes were generated');
     }
 
-    // 💾 CACHE: Guardar las recetas generadas en cache
+    // 💾 CACHE: Guardar las recetas generadas en cache del servidor
     try {
-      console.log('💾 Caching generated recipes...');
+      console.log('💾 Caching generated recipes in server cache...');
       // Convertir a formato compatible con cache
       const cacheableRecipes = recipesWithImages.map(recipe => ({
         id: (recipe as any).id || `recipe_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -159,8 +168,10 @@ export async function POST(request: NextRequest) {
         ingredients: (recipe as any).ingredients || [],
         instructions: (recipe as any).instructions || [],
       }));
-      await UniversalCacheManager.cacheRecipes(ingredients, servings, cacheableRecipes);
-      console.log('✅ Recipes cached successfully');
+
+      // Guardar en cache del servidor
+      global.serverCache.set(cacheKey, cacheableRecipes);
+      console.log('✅ Recipes cached in server cache successfully');
     } catch (error) {
       console.error('❌ Error caching recipes:', error);
     }
@@ -193,9 +204,9 @@ export async function POST(request: NextRequest) {
 
       console.log(`Fallback recipes generated: ${fallbackRecipesWithImages.length}`);
 
-      // 💾 CACHE: Guardar las recetas fallback en cache también
+      // 💾 CACHE: Guardar las recetas fallback en cache del servidor
       try {
-        console.log('💾 Caching fallback recipes...');
+        console.log('💾 Caching fallback recipes in server cache...');
         // Convertir a formato compatible con cache
         const cacheableFallbackRecipes = fallbackRecipesWithImages.map(recipe => ({
           id: `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -207,8 +218,13 @@ export async function POST(request: NextRequest) {
           ingredients: recipe.ingredients.map(ing => ing.name) || [],
           instructions: recipe.instructions || [],
         }));
-        await UniversalCacheManager.cacheRecipes(ingredients, servings, cacheableFallbackRecipes);
-        console.log('✅ Fallback recipes cached successfully');
+
+        // Guardar en cache del servidor
+        if (global.serverCache) {
+          const fallbackCacheKey = `recipes_${ingredients.sort().join(',')}_${servings}`;
+          global.serverCache.set(fallbackCacheKey, cacheableFallbackRecipes);
+        }
+        console.log('✅ Fallback recipes cached in server cache successfully');
       } catch (error) {
         console.error('❌ Error caching fallback recipes:', error);
       }

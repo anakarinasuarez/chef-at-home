@@ -138,20 +138,32 @@ export default function RecipesPage() {
             }
           }
 
-          console.log('🔄 No specific params found, generating default recipes');
-          // Si no hay parámetros específicos, generar recetas por defecto
-          // Usar ingredientes por defecto para generar nuevas recetas
+          console.log('🔄 No specific params found, checking for existing recipes');
+          // Si no hay parámetros específicos, verificar si hay recetas existentes
+          // Usar ingredientes por defecto solo si no hay recetas en cache
           ingredients = ['pasta', 'basil', 'olive oil', 'garlic', 'tomatoes'];
           servings = 4;
           console.log('🎯 Using default ingredients:', ingredients, 'servings:', servings);
 
-          // Limpiar cache para asegurar que se generen nuevas recetas
+          // Verificar cache antes de generar nuevas recetas
           try {
-            await UniversalCacheManager.clearAllCache();
-            sessionStorage.removeItem('currentRecipes');
-            console.log('🧹 Cache cleared for default recipe generation');
+            const cachedRecipes = await UniversalCacheManager.getCachedRecipes(
+              ingredients,
+              servings
+            );
+
+            if (cachedRecipes && cachedRecipes.length > 0) {
+              console.log('📦 Using cached default recipes:', cachedRecipes.length);
+              setRecipes(cachedRecipes);
+              setHasLoadedRecipes(true);
+              setLoading(false);
+              sessionStorage.setItem('currentRecipes', JSON.stringify(cachedRecipes));
+              return;
+            } else {
+              console.log('❌ No cached default recipes found, will generate new ones');
+            }
           } catch (error) {
-            console.log('❌ Error clearing cache:', error);
+            console.log('❌ Error checking cache for default recipes:', error);
           }
         } else if (!forceGenerate) {
           try {
@@ -211,6 +223,29 @@ export default function RecipesPage() {
         }
 
         console.log('🎯 Final ingredients for generation:', ingredients, 'servings:', servings);
+
+        // 🚀 OPTIMIZACIÓN: Verificar cache local antes de llamar al API
+        console.log('🔍 Checking local cache before API call...');
+        try {
+          const cachedRecipes = await UniversalCacheManager.getCachedRecipes(ingredients, servings);
+          if (cachedRecipes && cachedRecipes.length > 0) {
+            console.log(
+              '✅ Using local cached recipes, skipping API call:',
+              cachedRecipes.length,
+              'recipes'
+            );
+            setRecipes(cachedRecipes);
+            setHasLoadedRecipes(true);
+            setLoading(false);
+            // Guardar en sessionStorage para mantenerlas al navegar
+            sessionStorage.setItem('currentRecipes', JSON.stringify(cachedRecipes));
+            return;
+          } else {
+            console.log('❌ No local cached recipes found, will call API');
+          }
+        } catch (error) {
+          console.log('❌ Error checking local cache:', error);
+        }
 
         // Generate recipes using our new API route
         console.log('🚀 About to call API with:', {
