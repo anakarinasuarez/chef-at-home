@@ -3,12 +3,11 @@
 import Button from '@/components/Button';
 import MainLayout from '@/components/layouts/MainLayout';
 import { colors, typography } from '@/design-system';
-import { useSavedRecipesStore } from '@/stores';
+import { useSavedRecipesStore, useToastStore } from '@/stores';
 import { User } from '@/types';
 import { normalizeIngredientName } from '@/utils/ingredientUtils';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 
 interface CreateRecipePageProps {
   userName: string;
@@ -17,6 +16,7 @@ interface CreateRecipePageProps {
 
 export default function CreateRecipePage({ userName, user }: CreateRecipePageProps) {
   const router = useRouter();
+  const { showSuccess, showError } = useToastStore();
   const [ingredients, setIngredients] = useState<Array<{ id: string; name: string }>>([]);
   const [newIngredient, setNewIngredient] = useState('');
   const [selectedServings, setSelectedServings] = useState<number | null>(null);
@@ -89,7 +89,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
       );
 
       if (isDuplicate) {
-        toast.error(`"${trimmedIngredient}" is already in the ingredients list`);
+        showError(`"${trimmedIngredient}" is already in the ingredients list`);
         return;
       }
 
@@ -130,22 +130,22 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
 
   const handleSaveRecipe = async () => {
     if (ingredients.length === 0) {
-      toast.error('Please add at least one ingredient');
+      showError('Please add at least one ingredient');
       return;
     }
 
     if (!selectedServings) {
-      toast.error('Please select the number of servings');
+      showError('Please select the number of servings');
       return;
     }
 
     if (!recipeTitle.trim()) {
-      toast.error('Please enter a recipe title');
+      showError('Please enter a recipe title');
       return;
     }
 
     if (!editingRecipeId) {
-      toast.error('No recipe ID found for editing');
+      showError('No recipe ID found for editing');
       return;
     }
 
@@ -300,7 +300,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
       }
     } catch (error) {
       console.error('Error saving recipe:', error);
-      toast.error('Error saving recipe. Please try again.');
+      showError('Error saving recipe. Please try again.');
     } finally {
       setIsCreating(false);
     }
@@ -308,12 +308,12 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
 
   const handleCreateRecipe = async () => {
     if (ingredients.length === 0) {
-      toast.error('Please add at least one ingredient');
+      showError('Please add at least one ingredient');
       return;
     }
 
     if (!selectedServings) {
-      toast.error('Please select the number of servings');
+      showError('Please select the number of servings');
       return;
     }
 
@@ -328,7 +328,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
       router.push(redirectUrl);
     } catch (error) {
       console.error('Error redirecting to recipes page:', error);
-      toast.error('Error redirecting to recipes page. Please try again.');
+      showError('Error redirecting to recipes page. Please try again.');
     } finally {
       setIsCreating(false);
     }
