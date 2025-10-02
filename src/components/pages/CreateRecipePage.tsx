@@ -7,6 +7,7 @@ import { useSavedRecipesStore } from '@/stores';
 import { User } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface CreateRecipePageProps {
   userName: string;
@@ -115,32 +116,32 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
 
   const handleSaveRecipe = async () => {
     if (ingredients.length === 0) {
-      alert('Please add at least one ingredient');
+      toast.error('Please add at least one ingredient');
       return;
     }
 
     if (!selectedServings) {
-      alert('Please select the number of servings');
+      toast.error('Please select the number of servings');
       return;
     }
 
     if (!recipeTitle.trim()) {
-      alert('Please enter a recipe title');
+      toast.error('Please enter a recipe title');
       return;
     }
 
     if (!editingRecipeId) {
-      alert('No recipe ID found for editing');
+      toast.error('No recipe ID found for editing');
       return;
     }
 
     setIsCreating(true);
 
     try {
-      // 🚀 NUEVA LÓGICA: Si se cambiaron ingredientes, generar nuevas recetas
+      // 🚀 NUEVA LÓGICA: Detectar tipo de cambio para mejor UX
       // Obtener la receta original para comparar
       const originalRecipe = localStorage.getItem(`recipe-${editingRecipeId}`);
-      let shouldGenerateNew = false;
+      let changeType: 'ingredients' | 'servings' | 'title' | 'none' = 'none';
 
       if (originalRecipe) {
         try {
@@ -154,25 +155,38 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
           // Comparar ingredientes (orden independiente)
           const originalSorted = originalIngredients.sort();
           const currentSorted = currentIngredients.sort();
+          const ingredientsChanged =
+            JSON.stringify(originalSorted) !== JSON.stringify(currentSorted);
+          const servingsChanged = originalData.servings !== selectedServings;
+          const titleChanged = originalData.title !== recipeTitle.trim();
 
-          shouldGenerateNew =
-            JSON.stringify(originalSorted) !== JSON.stringify(currentSorted) ||
-            originalData.servings !== selectedServings;
+          // Determinar tipo de cambio
+          if (ingredientsChanged) {
+            changeType = 'ingredients';
+          } else if (servingsChanged) {
+            changeType = 'servings';
+          } else if (titleChanged) {
+            changeType = 'title';
+          }
 
-          console.log('🔍 Ingredient comparison:', {
+          console.log('🔍 Change detection:', {
             original: originalSorted,
             current: currentSorted,
-            shouldGenerateNew,
+            changeType,
+            ingredientsChanged,
+            servingsChanged,
+            titleChanged,
           });
         } catch (error) {
-          console.error('Error comparing ingredients:', error);
-          shouldGenerateNew = true; // Si no se puede comparar, generar nuevas
+          console.error('Error comparing recipe data:', error);
+          changeType = 'ingredients'; // Si no se puede comparar, asumir cambio de ingredientes
         }
       } else {
-        shouldGenerateNew = true; // Si no hay receta original, generar nuevas
+        changeType = 'ingredients'; // Si no hay receta original, generar nuevas
       }
 
-      if (shouldGenerateNew) {
+      // 🎯 ACCIONES SEGÚN TIPO DE CAMBIO
+      if (changeType === 'ingredients') {
         console.log('🔄 Ingredients changed, generating new recipes...');
 
         // Limpiar cache para forzar nueva generación
@@ -185,18 +199,66 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
           console.error('Error clearing cache:', error);
         }
 
-        // Redirigir a generar nuevas recetas con los ingredientes actualizados
+        // Redirigir a generar UNA nueva receta con los ingredientes actualizados
         const ingredientsParam = encodeURIComponent(
           JSON.stringify(ingredients.map(ing => ing.name))
         );
-        const redirectUrl = `/recipes?ingredients=${ingredientsParam}&servings=${selectedServings}&force=true&editMode=true&originalId=${editingRecipeId}&recipeTitle=${encodeURIComponent(recipeTitle.trim())}`;
-        console.log('🔄 Redirecting to generate new recipes:', redirectUrl);
+        const redirectUrl = `/recipes?ingredients=${ingredientsParam}&servings=${selectedServings}&force=true&editMode=true&originalId=${editingRecipeId}&recipeTitle=${encodeURIComponent(recipeTitle.trim())}&count=1`;
+        console.log('🔄 Redirecting to generate ONE new recipe:', redirectUrl);
         router.push(redirectUrl);
         return;
+      } else if (changeType === 'servings') {
+        console.log('📊 Servings changed, recalculating ingredients...');
+
+        // Recalcular proporciones de ingredientes
+        const originalRecipe = localStorage.getItem(`recipe-${editingRecipeId}`);
+        if (originalRecipe) {
+          try {
+            const originalData = JSON.parse(originalRecipe);
+            const originalServings = originalData.servings || 4;
+            const ratio = selectedServings / originalServings;
+
+            // Recalcular cantidades de ingredientes
+            const recalculatedIngredients =
+              originalData.ingredients?.map((ing: any) => {
+                const name = typeof ing === 'string' ? ing : ing.name;
+                const quantity =
+                  typeof ing === 'object' && ing.quantity
+                    ? Math.round(ing.quantity * ratio * 100) / 100
+                    : 1;
+                const unit = typeof ing === 'object' && ing.unit ? ing.unit : 'unit';
+
+                return { name, quantity, unit };
+              }) || [];
+
+            const updatedRecipeData = {
+              title: recipeTitle.trim(),
+              ingredients: recalculatedIngredients,
+              servings: selectedServings,
+              cookingTime: originalData.cookingTime || '30 minutes',
+              difficulty: originalData.difficulty || 'medium',
+              source: 'user-edited',
+              image: originalData.image || undefined,
+              instructions: originalData.instructions || [
+                'Instructions will be updated when you regenerate the recipe.',
+              ],
+            };
+
+            const success = updateRecipe(editingRecipeId, updatedRecipeData, user.id);
+            if (success) {
+              console.log('✅ Recipe servings updated successfully');
+              toast.success(`Recipe updated for ${selectedServings} servings!`);
+              router.push('/my-recipes');
+              return;
+            }
+          } catch (error) {
+            console.error('Error recalculating servings:', error);
+          }
+        }
       }
 
-      // Si no se cambiaron ingredientes, solo actualizar la receta existente
-      console.log('📝 No ingredient changes, updating existing recipe...');
+      // Si solo se cambió el título, actualizar metadatos
+      console.log('📝 Title only changed, updating recipe metadata...');
 
       const updatedRecipeData = {
         title: recipeTitle.trim(),
@@ -216,14 +278,15 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
       const success = updateRecipe(editingRecipeId, updatedRecipeData, user.id);
 
       if (success) {
-        console.log('✅ Receta editada guardada exitosamente');
+        console.log('✅ Recipe metadata updated successfully');
+        toast.success('Title updated successfully!');
         router.push('/my-recipes');
       } else {
         throw new Error('Failed to update recipe');
       }
     } catch (error) {
       console.error('Error saving recipe:', error);
-      alert('Error saving recipe. Please try again.');
+      toast.error('Error saving recipe. Please try again.');
     } finally {
       setIsCreating(false);
     }
@@ -231,12 +294,12 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
 
   const handleCreateRecipe = async () => {
     if (ingredients.length === 0) {
-      alert('Please add at least one ingredient');
+      toast.error('Please add at least one ingredient');
       return;
     }
 
     if (!selectedServings) {
-      alert('Please select the number of servings');
+      toast.error('Please select the number of servings');
       return;
     }
 
@@ -246,12 +309,12 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
       // 🚀 SOLUCIÓN: Solo redirigir, no hacer request aquí
       // El RecipesPage se encargará de hacer el request único
       const ingredientsParam = encodeURIComponent(JSON.stringify(ingredients.map(ing => ing.name)));
-      const redirectUrl = `/recipes?ingredients=${ingredientsParam}&servings=${selectedServings}`;
+      const redirectUrl = `/recipes?ingredients=${ingredientsParam}&servings=${selectedServings}&count=4`;
       console.log('Redirigiendo a página de recetas múltiples:', redirectUrl);
       router.push(redirectUrl);
     } catch (error) {
       console.error('Error redirecting to recipes page:', error);
-      alert('Error redirecting to recipes page. Please try again.');
+      toast.error('Error redirecting to recipes page. Please try again.');
     } finally {
       setIsCreating(false);
     }
@@ -451,7 +514,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
               ? 'Saving recipe...'
               : 'Creating recipe...'
             : isEditing
-              ? 'Save Recipe'
+              ? 'Update Recipe'
               : 'Create Recipe'}
         </Button>
         <Button

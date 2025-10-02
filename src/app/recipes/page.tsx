@@ -41,6 +41,12 @@ export default function RecipesPage() {
     setIsClient(true);
   }, []);
 
+  // Get URL params safely
+  const getUrlParams = useCallback(() => {
+    if (typeof window === 'undefined') return new URLSearchParams();
+    return new URLSearchParams(window.location.search);
+  }, []);
+
   // Debug: Log recipes state changes
   useEffect(() => {
     console.log('🔧 DEBUG: Recipes state changed:', recipes.length, 'recipes');
@@ -55,20 +61,63 @@ export default function RecipesPage() {
   useEffect(() => {
     if (!isClient) return;
 
-    console.log('🚀 useEffect triggered - hasLoadedRecipes:', hasLoadedRecipes);
+    console.log(
+      '🚀 useEffect triggered - hasLoadedRecipes:',
+      hasLoadedRecipes,
+      'recipes count:',
+      recipes.length
+    );
+
+    // Si ya tenemos recetas cargadas, no hacer nada
+    if (recipes.length > 0) {
+      console.log('📦 Recipes already loaded, skipping generation');
+      setLoading(false);
+      return;
+    }
+
+    // Si ya se cargaron recetas anteriormente, no regenerar
+    if (hasLoadedRecipes) {
+      console.log('📦 Recipes were already loaded, skipping generation');
+      setLoading(false);
+      return;
+    }
+
+    // Si estamos en modo edición y no hay recetas, no generar automáticamente
+    const urlParams = getUrlParams();
+    const editMode = urlParams.get('editMode') === 'true';
+    const forceGenerate = urlParams.get('force') === 'true';
+    const fromEdit = urlParams.get('fromEdit') === 'true';
+
+    // Solo evitar generación si es modo edición SIN force=true
+    if (editMode && !forceGenerate && recipes.length === 0) {
+      console.log('📦 Edit mode detected without force, not generating automatically');
+      setLoading(false);
+      return;
+    }
+
+    // Si venimos de edit mode, no generar recetas automáticamente
+    if (fromEdit) {
+      console.log('📦 Coming from edit mode, not generating recipes automatically');
+      // Limpiar la URL para evitar regeneración
+      if (typeof window !== 'undefined') {
+        window.history.replaceState({}, '', '/recipes');
+      }
+      setLoading(false);
+      return;
+    }
+
     const generateRecipes = async () => {
       console.log('🔄 generateRecipes function called');
 
       // Solo cargar desde sessionStorage si NO hay parámetros de generación
-      const urlParams = new URLSearchParams(
-        typeof window !== 'undefined' ? window.location.search : ''
-      );
+      const urlParams = getUrlParams();
       const forceGenerate = urlParams.get('force') === 'true';
       const ingredientsParam = urlParams.get('ingredients');
       const servingsParam = urlParams.get('servings');
       const editMode = urlParams.get('editMode') === 'true';
       const originalId = urlParams.get('originalId');
       const recipeTitle = urlParams.get('recipeTitle');
+      const countParam = urlParams.get('count');
 
       const hasSpecificParams = ingredientsParam || servingsParam || forceGenerate;
 
@@ -251,10 +300,11 @@ export default function RecipesPage() {
         }
 
         // Generate recipes using our new API route
+        const recipeCount = countParam ? parseInt(countParam) : 4;
         console.log('🚀 About to call API with:', {
           ingredients,
           servings,
-          count: 4,
+          count: recipeCount,
         });
 
         const response = await fetch('/api/recipes/generate', {
@@ -266,7 +316,7 @@ export default function RecipesPage() {
             ingredients: ingredients,
             servings: servings,
             cuisine: 'international',
-            count: 4,
+            count: recipeCount,
           }),
         });
 
@@ -281,16 +331,48 @@ export default function RecipesPage() {
         console.log('Number of recipes received:', data.recipes?.length || 0);
 
         // Convert API response to Recipe format
-        const aiRecipes = data.recipes.map((aiRecipe: Record<string, unknown>, index: number) => ({
-          id: `recipe_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
-          title: (aiRecipe.title as string) || `Recipe ${index + 1}`,
-          servings: (aiRecipe.servings as number) || servings,
-          cookingTime: (aiRecipe.cookingTime as string) || '30 minutes',
-          image: (aiRecipe.image as string) || null,
-          source: (aiRecipe.source as string) || 'gemini',
-          ingredients: (aiRecipe.ingredients as Array<unknown>) || [],
-          instructions: (aiRecipe.instructions as string[]) || [],
-        }));
+        const aiRecipes = data.recipes.map((aiRecipe: Record<string, unknown>, index: number) => {
+          console.log('🔧 DEBUG: Processing recipe', index, ':', aiRecipe);
+          console.log('🔧 DEBUG: Raw ingredients:', aiRecipe.ingredients);
+
+          // Procesar ingredientes correctamente
+          let processedIngredients: Array<{ name: string; quantity: number; unit: string }> = [];
+
+          if (aiRecipe.ingredients && Array.isArray(aiRecipe.ingredients)) {
+            processedIngredients = aiRecipe.ingredients.map((ing: any) => {
+              if (typeof ing === 'string') {
+                return { name: ing, quantity: 1, unit: 'unit' };
+              } else if (typeof ing === 'object' && ing.name) {
+                return {
+                  name: ing.name,
+                  quantity: ing.quantity || 1,
+                  unit: ing.unit || 'unit',
+                };
+              }
+              return { name: String(ing), quantity: 1, unit: 'unit' };
+            });
+          }
+
+          console.log('🔧 DEBUG: Processed ingredients:', processedIngredients);
+
+          return {
+            id: `recipe_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
+            title: (aiRecipe.title as string) || `Recipe ${index + 1}`,
+            servings: (aiRecipe.servings as number) || servings,
+            cookingTime: (aiRecipe.cookingTime as string) || '30 minutes',
+            image: (aiRecipe.image as string) || null,
+            source: (aiRecipe.source as string) || 'gemini',
+            ingredients: processedIngredients,
+            instructions: (aiRecipe.instructions as string[]) || [],
+            // En modo edición, agregar metadata para el reemplazo
+            ...(editMode &&
+              originalId && {
+                originalId,
+                isEditMode: true,
+                originalTitle: recipeTitle,
+              }),
+          };
+        });
 
         console.log('Processed recipes:', aiRecipes);
         console.log('Setting recipes state with count:', aiRecipes.length);
@@ -303,25 +385,11 @@ export default function RecipesPage() {
         sessionStorage.setItem('currentRecipes', JSON.stringify(aiRecipes));
         console.log('Recipes saved to sessionStorage');
 
-        // 🚀 MODO EDICIÓN: Si estamos en modo edición, actualizar la receta original
+        // 🚀 MODO EDICIÓN: Si estamos en modo edición, NO actualizar automáticamente
+        // El usuario debe guardar manualmente la nueva receta
         if (editMode && originalId && recipeTitle) {
-          console.log('🔄 Edit mode detected, updating original recipe...');
-          try {
-            const { useSavedRecipesStore } = await import('@/stores/savedRecipesStore');
-            const updateRecipe = useSavedRecipesStore.getState().updateRecipe;
-
-            // Actualizar la receta original con el primer resultado
-            const updatedRecipe = {
-              ...aiRecipes[0],
-              title: decodeURIComponent(recipeTitle),
-              id: originalId, // Mantener el ID original
-            };
-
-            updateRecipe(originalId, updatedRecipe, user?.id || '');
-            console.log('✅ Original recipe updated in edit mode');
-          } catch (error) {
-            console.error('❌ Error updating original recipe:', error);
-          }
+          console.log('🔄 Edit mode detected, waiting for user to save the new recipe...');
+          // No actualizamos automáticamente, esperamos a que el usuario guarde
         }
 
         // Cache the recipes using UniversalCacheManager
@@ -368,7 +436,7 @@ export default function RecipesPage() {
     };
 
     generateRecipes();
-  }, [hasLoadedRecipes, isClient]); // Solo ejecutar una vez al montar el componente
+  }, [isClient]); // Solo ejecutar una vez al montar el componente
 
   // Memoizar el handler de save recipe
   const handleSaveRecipe = useCallback((recipeId: string) => {
@@ -384,31 +452,36 @@ export default function RecipesPage() {
   }, []);
 
   // Memoizar el handler de remove from list
-  const handleRemoveFromList = useCallback(
-    (recipeId: string) => {
-      console.log('🗑️ handleRemoveFromList called with recipeId:', recipeId);
-      console.log('🗑️ Current recipes count:', recipes.length);
+  const handleRemoveFromList = useCallback((recipeId: string) => {
+    console.log('🗑️ handleRemoveFromList called with recipeId:', recipeId);
+    console.log('🗑️ Current recipes count:', recipes.length);
 
-      // Marcar la receta como removiendo para animación
-      setRemovingRecipeId(recipeId);
+    // Marcar la receta como removiendo para animación
+    setRemovingRecipeId(recipeId);
 
-      // Esperar un poco para que se vea la animación, luego eliminar
-      setTimeout(() => {
-        const updatedRecipes = recipes.filter(recipe => recipe.id !== recipeId);
-        console.log('🗑️ Updated recipes count:', updatedRecipes.length);
+    // Eliminar inmediatamente sin setTimeout para evitar problemas de estado
+    setRecipes(prevRecipes => {
+      const updatedRecipes = prevRecipes.filter(recipe => recipe.id !== recipeId);
+      console.log('🗑️ Updated recipes count:', updatedRecipes.length);
 
-        setRecipes(updatedRecipes);
-        setRemovingRecipeId(null);
+      // Actualizar sessionStorage con las recetas restantes
+      sessionStorage.setItem('currentRecipes', JSON.stringify(updatedRecipes));
 
-        // Actualizar sessionStorage con las recetas restantes
-        sessionStorage.setItem('currentRecipes', JSON.stringify(updatedRecipes));
+      // Si no quedan recetas, marcar como cargado para evitar regeneración
+      if (updatedRecipes.length === 0) {
+        setHasLoadedRecipes(true);
+        console.log('📦 No more recipes, marking as loaded to prevent regeneration');
+      }
 
-        // NO redirigir automáticamente - mantener al usuario en Generated Recipes
-        console.log('✅ Recipe removed from Generated Recipes, staying on current page');
-      }, 600); // Tiempo para la animación de desvanecimiento
-    },
-    [recipes]
-  );
+      return updatedRecipes;
+    });
+
+    // Limpiar el estado de removiendo después de la animación
+    setTimeout(() => {
+      setRemovingRecipeId(null);
+      console.log('✅ Recipe removed from Generated Recipes, staying on current page');
+    }, 600);
+  }, []);
 
   // Memoizar el handler de back to home
   const handleBackToHome = useCallback(() => {
@@ -514,8 +587,14 @@ export default function RecipesPage() {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [recipes.length, isClient]);
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!user && isClient) {
+      router.push('/auth/login');
+    }
+  }, [user, isClient, router]);
+
   if (!user) {
-    router.push('/auth/login');
     return null;
   }
 
@@ -581,25 +660,33 @@ export default function RecipesPage() {
           <div className='relative flex-1 flex flex-col'>
             {/* Scroll Container */}
             <div className='flex gap-6 overflow-x-auto scrollbar-hide items-center flex-1 pt-3 pb-1.5'>
-              {recipes.map(recipe => (
-                <div
-                  key={recipe.id}
-                  className={`flex-shrink-0 w-80 transition-all duration-600 ease-in-out ${
-                    removingRecipeId === recipe.id
-                      ? 'opacity-0 scale-95 transform translate-x-4'
-                      : 'opacity-100 scale-100 transform translate-x-0'
-                  }`}
-                >
-                  <SuspenseWrapper minHeight='400px'>
-                    <LazyRecipeCard
-                      recipe={recipe}
-                      variant='save'
-                      onRemoveFromList={handleRemoveFromList}
-                      isRemoving={removingRecipeId === recipe.id}
-                    />
-                  </SuspenseWrapper>
-                </div>
-              ))}
+              {recipes.map(recipe => {
+                console.log(
+                  '🔧 DEBUG: Rendering RecipeCard for:',
+                  recipe.id,
+                  'with onRemoveFromList:',
+                  !!handleRemoveFromList
+                );
+                return (
+                  <div
+                    key={recipe.id}
+                    className={`flex-shrink-0 w-80 transition-all duration-600 ease-in-out ${
+                      removingRecipeId === recipe.id
+                        ? 'opacity-0 scale-95 transform translate-x-4'
+                        : 'opacity-100 scale-100 transform translate-x-0'
+                    }`}
+                  >
+                    <SuspenseWrapper minHeight='400px'>
+                      <LazyRecipeCard
+                        recipe={recipe}
+                        variant='save'
+                        onRemoveFromList={handleRemoveFromList}
+                        isRemoving={removingRecipeId === recipe.id}
+                      />
+                    </SuspenseWrapper>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Scroll Indicator - Clickable Navigation */}

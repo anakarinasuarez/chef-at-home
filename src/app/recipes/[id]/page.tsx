@@ -48,11 +48,13 @@ export default function RecipeDetailPage() {
   const [isRecipeSavedState, setIsRecipeSavedState] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     const loadRecipe = () => {
       try {
         setLoading(true);
+        console.log('🔧 DEBUG: Loading recipe with ID:', params.id);
 
         // Verificar si viene desde My Recipes
         const urlParams = new URLSearchParams(window.location.search);
@@ -62,6 +64,10 @@ export default function RecipeDetailPage() {
 
         const isFromMyRecipesPage = isFromMyRecipesParam || isFromMyRecipesReferrer;
         setIsFromMyRecipes(isFromMyRecipesPage);
+
+        // Verificar si estamos en modo edición
+        const editModeParam = urlParams.get('editMode') === 'true';
+        setEditMode(editModeParam);
 
         console.log('Current URL:', window.location.href);
         console.log('URL params:', urlParams.toString());
@@ -75,6 +81,7 @@ export default function RecipeDetailPage() {
         if (savedRecipe) {
           const recipeData = JSON.parse(savedRecipe);
           console.log('Loaded recipe from localStorage:', recipeData);
+          console.log('🔧 DEBUG: Recipe ingredients in localStorage:', recipeData.ingredients);
 
           setRecipe(recipeData);
 
@@ -137,7 +144,7 @@ export default function RecipeDetailPage() {
     );
   }, [isFromMyRecipes, isRecipeSavedState, recipe?.id, user?.id]);
 
-  const handleSaveRecipe = () => {
+  const handleSaveRecipe = async () => {
     if (!recipe) {
       console.log('No recipe available');
       return;
@@ -174,6 +181,37 @@ export default function RecipeDetailPage() {
 
       // Si se guardó la receta, eliminar de la lista de recetas generadas
       if (success && !isRecipeSavedState) {
+        // 🚀 MODO EDICIÓN: Verificar si estamos en modo edición
+        const urlParams = new URLSearchParams(window.location.search);
+        const originalId = urlParams.get('originalId');
+
+        if (editMode && originalId) {
+          console.log('🔄 Edit mode: Replacing original recipe with new one...');
+          try {
+            const { useSavedRecipesStore } = await import('@/stores/savedRecipesStore');
+            const updateRecipe = useSavedRecipesStore.getState().updateRecipe;
+
+            // Reemplazar la receta original con la nueva
+            const updatedRecipe = {
+              ...recipe,
+              id: originalId, // Mantener el ID original
+              title: recipe.title, // Usar el título de la nueva receta
+            };
+
+            const success = updateRecipe(originalId, updatedRecipe, user.id);
+            if (success) {
+              console.log('✅ Original recipe replaced in edit mode');
+              showSuccess('Recipe updated successfully!');
+            } else {
+              console.error('❌ Failed to update recipe');
+              showError('Failed to update recipe');
+            }
+          } catch (error) {
+            console.error('❌ Error updating original recipe:', error);
+            showError('Error updating recipe');
+          }
+        }
+
         // Eliminar la receta de sessionStorage para que no aparezca en la lista
         const currentRecipes = sessionStorage.getItem('currentRecipes');
         if (currentRecipes) {
@@ -188,10 +226,29 @@ export default function RecipeDetailPage() {
             console.error('Error updating sessionStorage:', error);
           }
         }
+      }
 
+      // Navegación después de guardar (siempre se ejecuta si hay éxito)
+      if (success) {
         setTimeout(() => {
-          // Redirigir a la página de recetas
-          router.push('/recipes');
+          // Si venimos de edit mode, ir a My Recipes en lugar de Generated Recipes
+          const urlParams = new URLSearchParams(window.location.search);
+          const fromEdit = urlParams.get('fromEdit') === 'true';
+
+          console.log('🔧 DEBUG: Navigation after save:', {
+            currentUrl: window.location.href,
+            urlParams: urlParams.toString(),
+            fromEdit,
+            editMode,
+          });
+
+          if (fromEdit) {
+            console.log('🔧 DEBUG: Navigating to /my-recipes (fromEdit=true)');
+            router.push('/my-recipes');
+          } else {
+            console.log('🔧 DEBUG: Navigating to /recipes (fromEdit=false)');
+            router.push('/recipes');
+          }
         }, 1000); // Esperar 1 segundo para que se vea la notificación
       }
 
@@ -313,7 +370,21 @@ export default function RecipeDetailPage() {
         <div className='mb-8'>
           <div className='flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6'>
             <div className='flex items-start gap-4 flex-1'>
-              <Button variant='tertiary' onClick={() => router.back()} className='mt-1 !p-0'>
+              <Button
+                variant='tertiary'
+                onClick={() => {
+                  // Si venimos de edit mode, ir a My Recipes en lugar de volver atrás
+                  const urlParams = new URLSearchParams(window.location.search);
+                  const fromEdit = urlParams.get('fromEdit') === 'true';
+
+                  if (fromEdit) {
+                    router.push('/my-recipes');
+                  } else {
+                    router.back();
+                  }
+                }}
+                className='mt-1 !p-0'
+              >
                 <IoIosArrowBack className='text-xl' />
               </Button>
               <div className='flex-1'>
@@ -382,7 +453,7 @@ export default function RecipeDetailPage() {
                     ) : (
                       <BiPlus className='text-lg' />
                     )}
-                    {isRecipeSavedState ? 'Saved' : 'Save'}
+                    {isRecipeSavedState ? 'Saved' : editMode ? 'Update Recipe' : 'Save'}
                   </Button>
                   <Button
                     variant='secondary'

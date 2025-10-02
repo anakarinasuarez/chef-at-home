@@ -1,6 +1,6 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { StorageManager, STORAGE_KEYS } from "@/utils/storage";
+import { STORAGE_KEYS, StorageManager } from '@/utils/storage';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 // Interface para recetas guardadas (compatible con el sistema actual)
 interface FrontendRecipe {
@@ -47,11 +47,7 @@ export interface SavedRecipesState {
   loadSavedRecipes: (userId: string) => void;
   saveRecipe: (recipe: FrontendRecipe, userId: string) => boolean;
   removeRecipe: (recipeId: string, userId: string) => boolean;
-  updateRecipe: (
-    recipeId: string,
-    updatedRecipe: FrontendRecipe,
-    userId: string
-  ) => boolean;
+  updateRecipe: (recipeId: string, updatedRecipe: FrontendRecipe, userId: string) => boolean;
 }
 
 export const useSavedRecipesStore = create<SavedRecipesState>()(
@@ -75,8 +71,7 @@ export const useSavedRecipesStore = create<SavedRecipesState>()(
           });
         } catch (error) {
           set({
-            error:
-              error instanceof Error ? error.message : "Error loading recipes",
+            error: error instanceof Error ? error.message : 'Error loading recipes',
             isLoading: false,
           });
         }
@@ -84,14 +79,38 @@ export const useSavedRecipesStore = create<SavedRecipesState>()(
 
       saveRecipe: (recipe: FrontendRecipe, userId: string) => {
         try {
+          console.log('💾 saveRecipe called with:', { recipe, userId });
+
           const recipeToSave = {
             ...recipe,
             id: recipe.id || Date.now().toString(),
             savedAt: new Date().toISOString(),
           };
 
+          console.log('💾 Recipe to save:', recipeToSave);
+
           const currentRecipes = get().savedRecipes;
+          console.log('💾 Current saved recipes:', currentRecipes.length);
+
+          // Verificar si la receta ya existe
+          const existingIndex = currentRecipes.findIndex(r => r.id === recipeToSave.id);
+          if (existingIndex !== -1) {
+            console.log('💾 Recipe already exists, updating...');
+            const updatedRecipes = [...currentRecipes];
+            updatedRecipes[existingIndex] = recipeToSave;
+            set({ savedRecipes: updatedRecipes, error: null });
+
+            const success = StorageManager.setJSON(
+              STORAGE_KEYS.SAVED_RECIPES(userId),
+              updatedRecipes
+            );
+
+            console.log('💾 Update result:', success);
+            return success;
+          }
+
           const updatedRecipes = [...currentRecipes, recipeToSave];
+          console.log('💾 Updated recipes count:', updatedRecipes.length);
 
           set({ savedRecipes: updatedRecipes, error: null });
 
@@ -100,21 +119,17 @@ export const useSavedRecipesStore = create<SavedRecipesState>()(
             updatedRecipes
           );
 
+          console.log('💾 Storage save result:', success);
+
           // Cache individual de la receta
-          if (
-            !StorageManager.getItem(STORAGE_KEYS.RECIPE_CACHE(recipeToSave.id))
-          ) {
-            StorageManager.setJSON(
-              STORAGE_KEYS.RECIPE_CACHE(recipeToSave.id),
-              recipeToSave
-            );
+          if (!StorageManager.getItem(STORAGE_KEYS.RECIPE_CACHE(recipeToSave.id))) {
+            StorageManager.setJSON(STORAGE_KEYS.RECIPE_CACHE(recipeToSave.id), recipeToSave);
           }
 
           return success;
         } catch (error) {
           set({
-            error:
-              error instanceof Error ? error.message : "Error saving recipe",
+            error: error instanceof Error ? error.message : 'Error saving recipe',
           });
           return false;
         }
@@ -123,49 +138,44 @@ export const useSavedRecipesStore = create<SavedRecipesState>()(
       removeRecipe: (recipeId: string, userId: string) => {
         try {
           const currentRecipes = get().savedRecipes;
-          const updatedRecipes = currentRecipes.filter(
-            (recipe) => recipe.id !== recipeId
-          );
+          const updatedRecipes = currentRecipes.filter(recipe => recipe.id !== recipeId);
 
           set({ savedRecipes: updatedRecipes, error: null });
 
-          return StorageManager.setJSON(
-            STORAGE_KEYS.SAVED_RECIPES(userId),
-            updatedRecipes
-          );
+          return StorageManager.setJSON(STORAGE_KEYS.SAVED_RECIPES(userId), updatedRecipes);
         } catch (error) {
           set({
-            error:
-              error instanceof Error ? error.message : "Error removing recipe",
+            error: error instanceof Error ? error.message : 'Error removing recipe',
           });
           return false;
         }
       },
 
-      updateRecipe: (
-        recipeId: string,
-        updatedRecipe: FrontendRecipe,
-        userId: string
-      ) => {
+      updateRecipe: (recipeId: string, updatedRecipe: FrontendRecipe, userId: string) => {
         try {
           const currentRecipes = get().savedRecipes;
-          const recipeIndex = currentRecipes.findIndex(
-            (recipe) => recipe.id === recipeId
-          );
+          const recipeIndex = currentRecipes.findIndex(recipe => recipe.id === recipeId);
 
           if (recipeIndex === -1) {
+            console.log('💾 updateRecipe: Recipe not found with ID:', recipeId);
             set({
-              error: "Recipe not found",
+              error: 'Recipe not found',
             });
             return false;
           }
 
+          console.log('💾 updateRecipe: Found recipe at index:', recipeIndex);
+          console.log('💾 updateRecipe: Original recipe:', currentRecipes[recipeIndex]);
+          console.log('💾 updateRecipe: Updated recipe:', updatedRecipe);
+
           const updatedRecipes = [...currentRecipes];
           updatedRecipes[recipeIndex] = {
             ...updatedRecipe,
-            id: recipeId,
+            id: recipeId, // Mantener el ID original
             savedAt: currentRecipes[recipeIndex].savedAt, // Mantener la fecha original
           };
+
+          console.log('💾 updateRecipe: Final updated recipe:', updatedRecipes[recipeIndex]);
 
           set({ savedRecipes: updatedRecipes, error: null });
 
@@ -175,25 +185,23 @@ export const useSavedRecipesStore = create<SavedRecipesState>()(
           );
 
           // Actualizar cache individual de la receta
-          StorageManager.setJSON(
-            STORAGE_KEYS.RECIPE_CACHE(recipeId),
-            updatedRecipes[recipeIndex]
-          );
+          StorageManager.setJSON(STORAGE_KEYS.RECIPE_CACHE(recipeId), updatedRecipes[recipeIndex]);
 
+          console.log('💾 updateRecipe: Success:', success);
           return success;
         } catch (error) {
+          console.error('💾 updateRecipe: Error:', error);
           set({
-            error:
-              error instanceof Error ? error.message : "Error updating recipe",
+            error: error instanceof Error ? error.message : 'Error updating recipe',
           });
           return false;
         }
       },
 
-      setLoading: (isLoading) => set({ isLoading }),
-      setError: (error) => set({ error }),
+      setLoading: isLoading => set({ isLoading }),
+      setError: error => set({ error }),
       clearError: () => set({ error: null }),
-      setRemovingRecipeId: (removingRecipeId) => set({ removingRecipeId }),
+      setRemovingRecipeId: removingRecipeId => set({ removingRecipeId }),
       clearSavedRecipes: () =>
         set({
           savedRecipes: [],
@@ -202,8 +210,8 @@ export const useSavedRecipesStore = create<SavedRecipesState>()(
         }),
     }),
     {
-      name: "saved-recipes-storage",
-      partialize: (state) => ({
+      name: 'saved-recipes-storage',
+      partialize: state => ({
         savedRecipes: state.savedRecipes,
       }),
     }
@@ -211,18 +219,15 @@ export const useSavedRecipesStore = create<SavedRecipesState>()(
 );
 
 // Selectores estandarizados para evitar renders innecesarios
-export const useSavedRecipes = () =>
-  useSavedRecipesStore((state) => state.savedRecipes);
-export const useSavedRecipesLoading = () =>
-  useSavedRecipesStore((state) => state.isLoading);
-export const useSavedRecipesError = () =>
-  useSavedRecipesStore((state) => state.error);
+export const useSavedRecipes = () => useSavedRecipesStore(state => state.savedRecipes);
+export const useSavedRecipesLoading = () => useSavedRecipesStore(state => state.isLoading);
+export const useSavedRecipesError = () => useSavedRecipesStore(state => state.error);
 export const useSavedRecipesRemovingId = () =>
-  useSavedRecipesStore((state) => state.removingRecipeId);
+  useSavedRecipesStore(state => state.removingRecipeId);
 
 // Selector de acciones
 export const useSavedRecipesActions = () =>
-  useSavedRecipesStore((state) => ({
+  useSavedRecipesStore(state => ({
     loadSavedRecipes: state.loadSavedRecipes,
     saveRecipe: state.saveRecipe,
     removeRecipe: state.removeRecipe,

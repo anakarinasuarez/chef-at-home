@@ -111,9 +111,8 @@ export async function POST(request: NextRequest) {
     const recipesWithImages = await Promise.all(
       recipes.map(async (recipe, index) => {
         try {
-          // Si hay un título personalizado y es la primera receta, usarlo
-          const finalTitle =
-            customTitle && index === 0 ? customTitle : recipe?.title || 'Generated Recipe';
+          // Usar el título de la receta generada, no personalizado para todas
+          const finalTitle = recipe?.title || `Generated Recipe ${index + 1}`;
 
           console.log(`🎨 Generating image for: ${finalTitle}`);
 
