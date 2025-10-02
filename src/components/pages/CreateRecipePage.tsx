@@ -536,7 +536,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
           onClick={() => router.push('/my-recipes')}
           className='px-6 py-3'
         >
-          My Recipes
+          {isEditing ? 'Cancel' : 'My Recipes'}
         </Button>
       </div>
     </MainLayout>
