@@ -6,6 +6,7 @@ import Nav from '@/components/Nav';
 import { colors } from '@/design-system';
 import { useAuthUnified } from '@/hooks';
 import { UniversalCacheManager } from '@/lib/universal-cache';
+import { deduplicateIngredientsNumeric } from '@/utils/ingredientUtils';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { IoIosArrowBack } from 'react-icons/io';
@@ -339,7 +340,7 @@ export default function RecipesPage() {
           let processedIngredients: Array<{ name: string; quantity: number; unit: string }> = [];
 
           if (aiRecipe.ingredients && Array.isArray(aiRecipe.ingredients)) {
-            processedIngredients = aiRecipe.ingredients.map((ing: any) => {
+            const rawIngredients = aiRecipe.ingredients.map((ing: any) => {
               if (typeof ing === 'string') {
                 return { name: ing, quantity: 1, unit: 'unit' };
               } else if (typeof ing === 'object' && ing.name) {
@@ -351,6 +352,9 @@ export default function RecipesPage() {
               }
               return { name: String(ing), quantity: 1, unit: 'unit' };
             });
+
+            // Aplicar deduplicación para eliminar ingredientes repetidos
+            processedIngredients = deduplicateIngredientsNumeric(rawIngredients);
           }
 
           console.log('🔧 DEBUG: Processed ingredients:', processedIngredients);

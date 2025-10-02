@@ -5,6 +5,7 @@ import MainLayout from '@/components/layouts/MainLayout';
 import { colors, typography } from '@/design-system';
 import { useSavedRecipesStore } from '@/stores';
 import { User } from '@/types';
+import { normalizeIngredientName } from '@/utils/ingredientUtils';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -79,9 +80,22 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
 
   const handleAddIngredient = () => {
     if (newIngredient.trim()) {
+      const trimmedIngredient = newIngredient.trim();
+
+      // Verificar si el ingrediente ya existe (case-insensitive)
+      const normalizedNewIngredient = normalizeIngredientName(trimmedIngredient);
+      const isDuplicate = ingredients.some(
+        ingredient => normalizeIngredientName(ingredient.name) === normalizedNewIngredient
+      );
+
+      if (isDuplicate) {
+        toast.error(`"${trimmedIngredient}" is already in the ingredients list`);
+        return;
+      }
+
       const newIngredientObj = {
         id: Date.now().toString() + Math.random(),
-        name: newIngredient.trim(),
+        name: trimmedIngredient,
       };
       setIngredients([...ingredients, newIngredientObj]);
       setNewIngredient('');

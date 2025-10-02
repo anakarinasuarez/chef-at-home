@@ -10,6 +10,7 @@ import {
 } from '@/services/geminiService';
 import { generateRecipeImageWithOpenAI } from '@/services/openaiImageService';
 import { generateRecipeWithOpenAI, isOpenAIServiceAvailable } from '@/services/openaiRecipeService';
+import { deduplicateIngredients, filterDuplicateIngredients } from '@/utils/ingredientUtils';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Declarar tipo para el cache global del servidor
@@ -401,21 +402,27 @@ function generateFallbackRecipes(
       ingredients[(i + 1) % ingredients.length] || ingredients[1] || 'Vegetables';
 
     // Generar ingredientes más realistas con variedad
-    const recipeIngredients = [
-      ...ingredients.map((ing, index) => ({
+    const mainIngredients = ingredients.map((ing, index) => ({
+      name: ing,
+      quantity: Math.ceil(servings / 2) + i * 2 + index,
+      unit: index % 2 === 0 ? 'pieces' : 'grams',
+    }));
+
+    // Agregar ingredientes base de la cocina con rotación (sin duplicados)
+    const additionalIngredients = cuisine.baseIngredients
+      .slice(i % cuisine.baseIngredients.length, (i % cuisine.baseIngredients.length) + 3)
+      .map((ing: string, index: number) => ({
         name: ing,
-        quantity: Math.ceil(servings / 2) + i * 2 + index,
-        unit: index % 2 === 0 ? 'pieces' : 'grams',
-      })),
-      // Agregar ingredientes base de la cocina con rotación
-      ...cuisine.baseIngredients
-        .slice(i % cuisine.baseIngredients.length, (i % cuisine.baseIngredients.length) + 3)
-        .map((ing: string, index: number) => ({
-          name: ing,
-          quantity: (index + i + 1).toString(),
-          unit: ing.includes('oil') ? 'tbsp' : ing.includes('sauce') ? 'tbsp' : 'pieces',
-        })),
-    ];
+        quantity: (index + i + 1).toString(),
+        unit: ing.includes('oil') ? 'tbsp' : ing.includes('sauce') ? 'tbsp' : 'pieces',
+      }));
+
+    // Filtrar ingredientes duplicados y combinar
+    const filteredAdditional = filterDuplicateIngredients(mainIngredients, additionalIngredients);
+    const allIngredients = [...mainIngredients, ...filteredAdditional];
+
+    // Aplicar deduplicación final para asegurar que no hay duplicados
+    const recipeIngredients = deduplicateIngredients(allIngredients);
 
     // Generar instrucciones más detalladas con variedad
     const instructionTemplates = [
