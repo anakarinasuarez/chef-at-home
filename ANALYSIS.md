@@ -2,12 +2,16 @@
 
 ## 📊 Resumen Ejecutivo
 
-**Chef at Home** es una aplicación web moderna para crear recetas con IA que muestra una arquitectura sólida pero con oportunidades significativas de mejora para alcanzar estándares profesionales de código limpio, funcionalidad y escalabilidad.
+**Chef at Home** es una aplicación web moderna para crear recetas con IA que
+muestra una arquitectura sólida pero con oportunidades significativas de mejora
+para alcanzar estándares profesionales de código limpio, funcionalidad y
+escalabilidad.
 
 ### Estado Actual
 
 - ✅ **Arquitectura base sólida** con Next.js 14, TypeScript y Prisma
-- ✅ **Refactorización reciente** de componentes grandes (RecipesPage, RecipeCard)
+- ✅ **Refactorización reciente** de componentes grandes (RecipesPage,
+  RecipeCard)
 - ✅ **Sistema de testing** implementado con Vitest
 - ⚠️ **Cobertura de tests baja** (11 tests fallando de 117)
 - ⚠️ **Patrones inconsistentes** en manejo de estado y errores
@@ -72,8 +76,8 @@ const [recipes, setRecipes] = useState<Recipe[]>([]);
 try {
   // API call
 } catch (error) {
-  console.error("Error:", error);
-  alert("Something went wrong"); // UX pobre
+  console.error('Error:', error);
+  alert('Something went wrong'); // UX pobre
 }
 
 // ✅ Solución: Sistema unificado de errores
@@ -96,7 +100,7 @@ try {
 
 ```typescript
 // Recomendación: Zustand (ligero y moderno)
-import { create } from "zustand";
+import { create } from 'zustand';
 
 interface AppState {
   user: User | null;
@@ -113,24 +117,24 @@ interface AppState {
   setError: (error: string | null) => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>(set => ({
   user: null,
   recipes: [],
   savedRecipes: [],
   loading: false,
   error: null,
 
-  setUser: (user) => set({ user }),
-  addRecipe: (recipe) =>
-    set((state) => ({
+  setUser: user => set({ user }),
+  addRecipe: recipe =>
+    set(state => ({
       recipes: [...state.recipes, recipe],
     })),
-  saveRecipe: (id) =>
-    set((state) => ({
+  saveRecipe: id =>
+    set(state => ({
       savedRecipes: [...state.savedRecipes, id],
     })),
-  setLoading: (loading) => set({ loading }),
-  setError: (error) => set({ error }),
+  setLoading: loading => set({ loading }),
+  setError: error => set({ error }),
 }));
 ```
 
@@ -145,16 +149,18 @@ interface ErrorContextType {
 }
 
 // Toast notifications para UX profesional
-import { toast } from "react-hot-toast";
+import { useToastStore } from '@/stores';
 
 const handleApiCall = async () => {
+  const { showSuccess, showError } = useToastStore();
+
   try {
     setLoading(true);
     const result = await api.generateRecipes();
-    toast.success("Recipes generated successfully!");
+    showSuccess('Recipes generated successfully!');
     return result;
   } catch (error) {
-    toast.error("Failed to generate recipes. Please try again.");
+    showError('Failed to generate recipes. Please try again.');
     throw error;
   } finally {
     setLoading(false);
@@ -180,7 +186,7 @@ const handleApiCall = async () => {
 
 ```typescript
 // Recomendación: Zod para validación
-import { z } from "zod";
+import { z } from 'zod';
 
 const RecipeSchema = z.object({
   title: z.string().min(1).max(100),
@@ -211,7 +217,7 @@ const validateRecipe = (data: unknown) => {
 
 ```typescript
 // Lazy loading de componentes
-const RecipeCard = lazy(() => import("./RecipeCard"));
+const RecipeCard = lazy(() => import('./RecipeCard'));
 
 // Memoización estratégica
 const MemoizedRecipeCard = memo(RecipeCard, (prevProps, nextProps) => {
@@ -219,7 +225,7 @@ const MemoizedRecipeCard = memo(RecipeCard, (prevProps, nextProps) => {
 });
 
 // Virtualización para listas grandes
-import { FixedSizeList as List } from "react-window";
+import { FixedSizeList as List } from 'react-window';
 ```
 
 #### 6. **Sistema de Logging Profesional**
@@ -239,7 +245,7 @@ const logger: Logger = {
   warn: (message, data) => console.warn(`[WARN] ${message}`, data),
   error: (message, error) => console.error(`[ERROR] ${message}`, error),
   debug: (message, data) =>
-    process.env.NODE_ENV === "development" &&
+    process.env.NODE_ENV === 'development' &&
     console.debug(`[DEBUG] ${message}`, data),
 };
 ```
@@ -332,24 +338,29 @@ jobs:
 
 ## 🎯 Conclusión
 
-**Chef at Home** tiene una base sólida pero necesita trabajo significativo para alcanzar estándares profesionales. Las refactorizaciones recientes muestran el compromiso con la calidad del código, pero ahora es crucial:
+**Chef at Home** tiene una base sólida pero necesita trabajo significativo para
+alcanzar estándares profesionales. Las refactorizaciones recientes muestran el
+compromiso con la calidad del código, pero ahora es crucial:
 
 1. **Estabilizar** el sistema de testing
 2. **Centralizar** el manejo de estado
 3. **Unificar** el manejo de errores
 4. **Optimizar** la performance
 
-Con estas mejoras, la aplicación estará lista para producción y escalabilidad empresarial.
+Con estas mejoras, la aplicación estará lista para producción y escalabilidad
+empresarial.
 
 ---
 
 ## 📚 Recursos Recomendados
 
 - **Zustand**: https://zustand-demo.pmnd.rs/
-- **React Hook Form + Zod**: https://react-hook-form.com/get-started#SchemaValidation
+- **React Hook Form + Zod**:
+  https://react-hook-form.com/get-started#SchemaValidation
 - **React Query**: https://tanstack.com/query/latest
 - **Storybook**: https://storybook.js.org/
-- **Testing Library**: https://testing-library.com/docs/react-testing-library/intro/
+- **Testing Library**:
+  https://testing-library.com/docs/react-testing-library/intro/
 
 ---
 

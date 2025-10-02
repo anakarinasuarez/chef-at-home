@@ -1,8 +1,36 @@
 "use client";
 
 import { Toaster } from "react-hot-toast";
+import { useToastStore } from "@/stores";
+import { useEffect } from "react";
 
 export function ToastProvider() {
+  const toasts = useToastStore((state) => state.toasts);
+
+  useEffect(() => {
+    // Listen to toast store changes and trigger react-hot-toast
+    toasts.forEach((toast) => {
+      const { message, type, duration, id } = toast;
+      
+      // Import toast dynamically to avoid SSR issues
+      import('react-hot-toast').then(({ toast: toastFn }) => {
+        switch (type) {
+          case 'success':
+            toastFn.success(message, { duration, id });
+            break;
+          case 'error':
+            toastFn.error(message, { duration, id });
+            break;
+          case 'warning':
+            toastFn(message, { type: 'loading', duration, id });
+            break;
+          case 'info':
+            toastFn(message, { type: 'custom', duration, id });
+            break;
+        }
+      });
+    });
+  }, [toasts]);
   return (
     <Toaster
       position="top-right"

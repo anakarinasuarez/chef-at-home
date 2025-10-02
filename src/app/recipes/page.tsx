@@ -524,7 +524,7 @@ export default function RecipesPage() {
       console.log('🧹 Cache cleared, reloading page...');
 
       // Recargar la página para generar nuevas recetas
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && isClient) {
         window.location.reload();
       }
     } catch (error) {

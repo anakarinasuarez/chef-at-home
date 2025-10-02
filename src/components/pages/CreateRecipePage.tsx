@@ -261,7 +261,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
             const success = updateRecipe(editingRecipeId, updatedRecipeData, user.id);
             if (success) {
               console.log('✅ Recipe servings updated successfully');
-              toast.success(`Recipe updated for ${selectedServings} servings!`);
+              showSuccess(`Recipe updated for ${selectedServings} servings!`);
               router.push('/my-recipes');
               return;
             }
@@ -293,7 +293,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
 
       if (success) {
         console.log('✅ Recipe metadata updated successfully');
-        toast.success('Title updated successfully!');
+        showSuccess('Title updated successfully!');
         router.push('/my-recipes');
       } else {
         throw new Error('Failed to update recipe');

@@ -3,11 +3,8 @@
  * Evita duplicación de lógica de validación
  */
 
-export interface Ingredient {
-  name: string;
-  quantity: string | number;
-  unit: string;
-}
+// Import Ingredient interface from ingredientUtils to avoid duplication
+import { Ingredient } from './ingredientUtils';
 
 export interface RecipeData {
   title?: string;
@@ -28,22 +25,22 @@ export class RecipeValidator {
    * Limpia el formato de tiempo (ej: "30 min" -> "30 minutes")
    */
   static cleanTimeFormat(time: string | undefined): string {
-    if (!time) return "30 minutes";
+    if (!time) return '30 minutes';
 
     const timeStr = time.toString().toLowerCase();
 
     // Si ya contiene "minutes", devolverlo tal como está
-    if (timeStr.includes("minutes") || timeStr.includes("mins")) {
-      return timeStr.replace(/mins?/g, "minutes");
+    if (timeStr.includes('minutes') || timeStr.includes('mins')) {
+      return timeStr.replace(/mins?/g, 'minutes');
     }
 
     // Si contiene solo números, asumir que son minutos
-    const minutes = parseInt(timeStr.replace(/\D/g, ""));
+    const minutes = parseInt(timeStr.replace(/\D/g, ''));
     if (!isNaN(minutes)) {
       return `${minutes} minutes`;
     }
 
-    return "30 minutes";
+    return '30 minutes';
   }
 
   /**
@@ -55,18 +52,17 @@ export class RecipeValidator {
     servings: number
   ): RecipeData {
     const cleanedRecipe: RecipeData = {
-      title: recipe.title || "Delicious Recipe",
-      description:
-        recipe.description || "A flavorful dish made with fresh ingredients",
+      title: recipe.title || 'Delicious Recipe',
+      description: recipe.description || 'A flavorful dish made with fresh ingredients',
       ingredients: recipe.ingredients || [],
       instructions: recipe.instructions || [],
-      cookingTime: recipe.cookingTime || "30 minutes",
-      prepTime: recipe.prepTime || "15 minutes",
-      totalTime: recipe.totalTime || "45 minutes",
-      cuisine: recipe.cuisine || "International",
+      cookingTime: recipe.cookingTime || '30 minutes',
+      prepTime: recipe.prepTime || '15 minutes',
+      totalTime: recipe.totalTime || '45 minutes',
+      cuisine: recipe.cuisine || 'International',
       servings: recipe.servings || servings,
       image: recipe.image,
-      source: recipe.source || "ai-generated",
+      source: recipe.source || 'ai-generated',
     };
 
     // Validar estructura de ingredientes
@@ -76,9 +72,7 @@ export class RecipeValidator {
     );
 
     // Validar instrucciones
-    cleanedRecipe.instructions = this.validateInstructions(
-      cleanedRecipe.instructions as string[]
-    );
+    cleanedRecipe.instructions = this.validateInstructions(cleanedRecipe.instructions as string[]);
 
     // Limpiar formatos de tiempo
     cleanedRecipe.cookingTime = this.cleanTimeFormat(cleanedRecipe.cookingTime);
@@ -99,33 +93,31 @@ export class RecipeValidator {
 
     if (Array.isArray(ingredients)) {
       normalizedIngredients = ingredients.map((ing: Ingredient | string) => {
-        if (typeof ing === "string") {
+        if (typeof ing === 'string') {
           return {
             name: ing,
-            quantity: "1",
-            unit: "piece",
+            quantity: '1',
+            unit: 'piece',
           };
         }
         return {
           name: ing.name || ing.toString(),
-          quantity: ing.quantity || "1",
-          unit: ing.unit || "piece",
+          quantity: ing.quantity || '1',
+          unit: ing.unit || 'piece',
         };
       });
     } else {
-      normalizedIngredients = originalIngredients.map((ing) => ({
+      normalizedIngredients = originalIngredients.map(ing => ({
         name: ing,
-        quantity: "1",
-        unit: "piece",
+        quantity: '1',
+        unit: 'piece',
       }));
     }
 
     // Asegurar que todos los ingredientes originales estén incluidos
-    const includedIngredients = normalizedIngredients.map((ing) =>
-      ing.name.toLowerCase()
-    );
+    const includedIngredients = normalizedIngredients.map(ing => ing.name.toLowerCase());
 
-    originalIngredients.forEach((originalIng) => {
+    originalIngredients.forEach(originalIng => {
       if (
         !includedIngredients.some(
           (included: string) =>
@@ -135,8 +127,8 @@ export class RecipeValidator {
       ) {
         normalizedIngredients.push({
           name: originalIng,
-          quantity: "1",
-          unit: "piece",
+          quantity: '1',
+          unit: 'piece',
         });
       }
     });
@@ -150,15 +142,14 @@ export class RecipeValidator {
   private static validateInstructions(instructions: string[]): string[] {
     if (!Array.isArray(instructions) || instructions.length === 0) {
       return [
-        "Prepare all ingredients",
-        "Cook according to your preference",
-        "Serve hot and enjoy!",
+        'Prepare all ingredients',
+        'Cook according to your preference',
+        'Serve hot and enjoy!',
       ];
     }
 
     return instructions.filter(
-      (instruction) =>
-        typeof instruction === "string" && instruction.trim().length > 0
+      instruction => typeof instruction === 'string' && instruction.trim().length > 0
     );
   }
 
@@ -187,25 +178,25 @@ export class RecipeValidator {
     customTitle?: string
   ): RecipeData {
     return {
-      title: customTitle || "Simple Recipe",
-      description: "A delicious dish made with your ingredients",
-      ingredients: originalIngredients.map((ing) => ({
+      title: customTitle || 'Simple Recipe',
+      description: 'A delicious dish made with your ingredients',
+      ingredients: originalIngredients.map(ing => ({
         name: ing,
-        quantity: "1",
-        unit: "piece",
+        quantity: '1',
+        unit: 'piece',
       })),
       instructions: [
-        "Prepare all ingredients",
-        "Cook according to your preference",
-        "Season to taste",
-        "Serve hot and enjoy!",
+        'Prepare all ingredients',
+        'Cook according to your preference',
+        'Season to taste',
+        'Serve hot and enjoy!',
       ],
-      cookingTime: "30 minutes",
-      prepTime: "15 minutes",
-      totalTime: "45 minutes",
-      cuisine: "International",
+      cookingTime: '30 minutes',
+      prepTime: '15 minutes',
+      totalTime: '45 minutes',
+      cuisine: 'International',
       servings,
-      source: "fallback",
+      source: 'fallback',
     };
   }
 }
