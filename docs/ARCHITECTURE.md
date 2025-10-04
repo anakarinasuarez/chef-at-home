@@ -2,11 +2,14 @@
 
 ## Overview
 
-Chef at Home is a modern web application built with Next.js 14, TypeScript, and Zustand for state management. This document outlines the technical architecture, design patterns, and system components.
+Chef at Home is a modern web application built with Next.js 14, TypeScript, and
+Zustand for state management. This document outlines the technical architecture,
+design patterns, and system components.
 
 ## Technology Stack
 
 ### Frontend
+
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS + Custom Design System
@@ -16,14 +19,16 @@ Chef at Home is a modern web application built with Next.js 14, TypeScript, and 
 - **Code Quality**: ESLint + Prettier
 
 ### Backend
+
 - **Runtime**: Node.js
 - **Framework**: Next.js API Routes
-- **Database**: PostgreSQL with Prisma ORM
+- **Database**: SQLite with Prisma ORM
 - **Authentication**: bcryptjs + JWT
 - **AI Services**: OpenAI GPT-4 + Google Gemini
 - **Image Generation**: OpenAI DALL-E
 
 ### Development Tools
+
 - **Package Manager**: npm
 - **Version Control**: Git
 - **Code Formatting**: Prettier
@@ -80,7 +85,7 @@ class AuthService {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
     // Business logic here
   }
-  
+
   async register(userData: RegisterRequest): Promise<AuthResponse> {
     // Business logic here
   }
@@ -108,6 +113,7 @@ interface RecipeRepository {
 The application uses Zustand for state management with the following stores:
 
 #### 1. AuthStore
+
 ```typescript
 interface AuthState {
   user: UserResponse | null;
@@ -120,6 +126,7 @@ interface AuthState {
 ```
 
 #### 2. RecipesStore
+
 ```typescript
 interface RecipesState {
   recipes: UnifiedRecipe[];
@@ -132,6 +139,7 @@ interface RecipesState {
 ```
 
 #### 3. SavedRecipesStore
+
 ```typescript
 interface SavedRecipesState {
   savedRecipes: FrontendRecipe[];
@@ -139,7 +147,11 @@ interface SavedRecipesState {
   error: string | null;
   saveRecipe: (recipe: FrontendRecipe, userId: string) => boolean;
   removeRecipe: (recipeId: string, userId: string) => boolean;
-  updateRecipe: (recipeId: string, updatedRecipe: FrontendRecipe, userId: string) => boolean;
+  updateRecipe: (
+    recipeId: string,
+    updatedRecipe: FrontendRecipe,
+    userId: string
+  ) => boolean;
 }
 ```
 
@@ -170,6 +182,7 @@ App
 ### Component Design Patterns
 
 #### 1. Compound Components
+
 ```typescript
 // RecipeCard with sub-components
 <RecipeCard>
@@ -180,6 +193,7 @@ App
 ```
 
 #### 2. Render Props Pattern
+
 ```typescript
 // ErrorBoundary with render prop
 <ErrorBoundary>
@@ -192,16 +206,17 @@ App
 ```
 
 #### 3. Custom Hooks
+
 ```typescript
 // useRecipeCard hook
 const useRecipeCard = (recipe: Recipe) => {
   const [isSaving, setIsSaving] = useState(false);
   const [imageError, setImageError] = useState(false);
-  
+
   const handleSave = useCallback(() => {
     // Save logic
   }, [recipe]);
-  
+
   return { isSaving, imageError, handleSave };
 };
 ```
@@ -209,6 +224,7 @@ const useRecipeCard = (recipe: Recipe) => {
 ## Data Flow Architecture
 
 ### 1. User Authentication Flow
+
 ```
 User Input → AuthForm → AuthService → API Route → AuthBackendService → Database
                 ↓
@@ -216,6 +232,7 @@ User Input → AuthForm → AuthService → API Route → AuthBackendService →
 ```
 
 ### 2. Recipe Generation Flow
+
 ```
 User Input → CreateRecipePage → RecipeGenerationService → AI Service → API Response
                 ↓
@@ -223,6 +240,7 @@ User Input → CreateRecipePage → RecipeGenerationService → AI Service → A
 ```
 
 ### 3. Recipe Management Flow
+
 ```
 User Action → RecipeCard → SavedRecipesStore → LocalStorage → UI Update
 ```

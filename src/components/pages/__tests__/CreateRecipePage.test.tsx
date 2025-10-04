@@ -19,6 +19,8 @@ vi.mock('next/navigation', () => ({
 
 // Mock hooks
 const mockUpdateRecipe = vi.fn();
+const mockShowSuccess = vi.fn();
+const mockShowError = vi.fn();
 
 vi.mock('@/stores', () => ({
   useSavedRecipesStore: vi.fn(selector => {
@@ -27,6 +29,10 @@ vi.mock('@/stores', () => ({
     };
     return selector ? selector(state) : state;
   }),
+  useToastStore: vi.fn(() => ({
+    showSuccess: mockShowSuccess,
+    showError: mockShowError,
+  })),
 }));
 
 // Mock MainLayout
@@ -394,16 +400,17 @@ describe('CreateRecipePage', () => {
       await user.click(createButton);
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/recipes?force=true'));
+        expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/recipes?ingredients='));
       });
     });
 
     it('handles recipe creation error', async () => {
       const user = userEvent.setup();
-      vi.mocked(fetch).mockRejectedValueOnce(new Error('API Error'));
 
-      // Mock alert
-      const mockAlert = vi.spyOn(window, 'alert').mockImplementation(() => {});
+      // Mock router.push to throw an error
+      mockPush.mockImplementation(() => {
+        throw new Error('Navigation error');
+      });
 
       render(<CreateRecipePage {...mockProps} />);
 
@@ -421,10 +428,10 @@ describe('CreateRecipePage', () => {
       await user.click(createButton);
 
       await waitFor(() => {
-        expect(mockAlert).toHaveBeenCalledWith('Error generating recipes. Please try again.');
+        expect(mockShowError).toHaveBeenCalledWith(
+          'Error redirecting to recipes page. Please try again.'
+        );
       });
-
-      mockAlert.mockRestore();
     });
   });
 
@@ -453,7 +460,7 @@ describe('CreateRecipePage', () => {
     it('shows save button in edit mode', () => {
       render(<CreateRecipePage {...mockProps} />);
 
-      expect(screen.getByText('Save Recipe')).toBeInTheDocument();
+      expect(screen.getByText('Update Recipe')).toBeInTheDocument();
     });
 
     it('handles successful recipe save', async () => {
@@ -462,7 +469,7 @@ describe('CreateRecipePage', () => {
 
       render(<CreateRecipePage {...mockProps} />);
 
-      const saveButton = screen.getByText('Save Recipe');
+      const saveButton = screen.getByText('Update Recipe');
       await user.click(saveButton);
 
       expect(mockUpdateRecipe).toHaveBeenCalledWith('recipe-123', expect.any(Object), '1');
@@ -473,19 +480,14 @@ describe('CreateRecipePage', () => {
       const user = userEvent.setup();
       mockUpdateRecipe.mockReturnValue(false);
 
-      // Mock alert
-      const mockAlert = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
       render(<CreateRecipePage {...mockProps} />);
 
-      const saveButton = screen.getByText('Save Recipe');
+      const saveButton = screen.getByText('Update Recipe');
       await user.click(saveButton);
 
       await waitFor(() => {
-        expect(mockAlert).toHaveBeenCalledWith('Error saving recipe. Please try again.');
+        expect(mockShowError).toHaveBeenCalledWith('Error saving recipe. Please try again.');
       });
-
-      mockAlert.mockRestore();
     });
   });
 
