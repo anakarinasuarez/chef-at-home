@@ -384,6 +384,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
             style={{
               fontSize: typography.styles['body'].fontSize,
             }}
+            data-testid='recipe-title-input'
           />
         </div>
       )}
@@ -413,8 +414,14 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
             style={{
               fontSize: typography.styles['body'].fontSize,
             }}
+            data-testid='ingredient-input'
           />
-          <Button variant='secondary' onClick={handleAddIngredient} className='px-6'>
+          <Button
+            variant='secondary'
+            onClick={handleAddIngredient}
+            className='px-6'
+            data-testid='add-ingredient-button'
+          >
             +
           </Button>
         </div>
@@ -467,6 +474,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
                 variant={selectedServings === servings ? 'primary' : 'secondary'}
                 onClick={() => handleServingsChange(servings)}
                 className='px-4 py-2'
+                data-testid={`servings-${servings}-button`}
               >
                 {servings}
               </Button>
@@ -522,6 +530,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
             (isEditing && !recipeTitle.trim())
           }
           className='px-8 py-3'
+          data-testid='create-recipe-button'
         >
           {isCreating
             ? isEditing

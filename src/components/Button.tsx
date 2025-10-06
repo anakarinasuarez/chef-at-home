@@ -1,52 +1,54 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { colors, typography } from "@/design-system";
-import { ReactNode } from "react";
+import { colors, typography } from '@/design-system';
+import Link from 'next/link';
+import { ReactNode } from 'react';
 
 interface ButtonProps {
   href?: string;
-  variant: "primary" | "secondary" | "tertiary";
+  variant: 'primary' | 'secondary' | 'tertiary';
   children: ReactNode;
   className?: string;
-  type?: "button" | "submit";
+  type?: 'button' | 'submit';
   disabled?: boolean;
   onClick?: (e?: React.MouseEvent) => void;
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
+  'data-testid'?: string;
 }
 
 export default function Button({
   href,
   variant,
   children,
-  className = "",
-  type = "button",
+  className = '',
+  type = 'button',
   disabled = false,
   onClick,
-  size = "md",
+  size = 'md',
   fullWidth = false,
+  'data-testid': dataTestId,
 }: ButtonProps) {
   // Definir estilos base para cada variante según la imagen
   const getVariantStyles = () => {
     switch (variant) {
-      case "primary":
+      case 'primary':
         return {
-          backgroundColor: colors.brand?.primary?.[500] || "#96b462", // Verde claro sólido (fila 1)
-          color: colors.interface?.text?.inverse || "#ffffff", // Texto blanco
-          border: "none",
+          backgroundColor: colors.brand?.primary?.[500] || '#96b462', // Verde claro sólido (fila 1)
+          color: colors.interface?.text?.inverse || '#ffffff', // Texto blanco
+          border: 'none',
         };
-      case "secondary":
+      case 'secondary':
         return {
-          backgroundColor: "transparent", // Fondo transparente (fila 3)
-          color: colors.brand?.primary?.[500] || "#96b462", // Texto verde
-          border: `1px solid ${colors.brand?.primary?.[500] || "#96b462"}`, // Borde verde
+          backgroundColor: 'transparent', // Fondo transparente (fila 3)
+          color: colors.brand?.primary?.[500] || '#96b462', // Texto verde
+          border: `1px solid ${colors.brand?.primary?.[500] || '#96b462'}`, // Borde verde
         };
-      case "tertiary":
+      case 'tertiary':
         return {
-          backgroundColor: "transparent", // Sin fondo (fila 5)
-          color: colors.brand?.primary?.[500] || "#96b462", // Texto verde claro
-          border: "none",
+          backgroundColor: 'transparent', // Sin fondo (fila 5)
+          color: colors.brand?.primary?.[500] || '#96b462', // Texto verde claro
+          border: 'none',
         };
       default:
         return {};
@@ -56,20 +58,20 @@ export default function Button({
   // Definir estilos de hover para cada variante
   const getHoverStyles = () => {
     switch (variant) {
-      case "primary":
+      case 'primary':
         return {
-          backgroundColor: colors.brand?.primary?.[600] || "#7a9a4f", // Verde más oscuro (fila 2)
-          color: colors.interface?.text?.inverse || "#ffffff", // Texto blanco
+          backgroundColor: colors.brand?.primary?.[600] || '#7a9a4f', // Verde más oscuro (fila 2)
+          color: colors.interface?.text?.inverse || '#ffffff', // Texto blanco
         };
-      case "secondary":
+      case 'secondary':
         return {
-          backgroundColor: colors.brand?.secondary?.[500] || "#e8f5e8", // Verde muy claro (fila 4)
-          color: colors.brand?.primary?.[600] || "#7a9a4f", // Texto verde más oscuro
+          backgroundColor: colors.brand?.secondary?.[500] || '#e8f5e8', // Verde muy claro (fila 4)
+          color: colors.brand?.primary?.[600] || '#7a9a4f', // Texto verde más oscuro
         };
-      case "tertiary":
+      case 'tertiary':
         return {
-          backgroundColor: "transparent", // Sin cambio de fondo
-          color: colors.brand?.primary?.[600] || "#7a9a4f", // Texto verde más oscuro (fila 6)
+          backgroundColor: 'transparent', // Sin cambio de fondo
+          color: colors.brand?.primary?.[600] || '#7a9a4f', // Texto verde más oscuro (fila 6)
         };
       default:
         return {};
@@ -79,23 +81,23 @@ export default function Button({
   // Definir tamaños
   const getSizeStyles = () => {
     switch (size) {
-      case "sm":
+      case 'sm':
         return {
-          padding: "8px 16px",
-          fontSize: "14px",
-          minHeight: "36px",
+          padding: '8px 16px',
+          fontSize: '14px',
+          minHeight: '36px',
         };
-      case "md":
+      case 'md':
         return {
-          padding: "12px 24px",
-          fontSize: "16px",
-          minHeight: "44px",
+          padding: '12px 24px',
+          fontSize: '16px',
+          minHeight: '44px',
         };
-      case "lg":
+      case 'lg':
         return {
-          padding: "16px 32px",
-          fontSize: "18px",
-          minHeight: "52px",
+          padding: '16px 32px',
+          fontSize: '18px',
+          minHeight: '52px',
         };
       default:
         return {};
@@ -105,22 +107,21 @@ export default function Button({
   const baseStyles = {
     ...getVariantStyles(),
     ...getSizeStyles(),
-    borderRadius: "8px", // Border radius redondeado como en la imagen
-    fontWeight: typography.styles?.["button-medium"]?.fontWeight || "600",
-    lineHeight: typography.styles?.["button-medium"]?.lineHeight || "1",
+    borderRadius: '8px', // Border radius redondeado como en la imagen
+    fontWeight: typography.styles?.['button-medium']?.fontWeight || '600',
+    lineHeight: typography.styles?.['button-medium']?.lineHeight || '1',
     fontFamily:
-      typography.styles?.["button-medium"]?.fontFamily?.join(", ") ||
-      "Poppins, sans-serif",
+      typography.styles?.['button-medium']?.fontFamily?.join(', ') || 'Poppins, sans-serif',
     opacity: disabled ? 0.5 : 1,
-    cursor: disabled ? "not-allowed" : "pointer",
-    width: fullWidth ? "100%" : "auto",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transition: "all 0.2s ease-in-out",
-    textAlign: "center" as const,
-    outline: "none",
-    textDecoration: "none", // Para links
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    width: fullWidth ? '100%' : 'auto',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease-in-out',
+    textAlign: 'center' as const,
+    outline: 'none',
+    textDecoration: 'none', // Para links
   };
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
@@ -148,7 +149,7 @@ export default function Button({
   };
 
   // Si es un botón de submit o no tiene href, renderizar como button
-  if (type === "submit" || !href) {
+  if (type === 'submit' || !href) {
     return (
       <button
         type={type}
@@ -157,7 +158,8 @@ export default function Button({
         style={baseStyles}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        onClick={(e) => onClick?.(e)}
+        onClick={e => onClick?.(e)}
+        data-testid={dataTestId}
       >
         {children}
       </button>
@@ -172,6 +174,7 @@ export default function Button({
       style={baseStyles}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      data-testid={dataTestId}
     >
       {children}
     </Link>

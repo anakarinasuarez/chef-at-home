@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { memo } from "react";
-import { colors } from "@/design-system";
-import { ErrorBoundaryAdvanced } from "./ErrorBoundaryAdvanced";
-import { useRecipeCard } from "@/hooks/useRecipeCard";
-import { RecipeInfo } from "./recipe/RecipeInfo";
-import { RecipeImage } from "./recipe/RecipeImage";
-import { RecipeActions } from "./recipe/RecipeActions";
-import { RecipeCardData } from "@/types";
+import { colors } from '@/design-system';
+import { useRecipeCard } from '@/hooks/useRecipeCard';
+import { RecipeCardData } from '@/types';
+import { memo } from 'react';
+import { ErrorBoundaryAdvanced } from './ErrorBoundaryAdvanced';
+import { RecipeActions } from './recipe/RecipeActions';
+import { RecipeImage } from './recipe/RecipeImage';
+import { RecipeInfo } from './recipe/RecipeInfo';
 
 interface RecipeCardProps {
   recipe: RecipeCardData;
-  variant?: "save" | "my-recipes";
+  variant?: 'save' | 'my-recipes';
   onEdit?: (recipe: RecipeCardData) => void;
   onDelete?: (recipeId: string) => void;
   onShare?: (recipe: RecipeCardData) => void;
@@ -27,7 +27,7 @@ interface RecipeCardProps {
  */
 function RecipeCard({
   recipe,
-  variant = "save",
+  variant = 'save',
   onEdit,
   onDelete,
   onShare,
@@ -49,7 +49,7 @@ function RecipeCard({
     onRemoveFromList,
   });
 
-  console.log("🔍 RecipeCard DEBUG:", {
+  console.log('🔍 RecipeCard DEBUG:', {
     recipeId,
     variant,
     isSaved,
@@ -58,14 +58,15 @@ function RecipeCard({
 
   return (
     <ErrorBoundaryAdvanced
-      level="component"
-      errorBoundaryName="RecipeCard"
+      level='component'
+      errorBoundaryName='RecipeCard'
       allowRetry={true}
-      showDetails={process.env.NODE_ENV === "development"}
+      showDetails={process.env.NODE_ENV === 'development'}
     >
       <div
         onClick={handleCardClick}
-        className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 group"
+        className='rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 group'
+        data-testid='recipe-card'
         style={{
           backgroundColor: colors.interface.background.secondary,
           boxShadow: `0 10px 25px ${colors.app.recipeCard.shadow}`,
@@ -75,11 +76,7 @@ function RecipeCard({
         <RecipeInfo recipe={recipe} />
 
         {/* Recipe Image - Below info with padding */}
-        <RecipeImage
-          recipe={recipe}
-          imageError={imageError}
-          onImageError={handleImageError}
-        />
+        <RecipeImage recipe={recipe} imageError={imageError} onImageError={handleImageError} />
 
         {/* Action Buttons - Bottom right */}
         <RecipeActions

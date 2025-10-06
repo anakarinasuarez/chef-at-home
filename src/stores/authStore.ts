@@ -1,7 +1,7 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { UserResponse } from "@/types/auth";
-import { authService } from "@/services/authService";
+import { authService } from '@/services/authService';
+import { UserResponse } from '@/types/auth';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 // Estado inicial estandarizado
 const initialState = {
@@ -35,9 +35,9 @@ export const useAuthStore = create<AuthState>()(
       ...initialState,
 
       // Acciones básicas
-      setUser: (user) => set({ user, error: null }),
-      setLoading: (isLoading) => set({ isLoading }),
-      setError: (error) => set({ error }),
+      setUser: user => set({ user, error: null }),
+      setLoading: isLoading => set({ isLoading }),
+      setError: error => set({ error }),
       clearError: () => set({ error: null }),
       logout: () => {
         set({ user: null, error: null });
@@ -56,59 +56,56 @@ export const useAuthStore = create<AuthState>()(
             authService.saveUserToStorage(result.user);
             return true;
           } else {
-            set({ error: result.error || "Login failed", isLoading: false });
+            set({ error: result.error || 'Login failed', isLoading: false });
             return false;
           }
         } catch (error) {
-          console.error("Login error:", error);
-          set({ error: "An unexpected error occurred", isLoading: false });
+          console.error('Login error:', error);
+          set({ error: 'An unexpected error occurred', isLoading: false });
           return false;
         }
       },
 
       // Register - Usa el servicio externo
-      register: async (
-        name: string,
-        email: string,
-        password: string
-      ): Promise<boolean> => {
+      register: async (name: string, email: string, password: string): Promise<boolean> => {
         try {
           set({ isLoading: true, error: null });
 
           const result = await authService.register({ name, email, password });
 
-          if (result.success) {
-            set({ isLoading: false });
+          if (result.success && result.user) {
+            set({ user: result.user, isLoading: false });
+            authService.saveUserToStorage(result.user);
             return true;
           } else {
             set({
-              error: result.error || "Registration failed",
+              error: result.error || 'Registration failed',
               isLoading: false,
             });
             return false;
           }
         } catch (error) {
-          console.error("Registration error:", error);
-          set({ error: "An unexpected error occurred", isLoading: false });
+          console.error('Registration error:', error);
+          set({ error: 'An unexpected error occurred', isLoading: false });
           return false;
         }
       },
     }),
     {
-      name: "auth-storage",
-      partialize: (state) => ({ user: state.user }), // Solo persistir el usuario
+      name: 'auth-storage',
+      partialize: state => ({ user: state.user }), // Solo persistir el usuario
     }
   )
 );
 
 // Selectores estandarizados para evitar renders innecesarios
-export const useUser = () => useAuthStore((state) => state.user);
-export const useAuthLoading = () => useAuthStore((state) => state.isLoading);
-export const useAuthError = () => useAuthStore((state) => state.error);
+export const useUser = () => useAuthStore(state => state.user);
+export const useAuthLoading = () => useAuthStore(state => state.isLoading);
+export const useAuthError = () => useAuthStore(state => state.error);
 
 // Selector de acciones
 export const useAuthActions = () =>
-  useAuthStore((state) => ({
+  useAuthStore(state => ({
     setUser: state.setUser,
     setLoading: state.setLoading,
     setError: state.setError,

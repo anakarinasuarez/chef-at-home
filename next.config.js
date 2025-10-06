@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig = {
   // 🐳 Configuración para Docker
   output: 'standalone', // Necesario para Docker
@@ -98,11 +102,31 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
 
-  // 🔧 Configuración de webpack
-  webpack: (config, { isServer }) => {
-    // Configuración adicional de webpack si es necesaria
+  // 🔧 Configuración de webpack para optimización
+  webpack: (config, { isServer, dev }) => {
+    // Optimizaciones para producción
+    if (!dev && !isServer) {
+      // Configurar code splitting más agresivo
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            enforce: true,
+          },
+        },
+      };
+    }
+
     return config;
   },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

@@ -18,6 +18,15 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "analyze": "ANALYZE=true npm run build",
+    "analyze:server": "BUNDLE_ANALYZE=server npm run build",
+    "analyze:browser": "BUNDLE_ANALYZE=browser npm run build",
+    "analyze:detailed": "node scripts/analyze-bundle.js",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:run:headed": "cypress run --headed",
+    "e2e": "cypress run",
+    "e2e:open": "cypress open",
     "quality": "npm run type-check && npm run lint:check && npm run test:run"
   },
   "dependencies": {
@@ -32,11 +41,13 @@
     "react-dom": "18.3.1",
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.5.0",
+    "sharp": "^0.34.4",
     "zod": "^3.25.76",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/bundle-analyzer": "^15.5.4",
     "@tailwindcss/postcss": "^4.1.12",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
@@ -50,6 +61,7 @@
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.21",
+    "cypress": "^15.3.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
     "eslint-plugin-import": "^2.32.0",

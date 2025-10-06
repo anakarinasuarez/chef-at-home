@@ -1,9 +1,9 @@
-import { colors, typography } from "@/design-system";
+import { colors, typography } from '@/design-system';
 
 interface FormFieldProps {
   id: string;
   name: string;
-  type: "text" | "email" | "password";
+  type: 'text' | 'email' | 'password';
   label: string;
   placeholder: string;
   value: string;
@@ -12,6 +12,7 @@ interface FormFieldProps {
   minLength?: number;
   className?: string;
   error?: string;
+  'data-testid'?: string;
 }
 
 export default function FormField({
@@ -24,8 +25,9 @@ export default function FormField({
   onChange,
   required = false,
   minLength,
-  className = "",
+  className = '',
   error,
+  'data-testid': dataTestId,
 }: FormFieldProps) {
   return (
     <>
@@ -33,8 +35,8 @@ export default function FormField({
         htmlFor={id}
         className={`block text-white font-medium mb-1 ${className}`}
         style={{
-          fontSize: typography.styles["body"].fontSize,
-          fontWeight: typography.styles["body"].fontWeight,
+          fontSize: typography.styles['body'].fontSize,
+          fontWeight: typography.styles['body'].fontWeight,
           color: colors.interface.text.primary,
         }}
       >
@@ -49,24 +51,19 @@ export default function FormField({
         placeholder={placeholder}
         required={required}
         minLength={minLength}
+        data-testid={dataTestId}
         className={`w-80 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 ${
-          error 
-            ? "focus:ring-red-500 border-red-500" 
-            : "focus:ring-green-500"
+          error ? 'focus:ring-red-500 border-red-500' : 'focus:ring-green-500'
         }`}
         style={{
-          fontSize: typography.styles["caption"].fontSize,
-          fontFamily: typography.styles["caption"].fontFamily.join(", "),
-          fontWeight: typography.styles["caption"].fontWeight,
-          lineHeight: typography.styles["caption"].lineHeight,
-          letterSpacing: typography.styles["caption"].letterSpacing,
+          fontSize: typography.styles['caption'].fontSize,
+          fontFamily: typography.styles['caption'].fontFamily.join(', '),
+          fontWeight: typography.styles['caption'].fontWeight,
+          lineHeight: typography.styles['caption'].lineHeight,
+          letterSpacing: typography.styles['caption'].letterSpacing,
         }}
       />
-      {error && (
-        <p className="text-red-400 text-sm mt-1">
-          {error}
-        </p>
-      )}
+      {error && <p className='text-red-400 text-sm mt-1'>{error}</p>}
     </>
   );
 }

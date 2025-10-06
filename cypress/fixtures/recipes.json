@@ -1,0 +1,46 @@
+{
+  "recipes": [
+    {
+      "id": "1",
+      "title": "Pollo con Arroz",
+      "servings": 4,
+      "cookingTime": "30 min",
+      "difficulty": "Fácil",
+      "ingredients": [
+        { "name": "Pollo", "quantity": 500, "unit": "g" },
+        { "name": "Arroz", "quantity": 200, "unit": "g" },
+        { "name": "Cebolla", "quantity": 1, "unit": "pieza" }
+      ],
+      "instructions": [
+        "Cortar el pollo en trozos",
+        "Cocinar el arroz",
+        "Mezclar todo y servir"
+      ],
+      "image": "https://picsum.photos/400/300?random=1"
+    },
+    {
+      "id": "2",
+      "title": "Pasta Italiana",
+      "servings": 2,
+      "cookingTime": "20 min",
+      "difficulty": "Fácil",
+      "ingredients": [
+        { "name": "Pasta", "quantity": 250, "unit": "g" },
+        { "name": "Tomate", "quantity": 2, "unit": "piezas" },
+        { "name": "Queso", "quantity": 100, "unit": "g" }
+      ],
+      "instructions": [
+        "Hervir la pasta",
+        "Preparar la salsa de tomate",
+        "Mezclar y agregar queso"
+      ],
+      "image": "https://picsum.photos/400/300?random=2"
+    }
+  ],
+  "user": {
+    "id": "1",
+    "email": "test@chefathome.com",
+    "name": "Usuario de Prueba"
+  }
+}
+
