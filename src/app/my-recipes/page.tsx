@@ -85,10 +85,29 @@ export default function MyRecipesPage() {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [savedRecipes.length, isClient]);
 
-  // Si no está logueado, redirigir al login
+  // Si no está logueado, redirigir al login (solo en cliente)
+  useEffect(() => {
+    if (!user && isClient) {
+      router.push('/auth/login');
+    }
+  }, [user, isClient, router]);
+
+  // Si no está logueado, mostrar loading
   if (!user) {
-    router.push('/auth/login');
-    return null;
+    return (
+      <div
+        className='h-screen overflow-hidden text-white'
+        style={{ backgroundColor: colors.interface.background.primary }}
+      >
+        <Nav showMenu={true} userName="Loading..." currentPage='my-recipes' />
+        <div className='flex items-center justify-center h-[calc(100vh-120px)]'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4'></div>
+            <p>Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const handleBackToHome = () => {

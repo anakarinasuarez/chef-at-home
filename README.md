@@ -3,6 +3,12 @@
 A modern web application for creating delicious recipes with AI. Transform
 everyday ingredients into gourmet masterpieces.
 
+## 🌐 Live Demo
+
+**🚀 [View Live Demo](https://chef-at-home.vercel.app)**
+
+> **Note**: This is a portfolio project. The demo uses mock data and limited AI API calls for demonstration purposes.
+
 ## 🚀 Features
 
 - **AI Recipe Generation**: Generate personalized recipes based on available
@@ -239,20 +245,56 @@ npm run db:studio       # Open Prisma Studio
 
 ## 🚀 Deployment
 
-### Environment Setup
+### Deploy to Vercel (Recommended for Portfolio)
 
-1. Set up PostgreSQL database
-2. Configure environment variables
-3. Run database migrations
-4. Build the application
-5. Deploy to your hosting platform
+This project is optimized for Vercel deployment. Follow these steps:
 
-### Recommended Platforms
+#### 1. **Prepare for Deployment**
+```bash
+# Clone the repository
+git clone https://github.com/your-username/chef-at-home.git
+cd chef-at-home
 
-- **Vercel**: Optimized for Next.js
-- **Netlify**: Static site hosting
-- **Railway**: Full-stack deployment
-- **DigitalOcean**: VPS hosting
+# Install dependencies
+npm install
+```
+
+#### 2. **Deploy to Vercel**
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy to Vercel
+vercel
+
+# Follow the prompts:
+# - Link to existing project? No
+# - Project name: chef-at-home
+# - Directory: ./
+# - Override settings? No
+```
+
+#### 3. **Configure Environment Variables**
+In your Vercel dashboard, add these environment variables:
+
+```env
+DATABASE_URL="file:./dev.db"
+OPENAI_API_KEY="your-openai-api-key"
+GOOGLE_GEMINI_API_KEY="your-gemini-api-key"
+JWT_SECRET="your-super-secret-jwt-key"
+JWT_EXPIRES_IN="7d"
+```
+
+#### 4. **Redeploy**
+```bash
+vercel --prod
+```
+
+### Alternative Platforms
+
+- **Netlify**: Static site hosting with serverless functions
+- **Railway**: Full-stack deployment with PostgreSQL
+- **DigitalOcean**: VPS hosting with Docker
 
 ## 🤝 Contributing
 
