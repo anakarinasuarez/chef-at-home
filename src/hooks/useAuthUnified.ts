@@ -13,6 +13,7 @@ export const useAuthUnified = () => {
   const login = useAuthStore((state) => state.login);
   const register = useAuthStore((state) => state.register);
   const logout = useAuthStore((state) => state.logout);
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
 
   return {
     user,
@@ -21,6 +22,7 @@ export const useAuthUnified = () => {
     login,
     register,
     logout,
+    initializeAuth,
   };
 };
 

@@ -86,7 +86,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
         const success = await login(formData.email, formData.password);
         if (success) {
           showSuccess('Welcome back!');
-          router.push('/recipes');
+          router.push('/create');
         } else {
           setError('Invalid email or password');
           showError('Invalid email or password');
@@ -95,7 +95,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
         const success = await register(formData.name, formData.email, formData.password);
         if (success) {
           showSuccess('Account created successfully!');
-          router.push('/recipes');
+          router.push('/create');
         } else {
           setError('Registration failed. Please try again.');
           showError('Registration failed. Please try again.');

@@ -44,7 +44,7 @@ export default function Nav({
     closeMenu();
     switch (page) {
       case 'create':
-        router.push('/');
+        router.push('/create');
         break;
       case 'generated':
         router.push('/recipes');

@@ -22,6 +22,7 @@ export interface AuthState {
   setError: (error: string | null) => void;
   clearError: () => void;
   logout: () => void;
+  initializeAuth: () => void;
 
   // Acciones específicas de autenticación
   login: (email: string, password: string) => Promise<boolean>;
@@ -42,6 +43,20 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         set({ user: null, error: null });
         authService.removeUserFromStorage();
+      },
+
+      // Inicializar usuario desde localStorage
+      initializeAuth: () => {
+        console.log('🔄 initializeAuth called');
+        const storedUser = authService.getUserFromStorage();
+        console.log('🔄 Stored user from service:', storedUser);
+        if (storedUser) {
+          console.log('🔄 Setting user from storage:', storedUser);
+          set({ user: storedUser, isLoading: false });
+        } else {
+          console.log('🔄 No stored user found, setting user to null');
+          set({ user: null, isLoading: false });
+        }
       },
 
       // Login - Usa el servicio externo
