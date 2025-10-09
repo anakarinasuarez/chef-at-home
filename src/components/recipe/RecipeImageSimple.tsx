@@ -43,7 +43,7 @@ export const RecipeImageSimple = ({ recipe, imageError, onImageError }: RecipeIm
             priority
           />
         ) : (
-          <ImagePlaceholder />
+          <ImagePlaceholder title={recipe.title} />
         )}
       </div>
     </div>

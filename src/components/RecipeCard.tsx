@@ -77,7 +77,12 @@ function RecipeCard({
 
         {/* Recipe Image - Below info with padding */}
         <RecipeImageSimple
-          recipe={recipe}
+          recipe={{
+            id: recipe.id || 'unknown',
+            title: recipe.title,
+            image: recipe.image,
+            cuisine: recipe.difficulty
+          }}
           imageError={imageError}
           onImageError={handleImageError}
         />

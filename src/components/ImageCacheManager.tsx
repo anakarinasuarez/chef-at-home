@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/Button';
+import Button from '@/components/Button';
 import { useEffect, useState } from 'react';
 
 interface ImageCacheStats {
@@ -142,6 +142,7 @@ export default function ImageCacheManager() {
 
       <div className='flex flex-wrap gap-3'>
         <Button
+          variant="primary"
           onClick={fetchStats}
           disabled={loading}
           className='bg-blue-500 hover:bg-blue-600 text-white'
@@ -150,6 +151,7 @@ export default function ImageCacheManager() {
         </Button>
 
         <Button
+          variant="secondary"
           onClick={cleanExpiredImages}
           disabled={loading}
           className='bg-yellow-500 hover:bg-yellow-600 text-white'
@@ -158,6 +160,7 @@ export default function ImageCacheManager() {
         </Button>
 
         <Button
+          variant="secondary"
           onClick={clearAllImages}
           disabled={loading}
           className='bg-red-500 hover:bg-red-600 text-white'

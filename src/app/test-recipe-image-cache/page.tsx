@@ -1,3 +1,5 @@
+'use client';
+
 import { useRecipeImage } from '@/hooks/useRecipeImage';
 import { useState } from 'react';
 
