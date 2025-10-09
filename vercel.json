@@ -11,6 +11,7 @@
     }
   },
   "env": {
+    "DATABASE_URL": "file:./dev.db",
     "JWT_EXPIRES_IN": "7d"
   }
 }
