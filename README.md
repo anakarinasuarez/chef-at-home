@@ -14,7 +14,7 @@ A modern, full-stack web application that generates personalized recipes using A
 
 ## 🚀 Live Demo
 
-[View Live Application](https://chef-at-home.vercel.app) *(Coming Soon)*
+[View Live Application](https://chef-at-home-v1.vercel.app)
 
 ## 🛠️ Tech Stack
 
