@@ -1,12 +1,13 @@
-import OpenAI from "openai";
-import { UniversalCacheManager } from "@/lib/universal-cache";
-import { buildUnifiedImagePrompt } from "@/lib/prompts";
+import { buildUnifiedImagePrompt } from '@/lib/prompts';
+import { cacheImage, getCachedImage } from '@/lib/server-image-cache';
+import { UniversalCacheManager } from '@/lib/universal-cache';
+import OpenAI from 'openai';
 
 export interface RecipeImageRequest {
   recipeName: string;
   ingredients: string[];
   cuisine?: string;
-  style?: "photorealistic" | "artistic" | "minimalist" | "gourmet";
+  style?: 'photorealistic' | 'artistic' | 'minimalist' | 'gourmet';
 }
 
 // Create OpenAI client
@@ -14,14 +15,14 @@ const createOpenAIClient = (): OpenAI | null => {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
     if (apiKey) {
-      console.log("✅ OpenAI client created");
+      console.log('✅ OpenAI client created');
       return new OpenAI({ apiKey });
     } else {
-      console.warn("⚠️ OPENAI_API_KEY not found, service unavailable");
+      console.warn('⚠️ OPENAI_API_KEY not found, service unavailable');
       return null;
     }
   } catch (error) {
-    console.error("❌ Error creating OpenAI client:", error);
+    console.error('❌ Error creating OpenAI client:', error);
     return null;
   }
 };
@@ -48,24 +49,34 @@ export const generateRecipeImageWithOpenAI = async (
   const openai = createOpenAIClient();
 
   if (!openai) {
-    console.warn("OpenAI service not available");
+    console.warn('OpenAI service not available');
     return null;
   }
 
   try {
-    // Check if image is already cached using UniversalCacheManager
+    // Check if image is already cached using server-side cache first
+    const serverCachedImage = getCachedImage(request.recipeName, request.ingredients);
+
+    if (serverCachedImage) {
+      console.log(`📦 Using server cached image for: ${request.recipeName}`);
+      return serverCachedImage;
+    }
+
+    // Fallback to client-side cache (for backward compatibility)
     try {
-      const cachedImage = await UniversalCacheManager.getCachedImage(
+      const clientCachedImage = await UniversalCacheManager.getCachedImage(
         request.recipeName,
         request.ingredients
       );
 
-      if (cachedImage) {
-        console.log(`📦 Using cached image for: ${request.recipeName}`);
-        return cachedImage;
+      if (clientCachedImage) {
+        console.log(`📦 Using client cached image for: ${request.recipeName}`);
+        // Cache it on server side too for future requests
+        cacheImage(request.recipeName, request.ingredients, clientCachedImage);
+        return clientCachedImage;
       }
     } catch (error) {
-      console.log("No cached image found, generating new one");
+      console.log('No client cached image found, generating new one');
     }
 
     const prompt = buildImagePrompt(request);
@@ -74,10 +85,10 @@ export const generateRecipeImageWithOpenAI = async (
     console.log(`📝 Prompt: ${prompt}`);
 
     const response = await openai.images.generate({
-      model: "dall-e-3",
+      model: 'dall-e-3',
       prompt: prompt,
-      size: "1024x1024",
-      quality: "hd",
+      size: '1024x1024',
+      quality: 'hd',
       n: 1,
     });
 
@@ -88,17 +99,18 @@ export const generateRecipeImageWithOpenAI = async (
       console.log(`✅ DALL-E image generated for: ${request.recipeName}`);
       console.log(`🔗 Image URL: ${imageUrl}`);
 
-      // Cache the image URL using UniversalCacheManager
+      // Cache the image URL using both server and client cache
       if (imageUrl) {
         try {
-          await UniversalCacheManager.cacheImage(
-            request.recipeName,
-            request.ingredients,
-            imageUrl
-          );
-          console.log(`💾 Image cached for: ${request.recipeName}`);
+          // Cache on server side (primary cache)
+          cacheImage(request.recipeName, request.ingredients, imageUrl);
+          console.log(`💾 Image cached on server for: ${request.recipeName}`);
+
+          // Also cache on client side (for backward compatibility)
+          await UniversalCacheManager.cacheImage(request.recipeName, request.ingredients, imageUrl);
+          console.log(`💾 Image cached on client for: ${request.recipeName}`);
         } catch (error) {
-          console.error("Error caching image:", error);
+          console.error('Error caching image:', error);
         }
       }
 
@@ -108,12 +120,12 @@ export const generateRecipeImageWithOpenAI = async (
     console.log(`❌ No image data in response`);
     return null;
   } catch (error) {
-    console.error("Error generating image with DALL-E:", error);
+    console.error('Error generating image with DALL-E:', error);
     return null;
   }
 };
 
 // Get available models
 export const getAvailableImageModels = (): string[] => {
-  return ["dall-e-3", "dall-e-2"];
+  return ['dall-e-3', 'dall-e-2'];
 };

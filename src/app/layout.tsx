@@ -1,33 +1,36 @@
-import type { Metadata } from "next";
-import { Poppins, Inter, Alegreya } from "next/font/google";
-import "./globals.css";
-import { ToastProvider } from "@/components/ui/ToastProvider";
-import { ErrorBoundaryAdvanced } from "@/components/ErrorBoundaryAdvanced";
+import { ErrorBoundaryAdvanced } from '@/components/ErrorBoundaryAdvanced';
+import { RecipeCleanup } from '@/components/RecipeCleanup';
+import { ToastProvider } from '@/components/ui/ToastProvider';
+import '@/utils/manualCleanup'; // Manual cleanup for debugging
+import '@/utils/migrateRecipes'; // Auto-migrate old recipes
+import type { Metadata } from 'next';
+import { Alegreya, Inter, Poppins } from 'next/font/google';
+import './globals.css';
 
 const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-  display: "swap",
+  variable: '--font-poppins',
+  subsets: ['latin'],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  display: 'swap',
 });
 
 const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-  display: "swap",
+  variable: '--font-inter',
+  subsets: ['latin'],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  display: 'swap',
 });
 
 const alegreya = Alegreya({
-  variable: "--font-alegreya",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
+  variable: '--font-alegreya',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "Chef at Home",
-  description: "Create delicious recipes with AI",
+  title: 'Chef at Home',
+  description: 'Create delicious recipes with AI',
 };
 
 export default function RootLayout({
@@ -36,17 +39,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang='en' suppressHydrationWarning>
       <body
         className={`${poppins.variable} ${inter.variable} ${alegreya.variable} antialiased`}
-        style={{ fontFamily: "var(--font-poppins), system-ui, sans-serif" }}
+        style={{ fontFamily: 'var(--font-poppins), system-ui, sans-serif' }}
       >
         <ErrorBoundaryAdvanced
-          level="critical"
-          errorBoundaryName="RootLayout"
+          level='critical'
+          errorBoundaryName='RootLayout'
           allowRetry={true}
-          showDetails={process.env.NODE_ENV === "development"}
+          showDetails={process.env.NODE_ENV === 'development'}
         >
+          <RecipeCleanup />
           {children}
           <ToastProvider />
         </ErrorBoundaryAdvanced>

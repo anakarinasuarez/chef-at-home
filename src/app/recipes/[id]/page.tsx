@@ -50,6 +50,10 @@ export default function RecipeDetailPage() {
   const [imageError, setImageError] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
+  // Use existing image directly - NO API calls
+  const displayImage =
+    recipe?.image && recipe.image !== '/images/plate.png' ? recipe.image : '/images/plate.png';
+
   useEffect(() => {
     const loadRecipe = () => {
       try {
@@ -75,8 +79,8 @@ export default function RecipeDetailPage() {
         console.log('From My Recipes referrer:', isFromMyRecipesReferrer);
         console.log('From My Recipes final:', isFromMyRecipesPage);
 
-        // Buscar la receta en localStorage usando el ID de la URL
-        const savedRecipe = localStorage.getItem(`recipe-${params.id}`);
+        // Buscar la receta en localStorage usando el ID de la URL y userId
+        const savedRecipe = localStorage.getItem(`recipe-${user?.id}-${params.id}`);
 
         if (savedRecipe) {
           const recipeData = JSON.parse(savedRecipe);
@@ -474,13 +478,14 @@ export default function RecipeDetailPage() {
           {/* Recipe Image - LEFT COLUMN (2/3 del ancho - más grande) */}
           <div className='lg:col-span-2'>
             <div className='relative rounded-2xl overflow-hidden h-[500px] w-full'>
-              {recipe.image && !imageError ? (
+              {displayImage && !imageError ? (
                 <Image
-                  src={recipe.image}
+                  src={displayImage}
                   alt={recipe.title}
                   fill
                   className='object-cover'
                   onError={() => setImageError(true)}
+                  priority
                 />
               ) : (
                 <ImagePlaceholder
@@ -491,6 +496,8 @@ export default function RecipeDetailPage() {
                 />
               )}
             </div>
+
+            {/* No regenerate button - only use existing images */}
           </div>
 
           {/* Ingredients - RIGHT COLUMN (al lado de la imagen) */}

@@ -6,7 +6,7 @@ import { RecipeCardData } from '@/types';
 import { memo } from 'react';
 import { ErrorBoundaryAdvanced } from './ErrorBoundaryAdvanced';
 import { RecipeActions } from './recipe/RecipeActions';
-import { RecipeImage } from './recipe/RecipeImage';
+import { RecipeImageSimple } from './recipe/RecipeImageSimple';
 import { RecipeInfo } from './recipe/RecipeInfo';
 
 interface RecipeCardProps {
@@ -76,7 +76,11 @@ function RecipeCard({
         <RecipeInfo recipe={recipe} />
 
         {/* Recipe Image - Below info with padding */}
-        <RecipeImage recipe={recipe} imageError={imageError} onImageError={handleImageError} />
+        <RecipeImageSimple
+          recipe={recipe}
+          imageError={imageError}
+          onImageError={handleImageError}
+        />
 
         {/* Action Buttons - Bottom right */}
         <RecipeActions

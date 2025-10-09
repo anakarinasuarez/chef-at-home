@@ -1,5 +1,6 @@
 import { authService } from '@/services/authService';
 import { UserResponse } from '@/types/auth';
+import { UserStorageManager } from '@/utils/userStorage';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -43,6 +44,14 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         set({ user: null, error: null });
         authService.removeUserFromStorage();
+
+        // Clear all recipes when logging out
+        const allKeys = Object.keys(localStorage);
+        const recipeKeys = allKeys.filter(key => key.startsWith('recipe-'));
+        recipeKeys.forEach(key => {
+          localStorage.removeItem(key);
+          console.log(`🗑️ Removed recipe on logout: ${key}`);
+        });
       },
 
       // Inicializar usuario desde localStorage
@@ -50,12 +59,24 @@ export const useAuthStore = create<AuthState>()(
         console.log('🔄 initializeAuth called');
         const storedUser = authService.getUserFromStorage();
         console.log('🔄 Stored user from service:', storedUser);
+
         if (storedUser) {
           console.log('🔄 Setting user from storage:', storedUser);
           set({ user: storedUser, isLoading: false });
+
+          // Clear recipes from other users when initializing
+          UserStorageManager.clearOtherUsersRecipes(storedUser.id);
         } else {
           console.log('🔄 No stored user found, setting user to null');
           set({ user: null, isLoading: false });
+
+          // Clear all recipes when no user is logged in
+          const allKeys = Object.keys(localStorage);
+          const recipeKeys = allKeys.filter(key => key.startsWith('recipe-'));
+          recipeKeys.forEach(key => {
+            localStorage.removeItem(key);
+            console.log(`🗑️ Removed recipe on init (no user): ${key}`);
+          });
         }
       },
 
@@ -69,6 +90,10 @@ export const useAuthStore = create<AuthState>()(
           if (result.success && result.user) {
             set({ user: result.user, isLoading: false });
             authService.saveUserToStorage(result.user);
+
+            // Clear recipes from other users when logging in
+            UserStorageManager.clearOtherUsersRecipes(result.user.id);
+
             return true;
           } else {
             set({ error: result.error || 'Login failed', isLoading: false });
@@ -91,6 +116,10 @@ export const useAuthStore = create<AuthState>()(
           if (result.success && result.user) {
             set({ user: result.user, isLoading: false });
             authService.saveUserToStorage(result.user);
+
+            // Clear recipes from other users when registering
+            UserStorageManager.clearOtherUsersRecipes(result.user.id);
+
             return true;
           } else {
             set({

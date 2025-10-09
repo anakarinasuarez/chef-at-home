@@ -78,7 +78,10 @@ export const useRecipeCard = ({
   // Handler para click en la tarjeta (navegación)
   const handleCardClick = useCallback(() => {
     // Guardar los datos de la receta en localStorage para la página de detalle
-    localStorage.setItem(`recipe-${recipeId}`, JSON.stringify(recipe));
+    // Store recipe with userId to separate by user
+    if (user?.id) {
+      localStorage.setItem(`recipe-${user.id}-${recipeId}`, JSON.stringify(recipe));
+    }
 
     // Verificar si es modo edición
     const isEditMode = (recipe as any).isEditMode && (recipe as any).originalId;
@@ -150,7 +153,12 @@ export const useRecipeCard = ({
 
               setTimeout(() => {
                 // Guardar la receta actualizada en localStorage para el detalle (usando ID original)
-                localStorage.setItem(`recipe-${originalId}`, JSON.stringify(recipeToSave));
+                if (user?.id) {
+                  localStorage.setItem(
+                    `recipe-${user.id}-${originalId}`,
+                    JSON.stringify(recipeToSave)
+                  );
+                }
                 // Limpiar sessionStorage para evitar regeneración
                 sessionStorage.removeItem('currentRecipes');
                 // Navegar a la receta original (que ahora tiene el contenido actualizado)
@@ -161,7 +169,12 @@ export const useRecipeCard = ({
               console.log('❌ EDIT MODE: onRemoveFromList is not available');
               // Si no hay onRemoveFromList, navegar directamente
               setTimeout(() => {
-                localStorage.setItem(`recipe-${originalId}`, JSON.stringify(recipeToSave));
+                if (user?.id) {
+                  localStorage.setItem(
+                    `recipe-${user.id}-${originalId}`,
+                    JSON.stringify(recipeToSave)
+                  );
+                }
                 // Limpiar sessionStorage para evitar regeneración
                 sessionStorage.removeItem('currentRecipes');
                 router.push(`/recipes/${originalId}?fromEdit=true`);
@@ -197,7 +210,10 @@ export const useRecipeCard = ({
 
               // Navegar a la página de detalle después de eliminar
               setTimeout(() => {
-                localStorage.setItem(`recipe-${recipeId}`, JSON.stringify(recipe));
+                // Store recipe with userId to separate by user
+                if (user?.id) {
+                  localStorage.setItem(`recipe-${user.id}-${recipeId}`, JSON.stringify(recipe));
+                }
                 router.push(`/recipes/${recipeId}`);
               }, 100);
             } else {

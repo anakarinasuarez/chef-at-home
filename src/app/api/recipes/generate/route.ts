@@ -1,3 +1,5 @@
+import { cacheRecipeImage, startRecipeImageCacheCleanup } from '@/lib/recipe-image-cache';
+import { startImageCacheCleanup } from '@/lib/server-image-cache';
 import { sessionLimitsManager } from '@/lib/sessionLimits';
 import {
   GenerateRecipeRequest,
@@ -17,9 +19,25 @@ import { NextRequest, NextResponse } from 'next/server';
 // Declarar tipo para el cache global del servidor
 declare global {
   var serverCache: Map<string, any> | undefined;
+  var imageCacheInitialized: boolean | undefined;
+  var recipeImageCacheInitialized: boolean | undefined;
 }
 
 export async function POST(request: NextRequest) {
+  // Initialize image cache cleanup if not already done
+  if (!global.imageCacheInitialized) {
+    startImageCacheCleanup();
+    global.imageCacheInitialized = true;
+    console.log('🔄 Image cache cleanup initialized');
+  }
+
+  // Initialize recipe image cache cleanup if not already done
+  if (!global.recipeImageCacheInitialized) {
+    startRecipeImageCacheCleanup();
+    global.recipeImageCacheInitialized = true;
+    console.log('🔄 Recipe image cache cleanup initialized');
+  }
+
   let ingredients: string[] = [];
   let servings: number = 2;
   let cuisine: string = 'international';
@@ -150,7 +168,10 @@ export async function POST(request: NextRequest) {
           // Usar el título de la receta generada, no personalizado para todas
           const finalTitle = recipe?.title || `Generated Recipe ${index + 1}`;
 
-          console.log(`🎨 Generating image for: ${finalTitle}`);
+          // Generate unique recipe ID
+          const recipeId = `recipe_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+          console.log(`🎨 Generating image for: ${finalTitle} (ID: ${recipeId})`);
 
           // Generate image using OpenAI DALL-E
           const image = await generateRecipeImageWithOpenAI({
@@ -161,8 +182,16 @@ export async function POST(request: NextRequest) {
           });
 
           console.log(`✅ Image generated for: ${finalTitle}`);
+
+          // Cache the image by recipe ID for persistent storage
+          if (image && image !== '/images/plate.png') {
+            cacheRecipeImage(recipeId, finalTitle, ingredients, image);
+            console.log(`💾 Recipe image cached by ID: ${recipeId}`);
+          }
+
           return {
             ...recipe,
+            id: recipeId, // Add unique ID
             title: finalTitle, // Usar el título final (personalizado o generado)
             image: image || '/images/plate.png',
             imageSource: image ? 'ai-generated' : 'fallback',
@@ -172,8 +201,13 @@ export async function POST(request: NextRequest) {
             `❌ Error getting image for recipe: ${recipe?.title || 'Unknown Recipe'}`,
             error
           );
+
+          // Generate unique recipe ID even for fallback
+          const recipeId = `recipe_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
           return {
             ...recipe,
+            id: recipeId, // Add unique ID
             title: customTitle && index === 0 ? customTitle : recipe?.title || 'Generated Recipe', // Usar el título final
             image: '/images/plate.png',
             imageSource: 'fallback',
