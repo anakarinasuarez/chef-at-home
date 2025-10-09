@@ -6,6 +6,7 @@ import Nav from '@/components/Nav';
 import { colors } from '@/design-system';
 import { useAuthUnified } from '@/hooks';
 import { UniversalCacheManager } from '@/lib/universal-cache';
+import { useToastStore } from '@/stores';
 import { deduplicateIngredientsNumeric } from '@/utils/ingredientUtils';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -28,6 +29,7 @@ interface Recipe {
 
 export default function RecipesPage() {
   const { user } = useAuthUnified();
+  const { showError } = useToastStore();
   const router = useRouter();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set());
@@ -306,6 +308,7 @@ export default function RecipesPage() {
           ingredients,
           servings,
           count: recipeCount,
+          userId: user?.id, // Debug: verificar userId
         });
 
         const response = await fetch('/api/recipes/generate', {
@@ -318,12 +321,23 @@ export default function RecipesPage() {
             servings: servings,
             cuisine: 'international',
             count: recipeCount,
+            userId: user?.id, // Agregar userId para tracking de sesión
           }),
         });
 
         console.log('📡 API Response status:', response.status);
 
         if (!response.ok) {
+          const errorData = await response.json();
+
+          // Manejar límite de sesión excedido
+          if (response.status === 429 && errorData.limitExceeded) {
+            console.log('🚫 Daily limit exceeded:', errorData.message);
+            showError(errorData.message);
+            setLoading(false);
+            return;
+          }
+
           throw new Error(`Failed to generate recipes: ${response.status} ${response.statusText}`);
         }
 

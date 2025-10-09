@@ -1,3 +1,4 @@
+import { sessionLimitsManager } from '@/lib/sessionLimits';
 import {
   GenerateRecipeRequest,
   generateRecipeRequestSchema,
@@ -24,9 +25,11 @@ export async function POST(request: NextRequest) {
   let cuisine: string = 'international';
   let count: number = 1;
   let customTitle: string | undefined = undefined;
+  let userId: string | undefined = undefined;
 
   try {
     const requestData = await request.json();
+    console.log('🔍 API Route - Raw request body:', JSON.stringify(requestData, null, 2));
 
     // Validar los datos de entrada con Zod
     const validation = safeValidateSchema(generateRecipeRequestSchema, requestData);
@@ -41,7 +44,39 @@ export async function POST(request: NextRequest) {
     }
 
     const validatedData = validation.data as GenerateRecipeRequest;
-    ({ ingredients, servings, cuisine, count, title: customTitle } = validatedData);
+    ({ ingredients, servings, cuisine, count, title: customTitle, userId } = validatedData);
+
+    console.log('🔍 API Route - Received data:', {
+      ingredients,
+      servings,
+      count,
+      userId,
+      hasUserId: !!userId,
+    });
+
+    // 🚫 SESSION LIMIT CHECK: Verificar límite de recetas por sesión
+    if (userId) {
+      console.log('🔍 Checking session limit for userId:', userId);
+      const canGenerate = sessionLimitsManager.canGenerateRecipe(userId);
+      console.log('🔍 Can generate recipe:', canGenerate);
+
+      if (!canGenerate) {
+        const remaining = sessionLimitsManager.getRemainingRecipes(userId);
+        console.log('🚫 Daily limit exceeded for userId:', userId, 'remaining:', remaining);
+        return NextResponse.json(
+          {
+            error: 'Daily limit exceeded',
+            message: `You have reached today's recipe limit (1 recipe per day). Please try again tomorrow.`,
+            remainingRecipes: remaining,
+            limitExceeded: true,
+            resetTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
+          },
+          { status: 429 } // Too Many Requests
+        );
+      }
+    } else {
+      console.log('⚠️ No userId provided, skipping session limit check');
+    }
 
     // 🚀 CACHE CHECK: Verificar si ya tenemos recetas en cache (servidor)
     console.log('🔍 Checking server cache for ingredients:', ingredients, 'servings:', servings);
@@ -154,6 +189,29 @@ export async function POST(request: NextRequest) {
       throw new Error('No recipes were generated');
     }
 
+    // 📊 SESSION TRACKING: Registrar la generación de recetas en la sesión
+    console.log(
+      '📊 About to record recipe generation. userId:',
+      userId,
+      'recipes count:',
+      recipesWithImages.length
+    );
+    if (userId) {
+      console.log('📊 Recording recipe generation for userId:', userId);
+      const recorded = sessionLimitsManager.recordRecipeGeneration(userId);
+      if (!recorded) {
+        console.warn(
+          `⚠️ Failed to record recipe generation for user ${userId} - limit may have been exceeded`
+        );
+      } else {
+        console.log(`📊 Daily recipe generation recorded for user ${userId}`);
+        const remaining = sessionLimitsManager.getRemainingRecipes(userId);
+        console.log(`📊 Remaining daily recipes for user ${userId}:`, remaining);
+      }
+    } else {
+      console.log('⚠️ No userId provided, skipping recipe generation recording');
+    }
+
     // 💾 CACHE: Guardar las recetas generadas en cache del servidor
     try {
       console.log('💾 Caching generated recipes in server cache...');
@@ -203,6 +261,29 @@ export async function POST(request: NextRequest) {
       });
 
       console.log(`Fallback recipes generated: ${fallbackRecipesWithImages.length}`);
+
+      // 📊 SESSION TRACKING: Registrar la generación de recetas fallback en la sesión
+      console.log(
+        '📊 About to record FALLBACK recipe generation. userId:',
+        userId,
+        'recipes count:',
+        fallbackRecipesWithImages.length
+      );
+      if (userId) {
+        console.log('📊 Recording FALLBACK recipe generation for userId:', userId);
+        const recorded = sessionLimitsManager.recordRecipeGeneration(userId);
+        if (!recorded) {
+          console.warn(
+            `⚠️ Failed to record FALLBACK recipe generation for user ${userId} - limit may have been exceeded`
+          );
+        } else {
+          console.log(`📊 FALLBACK Daily recipe generation recorded for user ${userId}`);
+          const remaining = sessionLimitsManager.getRemainingRecipes(userId);
+          console.log(`📊 Remaining daily recipes for user ${userId}:`, remaining);
+        }
+      } else {
+        console.log('⚠️ No userId provided, skipping FALLBACK recipe generation recording');
+      }
 
       // 💾 CACHE: Guardar las recetas fallback en cache del servidor
       try {

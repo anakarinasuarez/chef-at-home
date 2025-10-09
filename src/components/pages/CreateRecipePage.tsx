@@ -3,6 +3,7 @@
 import Button from '@/components/Button';
 import MainLayout from '@/components/layouts/MainLayout';
 import { colors, typography } from '@/design-system';
+import { sessionLimitsManager } from '@/lib/sessionLimits';
 import { useSavedRecipesStore, useToastStore } from '@/stores';
 import { User } from '@/types';
 import { normalizeIngredientName } from '@/utils/ingredientUtils';
@@ -28,7 +29,16 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
   const [isCreating, setIsCreating] = useState(false);
   const [recipeTitle, setRecipeTitle] = useState('');
   const [originalImage, setOriginalImage] = useState<string | null>(null); // ✅ Para preservar la imagen original
+  const [canGenerateRecipe, setCanGenerateRecipe] = useState(true);
   const updateRecipe = useSavedRecipesStore(state => state.updateRecipe);
+
+  // Verificar límite de sesión
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const canGenerate = sessionLimitsManager.canGenerateRecipe(user.id);
+    setCanGenerateRecipe(canGenerate);
+  }, [user?.id]);
 
   // Cargar datos de edición si existe
   useEffect(() => {
@@ -527,7 +537,8 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
             isCreating ||
             ingredients.length === 0 ||
             !selectedServings ||
-            (isEditing && !recipeTitle.trim())
+            (isEditing && !recipeTitle.trim()) ||
+            (!isEditing && !canGenerateRecipe) // Deshabilitar si no puede generar más recetas
           }
           className='px-8 py-3'
           data-testid='create-recipe-button'
@@ -538,7 +549,9 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
               : 'Creating recipe...'
             : isEditing
               ? 'Update Recipe'
-              : 'Create Recipe'}
+              : !canGenerateRecipe
+                ? 'Session Limit Reached'
+                : 'Create Recipe'}
         </Button>
         <Button
           variant='secondary'
