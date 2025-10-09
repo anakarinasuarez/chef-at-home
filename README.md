@@ -23,6 +23,7 @@ A modern, full-stack web application that generates personalized recipes using A
 - **State Management**: Zustand
 - **Authentication**: Custom JWT-based auth
 - **AI Integration**: OpenAI GPT-3.5-turbo & DALL-E
+- **Testing**: Vitest (Unit Tests), Cypress (E2E Tests)
 - **Deployment**: Vercel
 - **Version Control**: Git & GitHub
 
@@ -108,15 +109,48 @@ A modern, full-stack web application that generates personalized recipes using A
 
 ## 🧪 Testing
 
+This project uses a comprehensive testing strategy with **Vitest** for unit tests and **Cypress** for end-to-end testing.
+
+### Unit Testing (Vitest)
 ```bash
-# Run tests
+# Run unit tests
 npm test
 
-# Run tests in watch mode
-npm run test:watch
+# Run tests with UI
+npm run test:ui
+
+# Run tests once (CI mode)
+npm run test:run
 
 # Run tests with coverage
 npm run test:coverage
+```
+
+### End-to-End Testing (Cypress)
+```bash
+# Open Cypress Test Runner
+npm run cypress:open
+
+# Run E2E tests headlessly
+npm run cypress:run
+
+# Run E2E tests with browser visible
+npm run cypress:run:headed
+
+# Alternative E2E commands
+npm run e2e
+npm run e2e:open
+```
+
+### Test Coverage
+- **Unit Tests**: Components, hooks, services, and utilities
+- **E2E Tests**: Complete user workflows and integrations
+- **Coverage Reports**: Available via `npm run test:coverage`
+
+### Quality Assurance
+```bash
+# Run all quality checks (TypeScript, ESLint, Tests)
+npm run quality
 ```
 
 ## 📦 Build for Production
