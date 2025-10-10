@@ -105,7 +105,7 @@ A modern, full-stack web application that generates personalized recipes using A
    ```
 
 5. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+   Navigate to [http://localhost:3001](http://localhost:3001)
 
 ## 🧪 Testing
 
