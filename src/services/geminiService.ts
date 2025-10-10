@@ -18,7 +18,7 @@ const createGeminiClient = (): GeminiClient | null => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
     console.log("✅ Gemini client created");
     return { genAI, model };
