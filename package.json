@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "build:production": "NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint",
@@ -28,7 +28,8 @@
     "cypress:run:headed": "cypress run --headed",
     "e2e": "cypress run",
     "e2e:open": "cypress open",
-    "quality": "npm run type-check && npm run lint:check && npm run test:run"
+    "quality": "npm run type-check && npm run lint:check && npm run test:run",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
