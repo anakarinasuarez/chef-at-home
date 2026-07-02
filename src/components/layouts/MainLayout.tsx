@@ -36,8 +36,8 @@ export default function MainLayout({
           {children}
         </div>
 
-        {/* Illustration column */}
-        <div className="flex-1 flex items-center justify-center px-lg lg:px-3xl py-xl lg:py-2xl">
+        {/* Illustration column — desktop only; mobile screens place their own art */}
+        <div className="hidden lg:flex flex-1 items-center justify-center px-lg lg:px-3xl py-xl lg:py-2xl">
           <div className="relative w-full max-w-form">
             <Image
               src={plateImage}
