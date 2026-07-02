@@ -1,4 +1,6 @@
-import MainLayout from "@/components/layouts/MainLayout";
+import plateImage from '@/assets/images/plate.png';
+import MainLayout from '@/components/layouts/MainLayout';
+import Image from 'next/image';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -13,13 +15,27 @@ export default function AuthLayout({
 }: AuthLayoutProps) {
   return (
     <MainLayout>
-      {/* Headline Principal */}
-      <h1 className="text-4xl font-bold text-fg leading-tight mb-4">
+      {/* Headline — centered on mobile, left-aligned in the desktop split */}
+      <h1 className='mb-md text-center text-[28px] font-bold leading-tight text-fg lg:mb-4 lg:text-left lg:text-4xl'>
         {title}
       </h1>
-      {subtitle && <p className="text-muted text-lg mb-6">{subtitle}</p>}
+      {subtitle && (
+        <p className='mb-xl text-center text-lg text-muted lg:text-left'>
+          {subtitle}
+        </p>
+      )}
 
-      {/* Contenido del formulario */}
+      {/* Mobile illustration banner (desktop shows it in the side column) */}
+      <div className='mb-xl flex justify-center lg:hidden'>
+        <Image
+          src={plateImage}
+          alt='Gourmet dish'
+          className='h-auto w-56'
+          priority
+        />
+      </div>
+
+      {/* Form */}
       {children}
     </MainLayout>
   );
