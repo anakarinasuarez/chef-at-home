@@ -12,27 +12,14 @@ export default function HomePage() {
   const { user, isLoading, initializeAuth } = useAuthUnified();
   const router = useRouter();
 
-  // Debug logs
-  console.log('🏠 HomePage - user:', user);
-  console.log('🏠 HomePage - isLoading:', isLoading);
-
   // Inicializar autenticación al montar el componente
   useEffect(() => {
-    console.log('🏠 HomePage - Initializing auth...');
     initializeAuth();
-
-    // Verificar si hay usuario en localStorage
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('user');
-      console.log('🏠 HomePage - Stored user in localStorage:', storedUser);
-    }
   }, [initializeAuth]);
 
   // Si el usuario está logueado, redirigir a /create
   useEffect(() => {
-    console.log('🏠 HomePage useEffect - user:', user, 'isLoading:', isLoading);
     if (user && !isLoading) {
-      console.log('🏠 HomePage - Redirecting to /create');
       router.push('/create');
     }
   }, [user, isLoading, router]);
