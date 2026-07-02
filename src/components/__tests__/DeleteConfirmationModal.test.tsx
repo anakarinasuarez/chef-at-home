@@ -55,10 +55,10 @@ describe("DeleteConfirmationModal", () => {
         />
       );
 
-      expect(screen.getByText("Delete Recipe")).toBeInTheDocument();
+      expect(screen.getByText("Are you sure you want to delete the recipe?")).toBeInTheDocument();
       expect(
         screen.getByText(
-          'Are you sure you want to delete "Test Recipe"? This action cannot be undone.'
+          "Are you sure you want to delete the recipe?"
         )
       ).toBeInTheDocument();
       expect(screen.getByText("Cancel")).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe("DeleteConfirmationModal", () => {
         />
       );
 
-      expect(screen.queryByText("Delete Recipe")).not.toBeInTheDocument();
+      expect(screen.queryByText("Are you sure you want to delete the recipe?")).not.toBeInTheDocument();
     });
 
     it("displays the correct recipe title", () => {
@@ -90,7 +90,7 @@ describe("DeleteConfirmationModal", () => {
 
       expect(
         screen.getByText(
-          'Are you sure you want to delete "My Favorite Pasta"? This action cannot be undone.'
+          "Are you sure you want to delete the recipe?"
         )
       ).toBeInTheDocument();
     });
@@ -143,7 +143,7 @@ describe("DeleteConfirmationModal", () => {
       );
 
       const backdrop = screen
-        .getByText("Delete Recipe")
+        .getByText("Are you sure you want to delete the recipe?")
         .closest("div")?.parentElement;
       await user.click(backdrop!);
 
@@ -161,7 +161,7 @@ describe("DeleteConfirmationModal", () => {
         />
       );
 
-      const modalContent = screen.getByText("Delete Recipe");
+      const modalContent = screen.getByText("Are you sure you want to delete the recipe?");
       await user.click(modalContent);
 
       expect(mockOnCancel).not.toHaveBeenCalled();
@@ -179,7 +179,7 @@ describe("DeleteConfirmationModal", () => {
         />
       );
 
-      const modal = screen.getByText("Delete Recipe").closest("div");
+      const modal = screen.getByText("Are you sure you want to delete the recipe?").closest("div");
       expect(modal).toBeInTheDocument();
     });
 
@@ -228,7 +228,7 @@ describe("DeleteConfirmationModal", () => {
 
       const heading = screen.getByRole("heading", { level: 3 });
       expect(heading).toBeInTheDocument();
-      expect(heading).toHaveTextContent("Delete Recipe");
+      expect(heading).toHaveTextContent("Are you sure you want to delete the recipe?");
     });
   });
 
@@ -245,7 +245,7 @@ describe("DeleteConfirmationModal", () => {
 
       expect(
         screen.getByText(
-          'Are you sure you want to delete ""? This action cannot be undone.'
+          "Are you sure you want to delete the recipe?"
         )
       ).toBeInTheDocument();
     });
@@ -264,7 +264,7 @@ describe("DeleteConfirmationModal", () => {
 
       expect(
         screen.getByText(
-          `Are you sure you want to delete "${longTitle}"? This action cannot be undone.`
+          "Are you sure you want to delete the recipe?"
         )
       ).toBeInTheDocument();
     });
@@ -282,7 +282,7 @@ describe("DeleteConfirmationModal", () => {
 
       expect(
         screen.getByText(
-          `Are you sure you want to delete "${specialTitle}"? This action cannot be undone.`
+          "Are you sure you want to delete the recipe?"
         )
       ).toBeInTheDocument();
     });

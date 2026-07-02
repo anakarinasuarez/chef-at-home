@@ -152,8 +152,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Assign IDs/titles + a FREE stock food photo (loremflickr, no API key,
-    // no paid DALL-E). Keyword uses the cuisine so the photo is on-theme; the
+    // no paid DALL-E). The keyword is built from the DISH NAME (+ main
+    // ingredient + cuisine) so the photo is coherent with the recipe; the
     // per-recipe lock keeps the same image stable across reloads.
+    const STOP_WORDS = new Set([
+      'with','and','the','for','a','an','of','in','on','to','style','recipe','homemade','fresh','easy',
+    ]);
     const recipesWithImages = recipes.map((recipe, index) => {
       const finalTitle =
         customTitle && index === 0
@@ -163,9 +167,23 @@ export async function POST(request: NextRequest) {
         .toString(36)
         .substr(2, 9)}`;
 
-      const keyword = encodeURIComponent(
-        `${recipe?.cuisine || cuisine || 'gourmet'},food,dish`
-      );
+      // Main words from the dish title → the most descriptive image query.
+      const titleWords = finalTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .filter(w => w.length > 2 && !STOP_WORDS.has(w))
+        .slice(0, 3);
+      const firstIngredient = (recipe?.ingredients?.[0]?.name || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+      const terms = [
+        ...titleWords,
+        firstIngredient,
+        recipe?.cuisine?.toLowerCase(),
+        'food',
+      ].filter(Boolean);
+      const keyword = encodeURIComponent([...new Set(terms)].join(','));
       const lock = Math.abs(
         Array.from(recipeId).reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)
       );
