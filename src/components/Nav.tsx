@@ -105,7 +105,7 @@ export default function Nav({
 
       {/* Menú desplegable */}
       {isMenuOpen && (
-        <div className='absolute top-0 right-0 w-64 rounded-b-lg shadow-lg z-50 bg-surface border border-border'>
+        <div className='fixed inset-x-0 bottom-0 z-50 w-full rounded-t-lg border border-border bg-surface shadow-lg lg:absolute lg:inset-x-auto lg:bottom-auto lg:top-0 lg:right-0 lg:w-64 lg:rounded-t-none lg:rounded-b-lg'>
           {/* Header del menú con botón de cerrar */}
           <div className='flex items-center justify-between px-8 py-4'>
             <div></div>

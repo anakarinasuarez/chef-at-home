@@ -398,7 +398,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
             onChange={e => setNewIngredient(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder='Add an ingredient...'
-            className='w-80 rounded-sm border border-border bg-input px-md py-sm text-base text-fg placeholder:text-muted transition-colors focus:border-primary focus:outline-none'
+            className='flex-1 min-w-0 rounded-sm border border-border bg-input px-md py-sm text-base text-fg placeholder:text-muted transition-colors focus:border-primary focus:outline-none'
             data-testid='ingredient-input'
           />
           <Button
@@ -501,8 +501,11 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
         )}
       </div>
 
-      {/* Botón de Crear/Guardar Receta */}
-      <div className='flex gap-4'>
+      {/* Spacer so the fixed mobile action bar never covers the last field */}
+      <div className='h-24 lg:hidden' aria-hidden='true' />
+
+      {/* Acciones — bottom-pinned ActionBar on mobile, inline in flow on desktop */}
+      <div className='fixed inset-x-0 bottom-0 z-40 flex gap-md border-t border-border bg-surface px-lg py-md lg:static lg:z-auto lg:gap-4 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0'>
         <Button
           variant='primary'
           onClick={isEditing ? handleSaveRecipe : handleCreateRecipe}
@@ -513,7 +516,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
             (isEditing && !recipeTitle.trim()) ||
             (!isEditing && !canGenerateRecipe) // Deshabilitar si no puede generar más recetas
           }
-          className='px-8 py-3'
+          className='flex-1 lg:flex-none px-8 py-3'
           data-testid='create-recipe-button'
         >
           {isCreating
@@ -529,7 +532,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
         <Button
           variant='secondary'
           onClick={() => router.push('/my-recipes')}
-          className='px-6 py-3'
+          className='flex-1 lg:flex-none px-6 py-3'
         >
           {isEditing ? 'Cancel' : 'My Recipes'}
         </Button>
