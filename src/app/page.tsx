@@ -3,8 +3,10 @@
 import Button from '@/components/Button';
 import MainLayout from '@/components/layouts/MainLayout';
 import { PageErrorBoundary } from '@/components/PageErrorBoundary';
-import { colors, typography } from '@/design-system';
+import { colors } from '@/design-system';
 import { useAuthUnified } from '@/hooks';
+import plateImage from '@/assets/images/plate.png';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -12,27 +14,14 @@ export default function HomePage() {
   const { user, isLoading, initializeAuth } = useAuthUnified();
   const router = useRouter();
 
-  // Debug logs
-  console.log('🏠 HomePage - user:', user);
-  console.log('🏠 HomePage - isLoading:', isLoading);
-
   // Inicializar autenticación al montar el componente
   useEffect(() => {
-    console.log('🏠 HomePage - Initializing auth...');
     initializeAuth();
-
-    // Verificar si hay usuario en localStorage
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('user');
-      console.log('🏠 HomePage - Stored user in localStorage:', storedUser);
-    }
   }, [initializeAuth]);
 
   // Si el usuario está logueado, redirigir a /create
   useEffect(() => {
-    console.log('🏠 HomePage useEffect - user:', user, 'isLoading:', isLoading);
     if (user && !isLoading) {
-      console.log('🏠 HomePage - Redirecting to /create');
       router.push('/create');
     }
   }, [user, isLoading, router]);
@@ -65,64 +54,50 @@ function LandingPage() {
 
   return (
     <MainLayout>
-      {/* Título Principal */}
-      <h1
-        className='mb-8 text-center lg:text-left leading-tight'
-        style={{
-          fontSize: typography.styles['title-1'].fontSize,
-          fontWeight: typography.styles['title-1'].fontWeight,
-          lineHeight: typography.styles['title-1'].lineHeight,
-          letterSpacing: typography.styles['title-1'].letterSpacing,
-          color: colors.interface.text.primary,
-        }}
-      >
-        Turn your everyday ingredients
-        <br />
-        into gourmet masterpieces with
-        <br />
-        AI driven recipes
+      {/* Heading — centered on mobile, left-aligned in the desktop split */}
+      <h1 className='mb-xl text-center text-[28px] font-bold leading-tight tracking-tight text-fg lg:mb-8 lg:text-left lg:text-[36px]'>
+        Turn your everyday ingredients into gourmet masterpieces with AI driven
+        recipes
       </h1>
 
-      {/* Lista de características */}
-      <div className='mb-8 space-y-4'>
-        <div
-          className='flex items-start space-x-3'
-          style={{
-            fontSize: typography.styles['body-large'].fontSize,
-            fontWeight: typography.styles['body-large'].fontWeight,
-            color: colors.interface.text.primary,
-          }}
-        >
-          <span className='text-primary text-xl'>•</span>
-          <span>
-            Reduce waste, save money, and
-            <br />
-            cook like a pro
-          </span>
+      {/* Mobile illustration (desktop shows it in the side column) */}
+      <div className='mb-xl flex justify-center lg:hidden'>
+        <Image
+          src={plateImage}
+          alt='Gourmet dish'
+          className='h-auto w-64'
+          priority
+        />
+      </div>
+
+      {/* Feature list */}
+      <div className='mb-xl space-y-lg text-base text-fg'>
+        <div className='flex items-start gap-sm'>
+          <span className='text-xl leading-none text-primary'>•</span>
+          <span>Reduce waste, save money, and cook like a pro</span>
         </div>
-        <div
-          className='flex items-start space-x-3'
-          style={{
-            fontSize: typography.styles['body-large'].fontSize,
-            fontWeight: typography.styles['body-large'].fontWeight,
-            color: colors.interface.text.primary,
-          }}
-        >
-          <span className='text-primary text-xl'>•</span>
-          <span>
-            Unleash your inner chef and create
-            <br />
-            magic in the kitchen!
-          </span>
+        <div className='flex items-start gap-sm'>
+          <span className='text-xl leading-none text-primary'>•</span>
+          <span>Unleash your inner chef and create magic in the kitchen!</span>
         </div>
       </div>
 
-      {/* Botones de acción */}
-      <div className='flex flex-col sm:flex-row gap-4 mt-8'>
-        <Button variant='primary' onClick={() => router.push('/auth/signup')}>
+      {/* CTAs — full-width stacked on mobile, inline on desktop */}
+      <div className='mt-xl flex flex-col gap-md sm:flex-row'>
+        <Button
+          variant='primary'
+          fullWidth
+          className='sm:w-auto'
+          onClick={() => router.push('/auth/signup')}
+        >
           Sign up free
         </Button>
-        <Button variant='secondary' onClick={() => router.push('/auth/login')}>
+        <Button
+          variant='secondary'
+          fullWidth
+          className='sm:w-auto'
+          onClick={() => router.push('/auth/login')}
+        >
           Login
         </Button>
       </div>

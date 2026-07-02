@@ -1,5 +1,17 @@
 import "@testing-library/jest-dom";
+import React from "react";
 import { vi } from "vitest";
+
+// Mock next/image → plain <img>. Static image imports resolve to an object
+// ({ src, width, height }) outside Next's loader, so unwrap `.src`.
+vi.mock("next/image", () => ({
+  __esModule: true,
+  default: ({ src, alt = "", priority, fill, quality, loader, ...props }: any) => {
+    const resolvedSrc =
+      typeof src === "object" && src !== null ? src.src ?? "" : src;
+    return React.createElement("img", { src: resolvedSrc, alt, ...props });
+  },
+}));
 
 // Import all mocks except services (let individual tests handle service mocks)
 import "./mocks/contexts";

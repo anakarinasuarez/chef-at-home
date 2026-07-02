@@ -148,8 +148,7 @@ describe("Nav", () => {
       await user.click(menuButton);
 
       expect(screen.getByText("Create Recipe")).toBeInTheDocument();
-      expect(screen.getByText("Generated Recipes")).toBeInTheDocument();
-      expect(screen.getByText("My Recipes")).toBeInTheDocument();
+      expect(screen.getByText("My Recipe")).toBeInTheDocument();
       expect(screen.getByText("Log Out")).toBeInTheDocument();
     });
 
@@ -201,7 +200,7 @@ describe("Nav", () => {
       expect(mockPush).toHaveBeenCalledWith("/");
     });
 
-    it("navigates to recipes page when Generated Recipes is clicked", async () => {
+    it("navigates to my-recipes page when My Recipe is clicked", async () => {
       const user = userEvent.setup();
       render(<Nav showMenu={true} />);
 
@@ -209,23 +208,8 @@ describe("Nav", () => {
       const menuButton = screen.getByLabelText("Menu");
       await user.click(menuButton);
 
-      // Click Generated Recipes
-      const generatedButton = screen.getByText("Generated Recipes");
-      await user.click(generatedButton);
-
-      expect(mockPush).toHaveBeenCalledWith("/recipes");
-    });
-
-    it("navigates to my-recipes page when My Recipes is clicked", async () => {
-      const user = userEvent.setup();
-      render(<Nav showMenu={true} />);
-
-      // Open menu
-      const menuButton = screen.getByLabelText("Menu");
-      await user.click(menuButton);
-
-      // Click My Recipes
-      const myRecipesButton = screen.getByText("My Recipes");
+      // Click My Recipe
+      const myRecipesButton = screen.getByText("My Recipe");
       await user.click(myRecipesButton);
 
       expect(mockPush).toHaveBeenCalledWith("/my-recipes");
@@ -262,19 +246,6 @@ describe("Nav", () => {
       expect(createButton.closest("button")).toHaveClass("text-on-primary");
     });
 
-    it("highlights generated page when currentPage is generated", async () => {
-      const user = userEvent.setup();
-      render(<Nav showMenu={true} currentPage="generated" />);
-
-      // Open menu
-      const menuButton = screen.getByLabelText("Menu");
-      await user.click(menuButton);
-
-      const generatedButton = screen.getByText("Generated Recipes");
-      expect(generatedButton.closest("button")).toHaveClass("bg-primary");
-      expect(generatedButton.closest("button")).toHaveClass("text-on-primary");
-    });
-
     it("highlights my-recipes page when currentPage is my-recipes", async () => {
       const user = userEvent.setup();
       render(<Nav showMenu={true} currentPage="my-recipes" />);
@@ -283,7 +254,7 @@ describe("Nav", () => {
       const menuButton = screen.getByLabelText("Menu");
       await user.click(menuButton);
 
-      const myRecipesButton = screen.getByText("My Recipes");
+      const myRecipesButton = screen.getByText("My Recipe");
       expect(myRecipesButton.closest("button")).toHaveClass("bg-primary");
       expect(myRecipesButton.closest("button")).toHaveClass("text-on-primary");
     });
@@ -299,9 +270,9 @@ describe("Nav", () => {
       await user.click(menuButton);
 
       // Hover is now CSS-driven via token utilities, no JS handlers.
-      const generatedButton = screen.getByText("Generated Recipes").closest("button");
-      expect(generatedButton).toHaveClass("hover:bg-primary-hover");
-      expect(generatedButton).toHaveClass("text-fg");
+      const inactiveItem = screen.getByText("My Recipe").closest("button");
+      expect(inactiveItem).toHaveClass("hover:bg-primary-hover");
+      expect(inactiveItem).toHaveClass("text-fg");
     });
 
     it("does not apply the active fill to inactive items", async () => {
@@ -312,8 +283,8 @@ describe("Nav", () => {
       const menuButton = screen.getByLabelText("Menu");
       await user.click(menuButton);
 
-      const generatedButton = screen.getByText("Generated Recipes").closest("button");
-      expect(generatedButton).not.toHaveClass("bg-primary");
+      const inactiveItem = screen.getByText("My Recipe").closest("button");
+      expect(inactiveItem).not.toHaveClass("bg-primary");
     });
   });
 
@@ -378,8 +349,8 @@ describe("Nav", () => {
 
       // Check that menu items are rendered
       expect(screen.getByText("Create Recipe")).toBeInTheDocument();
-      expect(screen.getByText("Generated Recipes")).toBeInTheDocument();
-      expect(screen.getByText("My Recipes")).toBeInTheDocument();
+      expect(screen.getByText("My Recipe")).toBeInTheDocument();
+      expect(screen.getByText("Log Out")).toBeInTheDocument();
     });
 
     it("handles rapid menu toggles", async () => {
@@ -418,7 +389,6 @@ describe("Nav", () => {
       expect(screen.getByTestId("menu-icon")).toBeInTheDocument();
       expect(screen.getByTestId("close-icon")).toBeInTheDocument();
       expect(screen.getByTestId("restaurant-icon")).toBeInTheDocument();
-      expect(screen.getByTestId("grid-icon")).toBeInTheDocument();
       expect(screen.getByTestId("favorite-icon")).toBeInTheDocument();
       expect(screen.getByTestId("logout-icon")).toBeInTheDocument();
     });
