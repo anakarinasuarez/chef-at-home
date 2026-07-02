@@ -15,28 +15,30 @@ export default function MainLayout({
   children,
   className = "",
   showMenu = false,
-  userName = "Anna",
+  userName = "",
   currentPage = "create",
 }: MainLayoutProps) {
   return (
     <>
       {/* Navigation */}
-      <Nav 
+      <Nav
         showMenu={showMenu}
         userName={userName}
         currentPage={currentPage}
       />
 
-      {/* Contenido Principal - Layout de 2 columnas */}
-      <main className={`flex min-h-[calc(100vh-80px)] pt-16 ${className}`}>
-        {/* Columna Izquierda - Contenido específico de cada página */}
-        <div className="flex-1 flex flex-col justify-start px-8 lg:px-16 py-12">
+      {/* Main content — stacked on mobile, 2-column split on desktop */}
+      <main
+        className={`flex flex-col lg:flex-row min-h-[calc(100vh-72px)] pt-[72px] ${className}`}
+      >
+        {/* Content column (page-specific) */}
+        <div className="flex-1 flex flex-col justify-start px-lg lg:px-3xl py-xl lg:py-2xl">
           {children}
         </div>
 
-        {/* Columna Derecha - Imagen Gourmet */}
-        <div className="flex-1 flex items-center justify-center px-8 lg:px-16 py-12">
-          <div className="relative w-full max-w-lg">
+        {/* Illustration column */}
+        <div className="flex-1 flex items-center justify-center px-lg lg:px-3xl py-xl lg:py-2xl">
+          <div className="relative w-full max-w-form">
             <Image
               src={plateImage}
               alt="Gourmet dish"

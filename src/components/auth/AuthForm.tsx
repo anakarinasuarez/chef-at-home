@@ -1,7 +1,6 @@
 'use client';
 
 import Button from '@/components/Button';
-import { colors } from '@/design-system';
 import { useAuthUnified } from '@/hooks';
 import { getFirstZodError, loginSchema, registerSchema, safeValidateSchema } from '@/schemas';
 import { useToastStore } from '@/stores';
@@ -113,7 +112,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
   const isSignup = type === 'signup';
 
   return (
-    <form onSubmit={handleSubmit} className='w-full max-w-md space-y-4'>
+    <form onSubmit={handleSubmit} className='w-full max-w-form space-y-4'>
       {/* Campo Nombre (solo para signup) */}
       {isSignup && (
         <FormField
@@ -178,7 +177,7 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
       {/* Mensaje de Error */}
       {error && (
         <div
-          className='text-red-400 text-sm bg-red-900/20 p-3 rounded-lg'
+          className='text-danger text-sm bg-danger/10 p-md rounded-md'
           data-testid='error-message'
         >
           {error}
@@ -191,27 +190,25 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
           type='submit'
           variant='primary'
           disabled={isLoading}
+          fullWidth
+          className='sm:w-auto'
           data-testid={isSignup ? 'signup-button' : 'login-button'}
         >
           {isLoading ? 'Processing...' : isSignup ? 'Sign Up' : 'Login'}
         </Button>
-        <Button href='/' variant='secondary'>
+        <Button href='/' variant='secondary' fullWidth className='sm:w-auto'>
           Cancel
         </Button>
       </div>
 
       {/* Link adicional (login/signup) */}
-      <div className='pt-2'>
-        <span className='text-gray-300' style={{ fontSize: '16px' }}>
+      <div className='pt-2 text-base'>
+        <span className='text-muted'>
           {type === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
         </span>
         <a
           href={type === 'signup' ? '/auth/login' : '/auth/signup'}
-          className='underline cursor-pointer'
-          style={{
-            color: colors.brand.primary[500],
-            fontSize: '16px',
-          }}
+          className='text-primary underline cursor-pointer hover:text-primary-hover'
         >
           {type === 'signup' ? 'Sign in here' : 'Sign up here'}
         </a>
@@ -219,14 +216,10 @@ export default function AuthForm({ type, title, subtitle }: AuthFormProps) {
 
       {/* Forgot Password Link (solo para login) */}
       {type !== 'signup' && (
-        <div className='pt-2 text-left'>
+        <div className='pt-2 text-left text-base'>
           <a
             href='/auth/forgot-password'
-            className='underline cursor-pointer hover:text-white transition-colors'
-            style={{
-              color: colors.brand.primary[500],
-              fontSize: '16px',
-            }}
+            className='text-primary underline cursor-pointer hover:text-primary-hover transition-colors'
           >
             Forgot your password?
           </a>

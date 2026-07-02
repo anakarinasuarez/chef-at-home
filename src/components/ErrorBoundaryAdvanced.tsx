@@ -192,7 +192,7 @@ export class ErrorBoundaryAdvanced extends Component<
         }`}
         style={{ backgroundColor: colors.interface.background.primary }}
       >
-        <div className="text-center max-w-lg">
+        <div className="text-center max-w-form">
           {/* Error Icon */}
           <div className="text-6xl mb-4">{isCritical ? "💥" : "⚠️"}</div>
 

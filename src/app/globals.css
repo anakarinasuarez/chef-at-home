@@ -66,7 +66,7 @@
    Design tokens exposed to Tailwind (utilities generated here).
    `inline` keeps the var() reference so mode switching works.
    ───────────────────────────────────────────────────────────── */
-@theme inline {
+@theme {
   /* Fonts (raw families come from next/font in layout.tsx) */
   --font-sans: var(--font-poppins), system-ui, sans-serif;
   --font-logo: var(--font-alegreya), serif;
@@ -87,6 +87,15 @@
   --radius-lg: 20px;
   --radius-full: 9999px;
 
+  /* Width containers → `max-w-*`. Named to avoid the spacing/​t-shirt collision:
+     our spacing scale uses sm/md/lg…, so DON'T use max-w-md/lg (they'd resolve
+     to the tiny spacing value). Use these semantic ones instead. */
+  --container-form: 28rem; /* 448px — auth form / modal width */
+  --container-page: 76rem; /* 1216px — centered page content max width */
+}
+
+/* Mode-aware color tokens — `inline` keeps the var() so theme switching works. */
+@theme inline {
   /* Backgrounds */
   --color-canvas: var(--bg-canvas);
   --color-surface: var(--bg-surface);

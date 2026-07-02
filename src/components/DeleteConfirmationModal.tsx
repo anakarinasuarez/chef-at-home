@@ -27,7 +27,7 @@ export default function DeleteConfirmationModal({
       }}
     >
       <div
-        className='mx-lg flex w-full max-w-md flex-col gap-2xl rounded-lg bg-surface px-2xl py-3xl shadow-2xl'
+        className='mx-lg flex w-full max-w-form flex-col gap-2xl rounded-lg bg-surface px-2xl py-3xl shadow-2xl'
         onClick={e => e.stopPropagation()}
       >
         <h3 className='text-xl font-semibold text-fg'>Delete Recipe</h3>

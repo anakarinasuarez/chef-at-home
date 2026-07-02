@@ -371,7 +371,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
             value={recipeTitle}
             onChange={e => setRecipeTitle(e.target.value)}
             placeholder='Enter recipe title...'
-            className='w-full max-w-md rounded-sm border border-border bg-input px-md py-sm text-base text-fg placeholder:text-muted transition-colors focus:border-primary focus:outline-none'
+            className='w-full max-w-form rounded-sm border border-border bg-input px-md py-sm text-base text-fg placeholder:text-muted transition-colors focus:border-primary focus:outline-none'
             data-testid='recipe-title-input'
           />
         </div>
