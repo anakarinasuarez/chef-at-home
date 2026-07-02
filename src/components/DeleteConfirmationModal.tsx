@@ -40,7 +40,11 @@ export default function DeleteConfirmationModal({
           <Button variant='tertiary' onClick={onCancel}>
             Cancel
           </Button>
-          <Button variant='danger-solid' onClick={onConfirm}>
+          <Button
+            variant='danger'
+            onClick={onConfirm}
+            className='border border-danger'
+          >
             Delete
           </Button>
         </div>

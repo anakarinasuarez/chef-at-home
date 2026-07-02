@@ -314,7 +314,7 @@ describe("DeleteConfirmationModal", () => {
       );
 
       // Delete uses the danger token variant instead of hardcoded #EF4444 / #DC2626.
-      expect(screen.getByText("Delete")).toHaveClass("button-danger-solid");
+      expect(screen.getByText("Delete")).toHaveClass("button-danger");
     });
   });
 
