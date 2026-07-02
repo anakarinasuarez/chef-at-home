@@ -439,12 +439,15 @@ export default function RecipeDetailPage() {
                     </span>
                   </p>
                   <p className='leading-relaxed text-fg'>{instruction}</p>
-                  <div className='relative h-[180px] w-full max-w-[326px] overflow-hidden rounded-md'>
-                    <ImagePlaceholder
-                      title={recipe.title}
-                      cuisine={recipe.cuisine || 'International'}
-                      className='h-full w-full'
-                      ingredients={[]}
+                  <div className='relative h-[180px] w-full max-w-[326px] overflow-hidden rounded-md bg-elevated'>
+                    <Image
+                      src={`https://loremflickr.com/326/180/${encodeURIComponent(
+                        recipe.cuisine || 'food'
+                      )},food,cooking?lock=${index + 11}`}
+                      alt={`Step ${index + 1}`}
+                      fill
+                      sizes='326px'
+                      className='object-cover'
                     />
                   </div>
                 </div>
@@ -466,17 +469,22 @@ export default function RecipeDetailPage() {
             <Button
               variant='secondary'
               onClick={() => handleEditRecipe()}
-              className='flex-1 flex items-center justify-center gap-2'
+              className='flex-1'
             >
-              <FaPencil className='text-lg' />
               Edit
             </Button>
             <Button
               variant='secondary'
-              onClick={() => handleDeleteRecipe()}
-              className='flex-1 flex items-center justify-center gap-2 hover:bg-danger hover:text-on-primary hover:border-danger'
+              onClick={() => handleShareRecipe()}
+              className='flex-1'
             >
-              <MdDelete className='text-lg' />
+              Share
+            </Button>
+            <Button
+              variant='danger'
+              onClick={() => handleDeleteRecipe()}
+              className='flex-1'
+            >
               Delete
             </Button>
           </>

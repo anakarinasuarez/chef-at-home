@@ -197,15 +197,15 @@ export default function MyRecipesPage() {
             <IoIosArrowBack className='text-xl' />
           </button>
           <div>
+            <p className='text-sm text-muted'>
+              {user?.name ? `${user.name}, ` : ''}these are your saved recipes
+            </p>
             <h1
-              className='text-3xl font-bold text-fg'
+              className='text-2xl font-bold leading-tight tracking-tight text-fg'
               data-testid='my-recipes-title'
             >
-              My Saved Recipes
+              Recipes you created like a true chef
             </h1>
-            <p className='mt-1 text-muted'>
-              {savedRecipes.length} recipes saved by you
-            </p>
           </div>
         </div>
 

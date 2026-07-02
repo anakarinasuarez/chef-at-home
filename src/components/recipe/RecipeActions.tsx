@@ -1,7 +1,4 @@
 import { RecipeCardData } from '@/types';
-import { BiShare } from 'react-icons/bi';
-import { FaPencil } from 'react-icons/fa6';
-import { MdDelete } from 'react-icons/md';
 import Button from '../Button';
 
 interface RecipeActionsProps {
@@ -29,7 +26,6 @@ export const RecipeActions = ({
   onSaveClick,
   onEdit,
   onDelete,
-  onShare,
 }: RecipeActionsProps) => {
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -52,40 +48,27 @@ export const RecipeActions = ({
     );
   }
 
-  // Edit / Delete / Share for My Recipes — Delete uses the danger token
+  // My Recipes card (Figma card-my-recipe): Delete (danger) + Edit (secondary),
+  // text labels, bottom-right. Share lives on the recipe detail, not the card.
   return (
-    <div className='flex justify-end gap-sm'>
+    <div className='flex items-center justify-end gap-sm'>
+      <Button
+        variant='danger'
+        onClick={e => e && handleDeleteClick(e)}
+        disabled={isRemoving}
+        data-testid='delete-button'
+      >
+        Delete
+      </Button>
       <Button
         variant='secondary'
         onClick={e => {
           e?.stopPropagation();
           onEdit?.(recipe);
         }}
-        aria-label='Edit recipe'
-        className='p-md flex items-center justify-center'
         data-testid='edit-button'
       >
-        <FaPencil className='text-lg' />
-      </Button>
-      <Button
-        variant='danger'
-        onClick={e => e && handleDeleteClick(e)}
-        aria-label='Delete recipe'
-        className='p-md flex items-center justify-center'
-        data-testid='delete-button'
-      >
-        <MdDelete className='text-lg' />
-      </Button>
-      <Button
-        variant='secondary'
-        onClick={e => {
-          e?.stopPropagation();
-          onShare?.(recipe);
-        }}
-        aria-label='Share recipe'
-        className='p-md flex items-center justify-center'
-      >
-        <BiShare className='text-lg' data-testid='bi-share' />
+        Edit
       </Button>
     </div>
   );

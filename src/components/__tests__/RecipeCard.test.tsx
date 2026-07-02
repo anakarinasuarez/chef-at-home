@@ -223,9 +223,8 @@ describe('RecipeCard', () => {
     it('renders with my-recipes variant', () => {
       render(<RecipeCard recipe={mockRecipe} variant='my-recipes' />);
 
-      expect(screen.getByTestId('fa-pencil')).toBeInTheDocument();
-      expect(screen.getByTestId('md-delete')).toBeInTheDocument();
-      expect(screen.getByTestId('bi-share')).toBeInTheDocument();
+      expect(screen.getByTestId('delete-button')).toBeInTheDocument();
+      expect(screen.getByTestId('edit-button')).toBeInTheDocument();
     });
 
     it('renders recipe image when available', () => {
@@ -392,10 +391,9 @@ describe('RecipeCard', () => {
   });
 
   describe('My Recipes Variant', () => {
-    it('renders edit, delete, and share buttons', () => {
+    it('renders delete and edit buttons', () => {
       const mockOnEdit = vi.fn();
       const mockOnDelete = vi.fn();
-      const mockOnShare = vi.fn();
 
       render(
         <RecipeCard
@@ -403,13 +401,11 @@ describe('RecipeCard', () => {
           variant='my-recipes'
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-          onShare={mockOnShare}
         />
       );
 
-      expect(screen.getByTestId('fa-pencil')).toBeInTheDocument();
-      expect(screen.getByTestId('md-delete')).toBeInTheDocument();
-      expect(screen.getByTestId('bi-share')).toBeInTheDocument();
+      expect(screen.getByTestId('delete-button')).toBeInTheDocument();
+      expect(screen.getByTestId('edit-button')).toBeInTheDocument();
     });
 
     it('handles edit button click', async () => {
@@ -418,8 +414,7 @@ describe('RecipeCard', () => {
 
       render(<RecipeCard recipe={mockRecipe} variant='my-recipes' onEdit={mockOnEdit} />);
 
-      const editButton = screen.getByTestId('fa-pencil').closest('button');
-      await user.click(editButton!);
+      await user.click(screen.getByTestId('edit-button'));
 
       expect(mockOnEdit).toHaveBeenCalledWith(mockRecipe);
     });
@@ -430,22 +425,9 @@ describe('RecipeCard', () => {
 
       render(<RecipeCard recipe={mockRecipe} variant='my-recipes' onDelete={mockOnDelete} />);
 
-      const deleteButton = screen.getByTestId('md-delete').closest('button');
-      await user.click(deleteButton!);
+      await user.click(screen.getByTestId('delete-button'));
 
       expect(mockOnDelete).toHaveBeenCalledWith('test-recipe-id');
-    });
-
-    it('handles share button click', async () => {
-      const user = userEvent.setup();
-      const mockOnShare = vi.fn();
-
-      render(<RecipeCard recipe={mockRecipe} variant='my-recipes' onShare={mockOnShare} />);
-
-      const shareButton = screen.getByTestId('bi-share').closest('button');
-      await user.click(shareButton!);
-
-      expect(mockOnShare).toHaveBeenCalledWith(mockRecipe);
     });
 
     it('does not trigger card click when action buttons are clicked', async () => {
@@ -454,8 +436,7 @@ describe('RecipeCard', () => {
 
       render(<RecipeCard recipe={mockRecipe} variant='my-recipes' onEdit={mockOnEdit} />);
 
-      const editButton = screen.getByTestId('fa-pencil').closest('button');
-      await user.click(editButton!);
+      await user.click(screen.getByTestId('edit-button'));
 
       expect(mockOnEdit).toHaveBeenCalledWith(mockRecipe);
       expect(mockPush).not.toHaveBeenCalled();
