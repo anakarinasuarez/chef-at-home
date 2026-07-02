@@ -57,13 +57,13 @@ function RecipeCard({
     >
       <div
         onClick={handleCardClick}
-        className='bg-surface rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 group'
+        className='flex w-full flex-col gap-lg rounded-lg bg-surface p-xl transition-shadow duration-200 cursor-pointer hover:shadow-lg'
         data-testid='recipe-card'
       >
-        {/* Recipe Info - Above image */}
+        {/* Recipe Info - title + meta */}
         <RecipeInfo recipe={recipe} />
 
-        {/* Recipe Image - Below info with padding */}
+        {/* Recipe Image */}
         <RecipeImageSimple
           recipe={{
             id: recipe.id || 'unknown',

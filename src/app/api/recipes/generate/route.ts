@@ -151,8 +151,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Assign IDs/titles. Images are free: the UI renders a themed
-    // ImagePlaceholder when there's no photo (no paid DALL-E calls).
+    // Assign IDs/titles + a FREE stock food photo (loremflickr, no API key,
+    // no paid DALL-E). Keyword uses the cuisine so the photo is on-theme; the
+    // per-recipe lock keeps the same image stable across reloads.
     const recipesWithImages = recipes.map((recipe, index) => {
       const finalTitle =
         customTitle && index === 0
@@ -162,12 +163,20 @@ export async function POST(request: NextRequest) {
         .toString(36)
         .substr(2, 9)}`;
 
+      const keyword = encodeURIComponent(
+        `${recipe?.cuisine || cuisine || 'gourmet'},food,dish`
+      );
+      const lock = Math.abs(
+        Array.from(recipeId).reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)
+      );
+      const image = `https://loremflickr.com/640/480/${keyword}?lock=${lock}`;
+
       return {
         ...recipe,
         id: recipeId,
         title: finalTitle,
-        image: '',
-        imageSource: 'placeholder',
+        image,
+        imageSource: 'stock',
       };
     });
 

@@ -73,8 +73,8 @@ describe('/api/recipes/generate', () => {
       expect(responseData.recipes).toHaveLength(1);
       expect(responseData.recipes[0].title).toBe('Chicken Risotto');
       expect(responseData.source).toBe('gemini');
-      // Images are free placeholders (no paid DALL-E)
-      expect(responseData.recipes[0].image).toBe('');
+      // Images are free stock food photos (no paid DALL-E)
+      expect(responseData.recipes[0].image).toContain('loremflickr.com');
     });
 
     it('should fall back to OpenAI when Gemini fails', async () => {
@@ -223,7 +223,7 @@ describe('/api/recipes/generate', () => {
       expect(mockGenerateRecipeWithOpenAI).not.toHaveBeenCalled();
     });
 
-    it('returns recipes with a free placeholder image (no paid image gen)', async () => {
+    it('returns recipes with a free stock image (no paid image gen)', async () => {
       const requestBody = {
         ingredients: ['chicken', 'rice'],
         servings: 4,
@@ -254,8 +254,8 @@ describe('/api/recipes/generate', () => {
 
       expect(response.status).toBe(200);
       expect(responseData.recipes).toHaveLength(1);
-      expect(responseData.recipes[0].image).toBe('');
-      expect(responseData.recipes[0].imageSource).toBe('placeholder');
+      expect(responseData.recipes[0].image).toContain('loremflickr.com');
+      expect(responseData.recipes[0].imageSource).toBe('stock');
     });
 
     it('should handle internal server error', async () => {
