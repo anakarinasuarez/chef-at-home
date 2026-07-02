@@ -193,14 +193,6 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
             changeType = 'title';
           }
 
-          console.log('🔍 Change detection:', {
-            original: originalSorted,
-            current: currentSorted,
-            changeType,
-            ingredientsChanged,
-            servingsChanged,
-            titleChanged,
-          });
         } catch (error) {
           console.error('Error comparing recipe data:', error);
           changeType = 'ingredients'; // Si no se puede comparar, asumir cambio de ingredientes
@@ -211,14 +203,11 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
 
       // 🎯 ACCIONES SEGÚN TIPO DE CAMBIO
       if (changeType === 'ingredients') {
-        console.log('🔄 Ingredients changed, generating new recipes...');
-
         // Limpiar cache para forzar nueva generación
         try {
           const { UniversalCacheManager } = await import('@/lib/universal-cache');
           await UniversalCacheManager.clearAllCache();
           sessionStorage.removeItem('currentRecipes');
-          console.log('🧹 Cache cleared for new recipe generation');
         } catch (error) {
           console.error('Error clearing cache:', error);
         }
@@ -228,12 +217,9 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
           JSON.stringify(ingredients.map(ing => ing.name))
         );
         const redirectUrl = `/recipes?ingredients=${ingredientsParam}&servings=${selectedServings}&force=true&editMode=true&originalId=${editingRecipeId}&recipeTitle=${encodeURIComponent(recipeTitle.trim())}&count=1`;
-        console.log('🔄 Redirecting to generate ONE new recipe:', redirectUrl);
         router.push(redirectUrl);
         return;
       } else if (changeType === 'servings') {
-        console.log('📊 Servings changed, recalculating ingredients...');
-
         // Recalcular proporciones de ingredientes
         const originalRecipe = localStorage.getItem(`recipe-${editingRecipeId}`);
         if (originalRecipe) {
@@ -270,7 +256,6 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
 
             const success = updateRecipe(editingRecipeId, updatedRecipeData, user.id);
             if (success) {
-              console.log('✅ Recipe servings updated successfully');
               showSuccess(`Recipe updated for ${selectedServings} servings!`);
               router.push('/my-recipes');
               return;
@@ -282,8 +267,6 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
       }
 
       // Si solo se cambió el título, actualizar metadatos
-      console.log('📝 Title only changed, updating recipe metadata...');
-
       const updatedRecipeData = {
         title: recipeTitle.trim(),
         ingredients: ingredients.map(ing => ({
@@ -302,7 +285,6 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
       const success = updateRecipe(editingRecipeId, updatedRecipeData, user.id);
 
       if (success) {
-        console.log('✅ Recipe metadata updated successfully');
         showSuccess('Title updated successfully!');
         router.push('/my-recipes');
       } else {
@@ -334,7 +316,6 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
       // El RecipesPage se encargará de hacer el request único
       const ingredientsParam = encodeURIComponent(JSON.stringify(ingredients.map(ing => ing.name)));
       const redirectUrl = `/recipes?ingredients=${ingredientsParam}&servings=${selectedServings}&count=4`;
-      console.log('Redirigiendo a página de recetas múltiples:', redirectUrl);
       router.push(redirectUrl);
     } catch (error) {
       console.error('Error redirecting to recipes page:', error);
@@ -390,10 +371,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
             value={recipeTitle}
             onChange={e => setRecipeTitle(e.target.value)}
             placeholder='Enter recipe title...'
-            className='w-full max-w-md px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200'
-            style={{
-              fontSize: typography.styles['body'].fontSize,
-            }}
+            className='w-full max-w-md rounded-sm border border-border bg-input px-md py-sm text-base text-fg placeholder:text-muted transition-colors focus:border-primary focus:outline-none'
             data-testid='recipe-title-input'
           />
         </div>
@@ -420,10 +398,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
             onChange={e => setNewIngredient(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder='Add an ingredient...'
-            className='w-80 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200'
-            style={{
-              fontSize: typography.styles['body'].fontSize,
-            }}
+            className='w-80 rounded-sm border border-border bg-input px-md py-sm text-base text-fg placeholder:text-muted transition-colors focus:border-primary focus:outline-none'
             data-testid='ingredient-input'
           />
           <Button
@@ -442,17 +417,15 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
             {ingredients.map(ingredient => (
               <div
                 key={ingredient.id}
-                className='group relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors duration-200'
-                style={{
-                  backgroundColor: colors.interface.background.secondary,
-                }}
+                className='group relative flex items-center justify-center rounded-sm bg-elevated px-md py-sm transition-colors duration-200'
               >
-                <span className='text-sm text-center' style={{ color: colors.brand.primary[500] }}>
+                <span className='text-sm text-center text-primary'>
                   {ingredient.name}
                 </span>
                 <button
                   onClick={() => handleRemoveIngredient(ingredient.id)}
-                  className='absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 bg-red-500 text-white hover:bg-red-600'
+                  aria-label={`Remove ${ingredient.name}`}
+                  className='absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 bg-danger text-on-primary hover:bg-danger-hover'
                 >
                   ×
                 </button>
@@ -507,7 +480,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
               value={newCustomServing}
               onChange={e => setNewCustomServing(e.target.value)}
               placeholder='Add numberts'
-              className='w-40 px-3 py-2 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500'
+              className='w-40 rounded-sm border border-border bg-input px-md py-sm text-fg placeholder:text-muted transition-colors focus:border-primary focus:outline-none'
               min='1'
             />
             <Button

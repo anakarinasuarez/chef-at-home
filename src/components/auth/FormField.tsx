@@ -1,5 +1,3 @@
-import { colors, typography } from '@/design-system';
-
 interface FormFieldProps {
   id: string;
   name: string;
@@ -14,6 +12,9 @@ interface FormFieldProps {
   error?: string;
   'data-testid'?: string;
 }
+
+const cn = (...parts: Array<string | false | undefined>) =>
+  parts.filter(Boolean).join(' ');
 
 export default function FormField({
   id,
@@ -30,16 +31,8 @@ export default function FormField({
   'data-testid': dataTestId,
 }: FormFieldProps) {
   return (
-    <>
-      <label
-        htmlFor={id}
-        className={`block text-white font-medium mb-1 ${className}`}
-        style={{
-          fontSize: typography.styles['body'].fontSize,
-          fontWeight: typography.styles['body'].fontWeight,
-          color: colors.interface.text.primary,
-        }}
-      >
+    <div className={cn('flex flex-col gap-1.5', className)}>
+      <label htmlFor={id} className='text-[13px] text-muted'>
         {label}
       </label>
       <input
@@ -52,18 +45,14 @@ export default function FormField({
         required={required}
         minLength={minLength}
         data-testid={dataTestId}
-        className={`w-80 px-3 py-3 bg-white text-gray-800 rounded-lg border-0 focus:outline-none focus:ring-2 ${
-          error ? 'focus:ring-red-500 border-red-500' : 'focus:ring-green-500'
-        }`}
-        style={{
-          fontSize: typography.styles['caption'].fontSize,
-          fontFamily: typography.styles['caption'].fontFamily.join(', '),
-          fontWeight: typography.styles['caption'].fontWeight,
-          lineHeight: typography.styles['caption'].lineHeight,
-          letterSpacing: typography.styles['caption'].letterSpacing,
-        }}
+        aria-invalid={error ? true : undefined}
+        className={cn(
+          'w-full rounded-sm border bg-input px-lg py-md text-base text-fg placeholder:text-muted',
+          'focus:outline-none focus-visible:outline-none',
+          error ? 'border-danger focus:border-danger' : 'border-border-strong focus:border-primary',
+        )}
       />
-      {error && <p className='text-red-400 text-sm mt-1'>{error}</p>}
-    </>
+      {error && <p className='mt-1 text-sm text-danger'>{error}</p>}
+    </div>
   );
 }
