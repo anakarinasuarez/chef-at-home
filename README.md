@@ -13,24 +13,75 @@ Figma, with free & unlimited AI recipe generation.
 
 ---
 
-## 📱 Screenshots
+## 📸 Screenshots
 
-The UI is a 1:1 implementation of the Figma design system (dark‑first, mobile 390 → desktop 1280).
+The UI is a 1:1 implementation of the Figma design system (dark‑first, fully responsive from mobile 390 → desktop 1280).
+
+### 🖥️ Desktop
+
+<p align="center">
+  <img src="docs/screenshots/desktop-home.png" width="800" alt="Home (desktop)"/>
+</p>
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/desktop-create.png" width="400"/><br/><sub>Create a recipe</sub></td>
+    <td align="center"><img src="docs/screenshots/desktop-detail.png" width="400"/><br/><sub>Recipe detail</sub></td>
+  </tr>
+</table>
+
+### 📱 Mobile
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/home.png" width="220"/><br/><sub>Home</sub></td>
-    <td align="center"><img src="docs/screenshots/create.png" width="220"/><br/><sub>Create wizard</sub></td>
-    <td align="center"><img src="docs/screenshots/loading.png" width="220"/><br/><sub>Generating</sub></td>
+    <td align="center"><img src="docs/screenshots/home.png" width="200"/><br/><sub>Home</sub></td>
+    <td align="center"><img src="docs/screenshots/create.png" width="200"/><br/><sub>Create wizard</sub></td>
+    <td align="center"><img src="docs/screenshots/loading.png" width="200"/><br/><sub>Generating</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/recipe-card.png" width="220"/><br/><sub>Recipe results</sub></td>
-    <td align="center"><img src="docs/screenshots/recipe-detail.png" width="220"/><br/><sub>Recipe detail</sub></td>
-    <td align="center"><img src="docs/screenshots/my-recipes.png" width="220"/><br/><sub>My recipes</sub></td>
+    <td align="center"><img src="docs/screenshots/recipe-card.png" width="200"/><br/><sub>Recipe results</sub></td>
+    <td align="center"><img src="docs/screenshots/recipe-detail.png" width="200"/><br/><sub>Recipe detail</sub></td>
+    <td align="center"><img src="docs/screenshots/my-recipes.png" width="200"/><br/><sub>My recipes</sub></td>
   </tr>
 </table>
 
 > 👉 Try the interactive app on the [**live demo**](https://chef-at-home-v1.vercel.app).
+
+---
+
+## 🧭 Project Context (Portfolio)
+
+**Role:** UX/UI Designer & Frontend Developer (end‑to‑end — design + code).
+
+**The challenge.** Chef at Home started as a functional AI recipe app with a
+paid AI backend and fragmented styling. I took it from a working prototype to a
+polished, production‑ready product: a real **design system** (designed in Figma
+and implemented in code), a **fully responsive** experience matched 1:1 to the
+mobile and desktop designs, and a **zero‑cost AI** pipeline.
+
+**What I did.**
+
+- **Designed a design system in Figma** — semantic color tokens (Light/Dark),
+  a Poppins type scale, 4/8pt spacing, and a component library (buttons, inputs,
+  cards, nav, chips, modals) — then **implemented it 1:1 in code** with Tailwind
+  v4 tokens.
+- **Rebuilt the UI to be 100% responsive** (mobile 390 → desktop 1280), matching
+  each Figma screen: onboarding, create wizard, results, recipe detail, saved
+  recipes, and the navigation/overlays.
+- **Migrated the AI to free & unlimited** — swapped the paid OpenAI/DALL‑E
+  pipeline for **Google Gemini 2.5 Flash** (structured JSON output) and free
+  stock photography, removing per‑use cost and daily limits.
+- **Modernized the stack** — Next.js 15 + React 19 + Tailwind v4 + Turbopack,
+  and added full **SEO** (metadata, Open Graph, sitemap, robots, PWA manifest).
+
+**Highlights.**
+
+- 🌗 Design system with Light/Dark theming, tokens, and reusable components
+- 📐 Pixel‑matched responsive UI (Figma → code)
+- 🆓 Free, unlimited AI recipe generation (Google Gemini)
+- 🟢 Lighthouse: **SEO 100 · Accessibility 100 · Best Practices 100 · Performance 91**
+
+**Links:** [Live demo](https://chef-at-home-v1.vercel.app) ·
+[Figma design](https://www.figma.com/design/wOuCDVihYDlaoOUXhsTDx5/Chef-at-Home)
 
 ---
 
