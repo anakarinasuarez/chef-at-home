@@ -1,21 +1,56 @@
 'use client';
 
-import { colors, typography } from '@/design-system';
 import Link from 'next/link';
 import { ReactNode } from 'react';
 
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'danger'
+  | 'icon';
+export type ButtonSize = 'sm' | 'md' | 'lg';
+
 interface ButtonProps {
   href?: string;
-  variant: 'primary' | 'secondary' | 'tertiary';
+  variant: ButtonVariant;
   children: ReactNode;
   className?: string;
   type?: 'button' | 'submit';
   disabled?: boolean;
   onClick?: (e?: React.MouseEvent) => void;
-  size?: 'sm' | 'md' | 'lg';
+  size?: ButtonSize;
   fullWidth?: boolean;
+  'aria-label'?: string;
   'data-testid'?: string;
 }
+
+const cn = (...parts: Array<string | false | undefined>) =>
+  parts.filter(Boolean).join(' ');
+
+// Base: Poppins Medium, radius-sm (6px), centered, token-driven, no inline styles.
+const BASE =
+  'inline-flex items-center justify-center gap-sm rounded-sm font-sans font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:cursor-not-allowed disabled:pointer-events-none';
+
+// Padding per size (Figma: md = px-xl py-lg, lg = px-3xl py-lg). Not applied to `icon`.
+const SIZE: Record<ButtonSize, string> = {
+  sm: 'px-lg py-sm text-sm',
+  md: 'px-xl py-lg text-base',
+  lg: 'px-3xl py-lg text-base',
+};
+
+// Enabled + disabled treatment per variant (disabled overrides semantic color).
+const VARIANT: Record<ButtonVariant, string> = {
+  primary:
+    'bg-primary text-on-primary hover:bg-primary-hover disabled:bg-disabled disabled:text-fg-disabled',
+  secondary:
+    'border border-primary text-primary hover:bg-secondary hover:text-primary-hover disabled:border-border-disabled disabled:text-fg-disabled disabled:hover:bg-transparent',
+  tertiary:
+    'text-primary hover:text-primary-hover disabled:text-fg-disabled',
+  danger:
+    'text-danger hover:text-danger-hover disabled:text-fg-disabled',
+  icon: 'p-md rounded-sm text-fg hover:bg-elevated disabled:text-fg-disabled disabled:hover:bg-transparent',
+};
 
 export default function Button({
   href,
@@ -27,156 +62,45 @@ export default function Button({
   onClick,
   size = 'md',
   fullWidth = false,
+  'aria-label': ariaLabel,
   'data-testid': dataTestId,
 }: ButtonProps) {
-  // Definir estilos base para cada variante según la imagen
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'primary':
-        return {
-          backgroundColor: colors.brand?.primary?.[500] || '#96b462', // Verde claro sólido (fila 1)
-          color: colors.interface?.text?.inverse || '#ffffff', // Texto blanco
-          border: 'none',
-        };
-      case 'secondary':
-        return {
-          backgroundColor: 'transparent', // Fondo transparente (fila 3)
-          color: colors.brand?.primary?.[500] || '#96b462', // Texto verde
-          border: `1px solid ${colors.brand?.primary?.[500] || '#96b462'}`, // Borde verde
-        };
-      case 'tertiary':
-        return {
-          backgroundColor: 'transparent', // Sin fondo (fila 5)
-          color: colors.brand?.primary?.[500] || '#96b462', // Texto verde claro
-          border: 'none',
-        };
-      default:
-        return {};
-    }
-  };
+  const classes = cn(
+    // legacy hooks kept for existing selectors/tests
+    'button',
+    `button-${variant}`,
+    `button-${size}`,
+    BASE,
+    variant === 'icon' ? '' : SIZE[size],
+    VARIANT[variant],
+    fullWidth && 'w-full',
+    className,
+  );
 
-  // Definir estilos de hover para cada variante
-  const getHoverStyles = () => {
-    switch (variant) {
-      case 'primary':
-        return {
-          backgroundColor: colors.brand?.primary?.[600] || '#7a9a4f', // Verde más oscuro (fila 2)
-          color: colors.interface?.text?.inverse || '#ffffff', // Texto blanco
-        };
-      case 'secondary':
-        return {
-          backgroundColor: colors.brand?.secondary?.[500] || '#e8f5e8', // Verde muy claro (fila 4)
-          color: colors.brand?.primary?.[600] || '#7a9a4f', // Texto verde más oscuro
-        };
-      case 'tertiary':
-        return {
-          backgroundColor: 'transparent', // Sin cambio de fondo
-          color: colors.brand?.primary?.[600] || '#7a9a4f', // Texto verde más oscuro (fila 6)
-        };
-      default:
-        return {};
-    }
-  };
-
-  // Definir tamaños
-  const getSizeStyles = () => {
-    switch (size) {
-      case 'sm':
-        return {
-          padding: '8px 16px',
-          fontSize: '14px',
-          minHeight: '36px',
-        };
-      case 'md':
-        return {
-          padding: '12px 24px',
-          fontSize: '16px',
-          minHeight: '44px',
-        };
-      case 'lg':
-        return {
-          padding: '16px 32px',
-          fontSize: '18px',
-          minHeight: '52px',
-        };
-      default:
-        return {};
-    }
-  };
-
-  const baseStyles = {
-    ...getVariantStyles(),
-    ...getSizeStyles(),
-    borderRadius: '8px', // Border radius redondeado como en la imagen
-    fontWeight: typography.styles?.['button-medium']?.fontWeight || '600',
-    lineHeight: typography.styles?.['button-medium']?.lineHeight || '1',
-    fontFamily:
-      typography.styles?.['button-medium']?.fontFamily?.join(', ') || 'Poppins, sans-serif',
-    opacity: disabled ? 0.5 : 1,
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    width: fullWidth ? '100%' : 'auto',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.2s ease-in-out',
-    textAlign: 'center' as const,
-    outline: 'none',
-    textDecoration: 'none', // Para links
-  };
-
-  const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
-    if (disabled) return;
-    const target = e.currentTarget;
-    const hoverStyles = getHoverStyles();
-    if (hoverStyles.backgroundColor) {
-      target.style.backgroundColor = hoverStyles.backgroundColor;
-    }
-    if (hoverStyles.color) {
-      target.style.color = hoverStyles.color;
-    }
-  };
-
-  const handleMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
-    if (disabled) return;
-    const target = e.currentTarget;
-    const normalStyles = getVariantStyles();
-    if (normalStyles.backgroundColor) {
-      target.style.backgroundColor = normalStyles.backgroundColor;
-    }
-    if (normalStyles.color) {
-      target.style.color = normalStyles.color;
-    }
-  };
-
-  // Si es un botón de submit o no tiene href, renderizar como button
-  if (type === 'submit' || !href) {
+  // Render as a Link only when it has an href and is not a submit/disabled control.
+  if (href && type !== 'submit' && !disabled) {
     return (
-      <button
-        type={type}
-        disabled={disabled}
-        className={`button button-${variant} button-${size} ${className}`}
-        style={baseStyles}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onClick={e => onClick?.(e)}
+      <Link
+        href={href}
+        className={classes}
+        aria-label={ariaLabel}
         data-testid={dataTestId}
       >
         {children}
-      </button>
+      </Link>
     );
   }
 
-  // Si tiene href, renderizar como Link
   return (
-    <Link
-      href={href}
-      className={`button button-${variant} button-${size} ${className}`}
-      style={baseStyles}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+    <button
+      type={type}
+      disabled={disabled}
+      className={classes}
+      aria-label={ariaLabel}
+      onClick={e => onClick?.(e)}
       data-testid={dataTestId}
     >
       {children}
-    </Link>
+    </button>
   );
 }
