@@ -29,7 +29,9 @@ const nextConfig = {
         pathname: '/**',
       },
       { protocol: 'https', hostname: 'api.openai.com', pathname: '/**' },
-      // Free stock food images (no API key)
+      // Coherent food photos via Pexels (free API key)
+      { protocol: 'https', hostname: 'images.pexels.com', pathname: '/**' },
+      // Free stock food images fallback (no API key)
       { protocol: 'https', hostname: 'loremflickr.com', pathname: '/**' },
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
       { protocol: 'https', hostname: 'picsum.photos', pathname: '/**' },
