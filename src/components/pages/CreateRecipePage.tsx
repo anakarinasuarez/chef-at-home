@@ -2,11 +2,12 @@
 
 import Button from '@/components/Button';
 import MainLayout from '@/components/layouts/MainLayout';
-import { colors, typography } from '@/design-system';
 import { sessionLimitsManager } from '@/lib/sessionLimits';
 import { useSavedRecipesStore, useToastStore } from '@/stores';
 import { User } from '@/types';
 import { normalizeIngredientName } from '@/utils/ingredientUtils';
+import plateImage from '@/assets/images/plate.png';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -327,45 +328,30 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
 
   return (
     <MainLayout showMenu={true} userName={userName} currentPage='create'>
-      {/* Mensaje de Bienvenida */}
-      <h2
-        className='mb-4 text-white'
-        style={{
-          fontSize: typography.styles['body-large'].fontSize,
-          fontWeight: typography.styles['body-large'].fontWeight,
-          color: colors.interface.text.primary,
-        }}
-      >
-        Welcome {userName}
-      </h2>
+      {/* Greeting */}
+      <p className='mb-sm text-sm text-muted'>Welcome {userName}</p>
 
-      {/* Título Principal */}
-      <h1
-        className='mb-6 text-center lg:text-left leading-tight'
-        style={{
-          fontSize: typography.styles['title-1'].fontSize,
-          fontWeight: typography.styles['title-1'].fontWeight,
-          lineHeight: typography.styles['title-1'].lineHeight,
-          letterSpacing: typography.styles['title-1'].letterSpacing,
-          color: colors.interface.text.primary,
-        }}
-      >
-        {isEditing ? 'Edit your recipe' : 'Create your perfect recipe'}
+      {/* Heading */}
+      <h1 className='mb-xl text-[28px] font-bold leading-tight tracking-tight text-fg lg:mb-6 lg:text-[32px]'>
+        {isEditing
+          ? 'Edit your recipe'
+          : 'What ingredients do you have to create your recipe?'}
       </h1>
+
+      {/* Mobile illustration banner (desktop shows it in the side column) */}
+      <div className='mb-xl flex justify-center lg:hidden'>
+        <Image
+          src={plateImage}
+          alt='Gourmet dish'
+          className='h-auto w-64'
+          priority
+        />
+      </div>
 
       {/* Campo de Título de la Receta - Solo en modo edición */}
       {isEditing && (
         <div className='mb-8'>
-          <h3
-            className='mb-4'
-            style={{
-              fontSize: typography.styles['title-3'].fontSize,
-              fontWeight: typography.styles['title-3'].fontWeight,
-              color: colors.interface.text.primary,
-            }}
-          >
-            Recipe Title
-          </h3>
+          <h3 className='mb-4 text-xl font-semibold text-fg'>Recipe Title</h3>
           <input
             type='text'
             value={recipeTitle}
@@ -379,16 +365,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
 
       {/* Sección de Ingredientes */}
       <div className='mb-8'>
-        <h3
-          className='mb-4'
-          style={{
-            fontSize: typography.styles['title-3'].fontSize,
-            fontWeight: typography.styles['title-3'].fontWeight,
-            color: colors.interface.text.primary,
-          }}
-        >
-          Ingredients
-        </h3>
+        <h3 className='mb-4 text-xl font-semibold text-fg'>Ingredients</h3>
 
         {/* Input para agregar ingredientes */}
         <div className='flex gap-2 mb-4'>
@@ -437,16 +414,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
 
       {/* Sección de Servings */}
       <div className='mb-8'>
-        <h3
-          className='mb-4'
-          style={{
-            fontSize: typography.styles['title-3'].fontSize,
-            fontWeight: typography.styles['title-3'].fontWeight,
-            color: colors.interface.text.primary,
-          }}
-        >
-          Servings
-        </h3>
+        <h3 className='mb-4 text-xl font-semibold text-fg'>Servings</h3>
 
         {/* Botones de selección rápida - solo se muestran si no está en modo custom */}
         {!showCustomInput && (
