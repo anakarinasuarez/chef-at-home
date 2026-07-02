@@ -156,7 +156,9 @@ describe('CreateRecipePage', () => {
       render(<CreateRecipePage {...mockProps} />);
 
       expect(screen.getByText('Welcome Test User')).toBeInTheDocument();
-      expect(screen.getByText('Create your perfect recipe')).toBeInTheDocument();
+      expect(
+        screen.getByText('What ingredients do you have to create your recipe?')
+      ).toBeInTheDocument();
     });
 
     it('renders ingredients section', () => {
@@ -181,7 +183,7 @@ describe('CreateRecipePage', () => {
       render(<CreateRecipePage {...mockProps} />);
 
       expect(screen.getByText('Create Recipe')).toBeInTheDocument();
-      expect(screen.getByText('My Recipes')).toBeInTheDocument();
+      expect(screen.getByText('Cancel')).toBeInTheDocument();
     });
 
     it('passes correct props to MainLayout', () => {
@@ -268,10 +270,10 @@ describe('CreateRecipePage', () => {
       const user = userEvent.setup();
       render(<CreateRecipePage {...mockProps} />);
 
-      const customButton = screen.getAllByText('+')[1]; // Second + button (custom servings)
+      const customButton = screen.getAllByText('+')[1]; // serving custom "+" chip
       await user.click(customButton);
 
-      expect(screen.getByPlaceholderText('Add numberts')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('e.g. 3')).toBeInTheDocument();
     });
 
     it('handles custom serving input', async () => {
@@ -279,18 +281,16 @@ describe('CreateRecipePage', () => {
       render(<CreateRecipePage {...mockProps} />);
 
       // Open custom input
-      const customButton = screen.getAllByText('+')[1]; // Second + button (custom servings)
+      const customButton = screen.getAllByText('+')[1];
       await user.click(customButton);
 
-      // Enter custom value
-      const customInput = screen.getByPlaceholderText('Add numberts');
-      const confirmButton = screen.getAllByText('+')[2]; // Third + button (confirm)
-
+      // Enter custom value and confirm
+      const customInput = screen.getByPlaceholderText('e.g. 3');
       await user.type(customInput, '10');
-      await user.click(confirmButton);
+      await user.click(screen.getByText('Add'));
 
-      // Check that the input was processed
-      expect(customInput).toBeInTheDocument();
+      // The custom value becomes a selectable serving chip
+      expect(screen.getByText('10')).toBeInTheDocument();
     });
 
     it('closes custom input when X button is clicked', async () => {
@@ -298,14 +298,14 @@ describe('CreateRecipePage', () => {
       render(<CreateRecipePage {...mockProps} />);
 
       // Open custom input
-      const customButton = screen.getAllByText('+')[1]; // Second + button (custom servings)
+      const customButton = screen.getAllByText('+')[1];
       await user.click(customButton);
 
       // Close custom input
       const closeButton = screen.getByText('×');
       await user.click(closeButton);
 
-      expect(screen.queryByPlaceholderText('Add numberts')).not.toBeInTheDocument();
+      expect(screen.queryByPlaceholderText('e.g. 3')).not.toBeInTheDocument();
     });
   });
 
@@ -492,12 +492,12 @@ describe('CreateRecipePage', () => {
   });
 
   describe('Navigation', () => {
-    it('navigates to my-recipes when My Recipes button is clicked', async () => {
+    it('navigates to my-recipes when Cancel button is clicked', async () => {
       const user = userEvent.setup();
       render(<CreateRecipePage {...mockProps} />);
 
-      const myRecipesButton = screen.getByText('My Recipes');
-      await user.click(myRecipesButton);
+      const cancelButton = screen.getByText('Cancel');
+      await user.click(cancelButton);
 
       expect(mockPush).toHaveBeenCalledWith('/my-recipes');
     });
@@ -562,7 +562,9 @@ describe('CreateRecipePage', () => {
       render(<CreateRecipePage {...mockProps} />);
 
       // Should render in normal mode
-      expect(screen.getByText('Create your perfect recipe')).toBeInTheDocument();
+      expect(
+        screen.getByText('What ingredients do you have to create your recipe?')
+      ).toBeInTheDocument();
     });
 
     it('handles custom serving validation', async () => {
@@ -570,18 +572,17 @@ describe('CreateRecipePage', () => {
       render(<CreateRecipePage {...mockProps} />);
 
       // Open custom input
-      const customButton = screen.getAllByText('+')[1]; // Second + button (custom servings)
+      const customButton = screen.getAllByText('+')[1];
       await user.click(customButton);
 
-      // Enter invalid value
-      const customInput = screen.getByPlaceholderText('Add numberts');
-      const confirmButton = screen.getAllByText('+')[2]; // Third + button (confirm)
-
+      // Enter invalid value and confirm
+      const customInput = screen.getByPlaceholderText('e.g. 3');
       await user.type(customInput, 'invalid');
-      await user.click(confirmButton);
+      await user.click(screen.getByText('Add'));
 
-      // Should not crash and input should remain
-      expect(screen.getByPlaceholderText('Add numberts')).toBeInTheDocument();
+      // Invalid input keeps the field open and surfaces an error
+      expect(screen.getByPlaceholderText('e.g. 3')).toBeInTheDocument();
+      expect(mockShowError).toHaveBeenCalled();
     });
   });
 });

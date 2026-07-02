@@ -4,7 +4,6 @@ import { useAuthUnified } from '@/hooks';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { BiSolidGrid } from 'react-icons/bi';
 import { FiLogOut } from 'react-icons/fi';
 import { IoRestaurantOutline } from 'react-icons/io5';
 import { MdClose, MdFavorite, MdOutlineMenu } from 'react-icons/md';
@@ -69,7 +68,8 @@ export default function Nav({
   };
 
   return (
-    <nav className='w-full px-8 py-4 flex items-center justify-between fixed top-0 left-0 z-50 bg-surface border-b border-border backdrop-blur'>
+    <>
+      <nav className='w-full px-8 py-4 flex items-center justify-between fixed top-0 left-0 z-50 bg-surface border-b border-border backdrop-blur'>
       {/* Logo - Ahora es clickeable y navega a inicio */}
       <Link href='/' className='flex items-end hover:opacity-80 transition-opacity'>
         {/* Chef Hat Icon - Usando PiChefHatLight */}
@@ -102,65 +102,68 @@ export default function Nav({
           </button>
         </div>
       )}
+      </nav>
 
-      {/* Menú desplegable */}
+      {/* Menu — overlay bottom sheet on mobile, dropdown on desktop */}
       {isMenuOpen && (
-        <div className='fixed inset-x-0 bottom-0 z-50 w-full rounded-t-lg border border-border bg-surface shadow-lg lg:absolute lg:inset-x-auto lg:bottom-auto lg:top-0 lg:right-0 lg:w-64 lg:rounded-t-none lg:rounded-b-lg'>
-          {/* Header del menú con botón de cerrar */}
-          <div className='flex items-center justify-between px-8 py-4'>
-            <div></div>
-            <button
-              onClick={closeMenu}
-              className='p-2 rounded-sm transition-colors flex items-center justify-center text-fg hover:bg-elevated'
-              aria-label='Close menu'
-            >
-              <MdClose className='text-xl' />
-            </button>
+        <>
+          {/* Scrim (mobile only) */}
+          <button
+            type='button'
+            aria-label='Close menu'
+            onClick={closeMenu}
+            className='fixed inset-0 z-40 bg-black/60 lg:hidden'
+          />
+
+          <div className='fixed inset-x-0 bottom-0 z-50 w-full rounded-t-lg border border-border bg-surface pb-sm shadow-lg lg:absolute lg:inset-x-auto lg:bottom-auto lg:right-0 lg:top-0 lg:w-64 lg:rounded-t-none lg:rounded-b-lg lg:border-t lg:pb-0'>
+            {/* Grabber (mobile only) */}
+            <div className='flex justify-center pt-sm lg:hidden'>
+              <span className='h-1 w-10 rounded-full bg-border-strong' />
+            </div>
+
+            {/* Close */}
+            <div className='flex items-center justify-end px-lg py-md'>
+              <button
+                onClick={closeMenu}
+                className='flex items-center justify-center rounded-sm p-2 text-fg transition-colors hover:bg-elevated'
+                aria-label='Close menu'
+              >
+                <MdClose className='text-xl' />
+              </button>
+            </div>
+
+            {/* Items */}
+            <div className='pb-sm'>
+              <button
+                onClick={() => handleNavigation('create')}
+                className={itemClass(currentPage === 'create')}
+                data-testid='create-recipe-link'
+              >
+                <IoRestaurantOutline className='text-xl' />
+                <span>Create Recipe</span>
+              </button>
+
+              <button
+                onClick={() => handleNavigation('my-recipes')}
+                className={itemClass(currentPage === 'my-recipes')}
+                data-testid='my-recipes-link'
+              >
+                <MdFavorite className='text-xl' />
+                <span>My Recipe</span>
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className={itemClass(false)}
+                data-testid='logout-button'
+              >
+                <FiLogOut className='text-xl' />
+                <span>Log Out</span>
+              </button>
+            </div>
           </div>
-
-          {/* Opciones del menú */}
-          <div className='py-0'>
-            {/* Create Recipe */}
-            <button
-              onClick={() => handleNavigation('create')}
-              className={itemClass(currentPage === 'create')}
-              data-testid='create-recipe-link'
-            >
-              <IoRestaurantOutline className='text-xl' />
-              <span>Create Recipe</span>
-            </button>
-
-            {/* Generated Recipes */}
-            <button
-              onClick={() => handleNavigation('generated')}
-              className={itemClass(currentPage === 'generated')}
-            >
-              <BiSolidGrid className='text-xl' />
-              <span>Generated Recipes</span>
-            </button>
-
-            {/* My Recipes */}
-            <button
-              onClick={() => handleNavigation('my-recipes')}
-              className={itemClass(currentPage === 'my-recipes')}
-              data-testid='my-recipes-link'
-            >
-              <MdFavorite className='text-xl' />
-              <span>My Recipes</span>
-            </button>
-
-            {/* Log Out */}
-            <button
-              onClick={handleLogout}
-              className={itemClass(false)}
-              data-testid='logout-button'
-            >
-              <FiLogOut className='text-xl' />
-              <span>Log Out</span>
-            </button>
-          </div>
-        </div>
+        </>
       )}
-    </nav>
+    </>
   );
 }

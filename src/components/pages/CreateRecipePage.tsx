@@ -1,6 +1,7 @@
 'use client';
 
 import Button from '@/components/Button';
+import Chip from '@/components/ui/Chip';
 import MainLayout from '@/components/layouts/MainLayout';
 import { sessionLimitsManager } from '@/lib/sessionLimits';
 import { useSavedRecipesStore, useToastStore } from '@/stores';
@@ -129,13 +130,16 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
   };
 
   const handleCustomServings = () => {
-    if (newCustomServing.trim()) {
-      const customValue = parseInt(newCustomServing);
-      if (!isNaN(customValue) && customValue > 0) {
-        setSelectedServings(customValue);
-        setShowCustomInput(false);
-        setNewCustomServing('');
-      }
+    const customValue = parseInt(newCustomServing, 10);
+    if (!isNaN(customValue) && customValue > 0) {
+      setCustomServings(prev =>
+        prev.includes(customValue) ? prev : [...prev, customValue]
+      );
+      setSelectedServings(customValue);
+      setShowCustomInput(false);
+      setNewCustomServing('');
+    } else {
+      showError('Enter a valid number of servings');
     }
   };
 
@@ -326,6 +330,10 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
     }
   };
 
+  const servingOptions = Array.from(
+    new Set([1, 2, 4, 6, 8, ...customServings])
+  ).sort((a, b) => a - b);
+
   return (
     <MainLayout showMenu={true} userName={userName} currentPage='create'>
       {/* Greeting */}
@@ -416,57 +424,57 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
       <div className='mb-8'>
         <h3 className='mb-4 text-xl font-semibold text-fg'>Servings</h3>
 
-        {/* Botones de selección rápida - solo se muestran si no está en modo custom */}
-        {!showCustomInput && (
-          <div className='flex flex-wrap gap-2 mb-4'>
-            {[1, 2, 4, 6, 8].map(servings => (
-              <Button
-                key={servings}
-                variant={selectedServings === servings ? 'primary' : 'secondary'}
-                onClick={() => handleServingsChange(servings)}
-                className='px-4 py-2'
-                data-testid={`servings-${servings}-button`}
-              >
-                {servings}
-              </Button>
-            ))}
-            <Button
-              variant='secondary'
-              onClick={() => setShowCustomInput(true)}
-              className='px-4 py-2'
+        {/* Serving pills (Figma serving-selector) + optional custom value */}
+        <div className='flex flex-wrap items-center gap-sm'>
+          {servingOptions.map(servings => (
+            <Chip
+              key={servings}
+              selected={selectedServings === servings}
+              onClick={() => handleServingsChange(servings)}
+              data-testid={`servings-${servings}-button`}
             >
-              +
-            </Button>
-          </div>
-        )}
+              {servings}
+            </Chip>
+          ))}
 
-        {/* Input personalizado - solo se muestra cuando está en modo custom */}
-        {showCustomInput && (
-          <div className='flex gap-2'>
-            <input
-              type='number'
-              value={newCustomServing}
-              onChange={e => setNewCustomServing(e.target.value)}
-              placeholder='Add numberts'
-              className='w-40 rounded-sm border border-border bg-input px-md py-sm text-fg placeholder:text-muted transition-colors focus:border-primary focus:outline-none'
-              min='1'
-            />
-            <Button
-              variant='secondary'
-              onClick={() => setShowCustomInput(false)}
-              className='w-10 h-10 flex items-center justify-center'
-            >
-              ×
-            </Button>
-            <Button
-              variant='secondary'
-              onClick={handleCustomServings}
-              className='w-10 h-10 flex items-center justify-center'
+          {showCustomInput ? (
+            <div className='flex items-center gap-sm'>
+              <input
+                type='number'
+                value={newCustomServing}
+                onChange={e => setNewCustomServing(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') handleCustomServings();
+                }}
+                placeholder='e.g. 3'
+                className='w-24 rounded-sm border border-border bg-input px-md py-sm text-fg placeholder:text-muted transition-colors focus:border-primary focus:outline-none'
+                min='1'
+                autoFocus
+              />
+              <Button variant='secondary' size='sm' onClick={handleCustomServings}>
+                Add
+              </Button>
+              <Button
+                variant='tertiary'
+                size='sm'
+                aria-label='Cancel custom servings'
+                onClick={() => {
+                  setShowCustomInput(false);
+                  setNewCustomServing('');
+                }}
+              >
+                ×
+              </Button>
+            </div>
+          ) : (
+            <Chip
+              aria-label='Add custom servings'
+              onClick={() => setShowCustomInput(true)}
             >
               +
-            </Button>
-          </div>
-        )}
+            </Chip>
+          )}
+        </div>
       </div>
 
       {/* Spacer so the fixed mobile action bar never covers the last field */}
@@ -502,7 +510,7 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
           onClick={() => router.push('/my-recipes')}
           className='flex-1 lg:flex-none px-6 py-3'
         >
-          {isEditing ? 'Cancel' : 'My Recipes'}
+          Cancel
         </Button>
       </div>
     </MainLayout>
