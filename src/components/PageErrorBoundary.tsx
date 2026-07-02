@@ -41,7 +41,7 @@ export const PageErrorBoundary: React.FC<PageErrorBoundaryProps> = ({
       className="min-h-screen flex items-center justify-center p-4"
       style={{ backgroundColor: colors.interface.background.primary }}
     >
-      <div className="text-center max-w-lg">
+      <div className="text-center max-w-form">
         <div className="text-8xl mb-6">🍳💥</div>
 
         <h1

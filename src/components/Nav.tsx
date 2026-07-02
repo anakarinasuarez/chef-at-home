@@ -1,6 +1,5 @@
 'use client';
 
-import { colors } from '@/design-system';
 import { useAuthUnified } from '@/hooks';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -17,9 +16,21 @@ interface NavProps {
   currentPage?: 'create' | 'generated' | 'my-recipes';
 }
 
+const cn = (...parts: Array<string | false | undefined>) =>
+  parts.filter(Boolean).join(' ');
+
+// Menu row: active gets the solid brand fill, others reveal it on hover.
+const itemClass = (active: boolean) =>
+  cn(
+    'w-full px-8 py-3 text-left transition-colors flex items-center gap-3',
+    active
+      ? 'bg-primary text-on-primary'
+      : 'text-fg hover:bg-primary-hover hover:text-on-primary',
+  );
+
 export default function Nav({
   showMenu = false,
-  userName = 'Anna',
+  userName = '',
   currentPage = 'create',
 }: NavProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -58,56 +69,19 @@ export default function Nav({
   };
 
   return (
-    <nav
-      className='w-full px-8 py-4 flex items-center justify-between fixed top-0 left-0 z-50'
-      style={{ backgroundColor: colors.interface.background.secondary }}
-    >
+    <nav className='w-full px-8 py-4 flex items-center justify-between fixed top-0 left-0 z-50 bg-surface border-b border-border backdrop-blur'>
       {/* Logo - Ahora es clickeable y navega a inicio */}
       <Link href='/' className='flex items-end hover:opacity-80 transition-opacity'>
         {/* Chef Hat Icon - Usando PiChefHatLight */}
         <div className='w-10 h-10 flex items-center justify-center'>
-          <PiChefHatLight
-            className='text-2xl'
-            style={{
-              color: colors.brand.primary[500],
-              fontSize: '28px',
-            }}
-          />
+          <PiChefHatLight className='text-primary text-[28px]' />
         </div>
 
         {/* Logo Text */}
-        <div className='flex items-end space-x-0.5'>
-          <span
-            className='font-alegreya text-white'
-            style={{
-              fontSize: '20px',
-              fontWeight: 600,
-              fontFamily: 'var(--font-alegreya), serif',
-            }}
-          >
-            Chef
-          </span>
-          <span
-            className='font-alegreya'
-            style={{
-              fontSize: '20px',
-              fontWeight: 600,
-              color: colors.brand.primary[500],
-              fontFamily: 'var(--font-alegreya), serif',
-            }}
-          >
-            at
-          </span>
-          <span
-            className='font-alegreya text-white'
-            style={{
-              fontSize: '20px',
-              fontWeight: 600,
-              fontFamily: 'var(--font-alegreya), serif',
-            }}
-          >
-            home
-          </span>
+        <div className='flex items-end space-x-0.5 font-logo font-semibold text-[20px]'>
+          <span className='text-fg'>Chef</span>
+          <span className='text-primary'>at</span>
+          <span className='text-fg'>home</span>
         </div>
       </Link>
 
@@ -115,48 +89,32 @@ export default function Nav({
       {showMenu && (
         <div className='flex items-center space-x-4'>
           {/* Nombre del usuario */}
-          <span
-            className='text-white font-medium'
-            style={{
-              fontSize: '16px',
-              color: colors.interface.text.primary,
-            }}
-          >
-            {userName}
-          </span>
+          <span className='text-fg font-medium text-base'>{userName}</span>
 
           {/* Botón del menú */}
           <button
             onClick={toggleMenu}
-            className='flex items-center justify-center p-1 hover:bg-gray-700 rounded-lg transition-colors w-9 h-9'
+            className='flex items-center justify-center p-1 rounded-sm transition-colors w-9 h-9 text-fg hover:bg-elevated'
             aria-label='Menu'
             data-testid='user-menu'
           >
-            <MdOutlineMenu
-              className='text-2xl'
-              style={{
-                color: colors.interface.text.primary,
-                fontSize: '24px',
-              }}
-            />
+            <MdOutlineMenu className='text-2xl' />
           </button>
         </div>
       )}
 
       {/* Menú desplegable */}
       {isMenuOpen && (
-        <div
-          className='absolute top-0 right-0 w-64 rounded-b-lg shadow-lg z-50'
-          style={{ backgroundColor: colors.interface.background.secondary }}
-        >
+        <div className='fixed inset-x-0 bottom-0 z-50 w-full rounded-t-lg border border-border bg-surface shadow-lg lg:absolute lg:inset-x-auto lg:bottom-auto lg:top-0 lg:right-0 lg:w-64 lg:rounded-t-none lg:rounded-b-lg'>
           {/* Header del menú con botón de cerrar */}
           <div className='flex items-center justify-between px-8 py-4'>
             <div></div>
             <button
               onClick={closeMenu}
-              className='p-2 hover:bg-gray-700 rounded transition-colors flex items-center justify-center'
+              className='p-2 rounded-sm transition-colors flex items-center justify-center text-fg hover:bg-elevated'
+              aria-label='Close menu'
             >
-              <MdClose className='text-xl' style={{ color: colors.interface.text.primary }} />
+              <MdClose className='text-xl' />
             </button>
           </div>
 
@@ -165,29 +123,7 @@ export default function Nav({
             {/* Create Recipe */}
             <button
               onClick={() => handleNavigation('create')}
-              className='w-full px-8 py-3 text-left transition-colors flex items-center gap-3'
-              style={{
-                backgroundColor:
-                  currentPage === 'create'
-                    ? colors.brand.primary[500]
-                    : colors.interface.background.secondary,
-                color:
-                  currentPage === 'create'
-                    ? colors.interface.background.primary
-                    : colors.interface.text.primary,
-              }}
-              onMouseEnter={e => {
-                if (currentPage !== 'create') {
-                  e.currentTarget.style.backgroundColor = colors.brand.primary[500];
-                  e.currentTarget.style.color = colors.interface.background.primary;
-                }
-              }}
-              onMouseLeave={e => {
-                if (currentPage !== 'create') {
-                  e.currentTarget.style.backgroundColor = colors.interface.background.secondary;
-                  e.currentTarget.style.color = colors.interface.text.primary;
-                }
-              }}
+              className={itemClass(currentPage === 'create')}
               data-testid='create-recipe-link'
             >
               <IoRestaurantOutline className='text-xl' />
@@ -197,29 +133,7 @@ export default function Nav({
             {/* Generated Recipes */}
             <button
               onClick={() => handleNavigation('generated')}
-              className='w-full px-8 py-3 text-left transition-colors flex items-center gap-3'
-              style={{
-                backgroundColor:
-                  currentPage === 'generated'
-                    ? colors.brand.primary[500]
-                    : colors.interface.background.secondary,
-                color:
-                  currentPage === 'generated'
-                    ? colors.interface.background.primary
-                    : colors.interface.text.primary,
-              }}
-              onMouseEnter={e => {
-                if (currentPage !== 'generated') {
-                  e.currentTarget.style.backgroundColor = colors.brand.primary[500];
-                  e.currentTarget.style.color = colors.interface.background.primary;
-                }
-              }}
-              onMouseLeave={e => {
-                if (currentPage !== 'generated') {
-                  e.currentTarget.style.backgroundColor = colors.interface.background.secondary;
-                  e.currentTarget.style.color = colors.interface.text.primary;
-                }
-              }}
+              className={itemClass(currentPage === 'generated')}
             >
               <BiSolidGrid className='text-xl' />
               <span>Generated Recipes</span>
@@ -228,29 +142,7 @@ export default function Nav({
             {/* My Recipes */}
             <button
               onClick={() => handleNavigation('my-recipes')}
-              className='w-full px-8 py-3 text-left transition-colors flex items-center gap-3'
-              style={{
-                backgroundColor:
-                  currentPage === 'my-recipes'
-                    ? colors.brand.primary[500]
-                    : colors.interface.background.secondary,
-                color:
-                  currentPage === 'my-recipes'
-                    ? colors.interface.background.primary
-                    : colors.interface.text.primary,
-              }}
-              onMouseEnter={e => {
-                if (currentPage !== 'my-recipes') {
-                  e.currentTarget.style.backgroundColor = colors.brand.primary[500];
-                  e.currentTarget.style.color = colors.interface.background.primary;
-                }
-              }}
-              onMouseLeave={e => {
-                if (currentPage !== 'my-recipes') {
-                  e.currentTarget.style.backgroundColor = colors.interface.background.secondary;
-                  e.currentTarget.style.color = colors.interface.text.primary;
-                }
-              }}
+              className={itemClass(currentPage === 'my-recipes')}
               data-testid='my-recipes-link'
             >
               <MdFavorite className='text-xl' />
@@ -260,19 +152,7 @@ export default function Nav({
             {/* Log Out */}
             <button
               onClick={handleLogout}
-              className='w-full px-8 py-3 text-left transition-colors flex items-center gap-3'
-              style={{
-                color: colors.interface.text.primary,
-                backgroundColor: colors.interface.background.secondary,
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = colors.brand.primary[500];
-                e.currentTarget.style.color = colors.interface.background.primary;
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = colors.interface.background.secondary;
-                e.currentTarget.style.color = colors.interface.text.primary;
-              }}
+              className={itemClass(false)}
               data-testid='logout-button'
             >
               <FiLogOut className='text-xl' />

@@ -1,181 +1,187 @@
 @import "tailwindcss";
 
-:root {
-  --background: #131313;
-  --foreground: #ffffff;
-  --font-poppins: var(--font-poppins);
-  --font-inter: var(--font-inter);
-  --font-alegreya: var(--font-alegreya);
+/* Dark is the default; `light` opts in via data-theme on <html>. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ─────────────────────────────────────────────────────────────
+   Semantic color tokens (mode-aware). Values mirror the Figma
+   "Chef at Home" design system (Foundations · collection Color).
+   Components consume the utilities generated in @theme inline
+   below — never these raw vars or literal hex.
+   ───────────────────────────────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  --bg-canvas: #131313;
+  --bg-surface: #1d1c1e;
+  --bg-elevated: #242325;
+  --bg-input: #080808;
+  --bg-disabled: #242325;
+
+  --text-primary: #ffffff;
+  --text-secondary: #dbdee1;
+  --text-on-primary: #131313;
+  --text-disabled: #595b5e;
+
+  --border-default: #34343a;
+  --border-strong: #dbdee1;
+  --border-disabled: #34343a;
+
+  --brand-primary: #96b462;
+  --brand-primary-hover: #687552;
+  --brand-secondary: #e8f0db;
+
+  --danger: #c83c3c;
+  --danger-hover: #a82f2f;
+
+  --focus-ring: #96b462;
 }
 
+[data-theme="light"] {
+  --bg-canvas: #f7f8f5;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-input: #eff1ed;
+  --bg-disabled: #eff1ed;
+
+  --text-primary: #131313;
+  --text-secondary: #595b5e;
+  --text-on-primary: #ffffff;
+  --text-disabled: #9b9da0;
+
+  --border-default: #dde0da;
+  --border-strong: #6b6b6e;
+  --border-disabled: #dde0da;
+
+  --brand-primary: #687552;
+  --brand-primary-hover: #52603f;
+  --brand-secondary: #e8f0db;
+
+  --danger: #c83c3c;
+  --danger-hover: #a82f2f;
+
+  --focus-ring: #687552;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Design tokens exposed to Tailwind (utilities generated here).
+   `inline` keeps the var() reference so mode switching works.
+   ───────────────────────────────────────────────────────────── */
+@theme {
+  /* Fonts (raw families come from next/font in layout.tsx) */
+  --font-sans: var(--font-poppins), system-ui, sans-serif;
+  --font-logo: var(--font-alegreya), serif;
+
+  /* Spacing — 4/8pt scale */
+  --spacing-2xs: 2px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 40px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Width containers → `max-w-*`. Named to avoid the spacing/​t-shirt collision:
+     our spacing scale uses sm/md/lg…, so DON'T use max-w-md/lg (they'd resolve
+     to the tiny spacing value). Use these semantic ones instead. */
+  --container-form: 28rem; /* 448px — auth form / modal width */
+  --container-page: 76rem; /* 1216px — centered page content max width */
+}
+
+/* Mode-aware color tokens — `inline` keeps the var() so theme switching works. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-poppins);
-  --font-logo: var(--font-alegreya);
+  /* Backgrounds */
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-input: var(--bg-input);
+  --color-disabled: var(--bg-disabled);
+
+  /* Brand */
+  --color-primary: var(--brand-primary);
+  --color-primary-hover: var(--brand-primary-hover);
+  --color-secondary: var(--brand-secondary);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+
+  /* Text */
+  --color-fg: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-on-primary: var(--text-on-primary);
+  --color-fg-disabled: var(--text-disabled);
+
+  /* Borders + focus */
+  --color-border: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-border-disabled: var(--border-disabled);
+  --color-ring: var(--focus-ring);
+
+  /* Back-compat aliases (used by legacy classes; removed as components migrate) */
+  --color-background: var(--bg-canvas);
+  --color-foreground: var(--text-primary);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #131313;
-    --foreground: #ffffff;
+/* ───────────────────────────────── Base ───────────────────────────────── */
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  [data-theme="light"] {
+    color-scheme: light;
+  }
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-poppins), system-ui, sans-serif;
-  font-weight: 400;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Asegurar que las fuentes se carguen correctamente */
+/* ───────────────────────── Font helper classes ─────────────────────────
+   Kept for the ~27 existing `font-poppins/inter/alegreya` usages; these
+   migrate to `font-sans` / `font-logo` during the component refactor. */
 .font-poppins {
   font-family: var(--font-poppins), system-ui, sans-serif;
 }
-
 .font-inter {
   font-family: var(--font-inter), system-ui, sans-serif;
 }
-
 .font-alegreya {
   font-family: var(--font-alegreya), serif;
 }
 
-/* Scroll horizontal personalizado */
+/* ───────────────────────── Scroll utilities ───────────────────────────── */
 .scrollbar-hide {
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
-
 .scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
 }
 
-/* Smooth scroll para el contenedor horizontal */
-.overflow-x-auto {
-  scroll-behavior: smooth;
-}
-
-/* Estilos para el indicador de scroll */
-.scroll-indicator {
-  transition: opacity 0.3s ease;
-}
-
-.scroll-indicator.active {
-  opacity: 1;
-}
-
-/* Estilos para inputs del formulario */
-input::placeholder {
-  color: #9ca3af !important; /* colors.interface.text.tertiary */
-  opacity: 1;
-}
-
-input:focus::placeholder {
-  color: #6b7280 !important; /* colors.interface.text.muted */
-  opacity: 0.7;
-}
-
-/* Estilos específicos para inputs tipo password/form */
-input[type="text"],
-input[type="number"],
-input[type="password"] {
-  background-color: #ffffff !important;
-  color: #1f2937 !important; /* text-gray-800 */
-  border: none !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-}
-
-/* Input de ingredientes - ancho completo */
-input[type="text"] {
-  max-width: 320px !important; /* w-80 = 20rem = 320px */
-}
-
-/* Input de servings - ancho pequeño */
-input[type="number"] {
-  max-width: 128px !important; /* w-32 = 8rem = 128px */
-}
-
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="password"]:focus {
-  outline: none !important;
-  box-shadow: 0 0 0 2px #96b462, 0 1px 3px 0 rgba(0, 0, 0, 0.1),
-    0 1px 2px 0 rgba(0, 0, 0, 0.06);
-}
-
-/* Estilos para el scroll de ingredientes */
 .ingredients-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #96b462 #2a2a2a;
+  scrollbar-color: var(--brand-primary) var(--bg-elevated);
 }
-
 .ingredients-scroll::-webkit-scrollbar {
   width: 6px;
 }
-
 .ingredients-scroll::-webkit-scrollbar-track {
-  background: #2a2a2a;
+  background: var(--bg-elevated);
   border-radius: 3px;
 }
-
 .ingredients-scroll::-webkit-scrollbar-thumb {
-  background: #96b462;
+  background: var(--brand-primary);
   border-radius: 3px;
 }
-
 .ingredients-scroll::-webkit-scrollbar-thumb:hover {
-  background: #7a9b4f;
-}
-
-/* Line clamp utilities */
-.line-clamp-1 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-}
-
-.line-clamp-2 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.line-clamp-3 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
-
-/* Estilos personalizados para botones */
-.custom-button {
-  border-radius: 12px !important;
-  padding: 12px 24px !important;
-  font-size: 16px !important;
-  border: none !important;
-  outline: none !important;
-  transition: all 0.2s ease-in-out !important;
-}
-
-/* Estilos específicos para botones secundarios */
-.custom-button-secondary {
-  border: 1px solid #96b462 !important;
-}
-
-.custom-button:hover {
-  transform: scale(1.05) !important;
-  box-shadow: 0 4px 12px rgba(150, 180, 98, 0.3) !important;
-}
-
-.custom-button:focus {
-  outline: none !important;
-  box-shadow: 0 0 0 2px rgba(150, 180, 98, 0.5) !important;
+  background: var(--brand-primary-hover);
 }

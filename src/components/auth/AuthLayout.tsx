@@ -14,10 +14,10 @@ export default function AuthLayout({
   return (
     <MainLayout>
       {/* Headline Principal */}
-      <h1 className="text-4xl font-bold text-white leading-tight mb-4">
+      <h1 className="text-4xl font-bold text-fg leading-tight mb-4">
         {title}
       </h1>
-      {subtitle && <p className="text-gray-300 text-lg mb-6">{subtitle}</p>}
+      {subtitle && <p className="text-muted text-lg mb-6">{subtitle}</p>}
 
       {/* Contenido del formulario */}
       {children}

@@ -1,9 +1,9 @@
 'use client';
 
+import Button from '@/components/Button';
 import { LazyRecipeCard } from '@/components/lazy/LazyComponents';
 import { SuspenseWrapper } from '@/components/lazy/SuspenseWrapper';
 import Nav from '@/components/Nav';
-import { colors } from '@/design-system';
 import { useAuthUnified } from '@/hooks';
 import { UniversalCacheManager } from '@/lib/universal-cache';
 import { useToastStore } from '@/stores';
@@ -551,7 +551,9 @@ export default function RecipesPage() {
     (index: number) => {
       if (!isClient) return;
 
-      const container = document.querySelector('.overflow-x-auto') as HTMLElement;
+      const container = document.querySelector(
+      '[data-testid="recipes-scroll-container"]'
+    ) as HTMLElement;
       if (container) {
         const recipeCard = container.children[index] as HTMLElement;
         if (recipeCard) {
@@ -571,7 +573,9 @@ export default function RecipesPage() {
   useEffect(() => {
     if (!isClient) return;
 
-    const container = document.querySelector('.overflow-x-auto') as HTMLElement;
+    const container = document.querySelector(
+      '[data-testid="recipes-scroll-container"]'
+    ) as HTMLElement;
     if (!container) return;
 
     const handleScroll = () => {
@@ -619,14 +623,11 @@ export default function RecipesPage() {
   // Loading state
   if (loading) {
     return (
-      <div
-        className='h-screen overflow-hidden text-white'
-        style={{ backgroundColor: colors.interface.background.primary }}
-      >
+      <div className='h-screen overflow-hidden bg-canvas text-fg'>
         <Nav showMenu={true} userName={user.name} currentPage='generated' />
         <div className='flex items-center justify-center h-[calc(100vh-120px)]'>
           <div className='text-center'>
-            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4'></div>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4'></div>
             <p>Generating your recipes...</p>
           </div>
         </div>
@@ -635,93 +636,68 @@ export default function RecipesPage() {
   }
 
   return (
-    <div
-      className='h-screen overflow-hidden'
-      style={{ backgroundColor: colors.interface.background.primary }}
-    >
+    <div className='min-h-screen lg:h-screen lg:overflow-hidden bg-canvas'>
       <Nav showMenu={true} userName={user.name} currentPage='generated' />
 
-      <div className='max-w-7xl mx-auto px-4 py-8 mt-20 h-[calc(100vh-120px)] flex flex-col'>
+      <div className='max-w-page mx-auto px-lg lg:px-3xl py-xl mt-20 lg:h-[calc(100vh-120px)] flex flex-col'>
         {/* Header */}
         <div className='flex items-start gap-4 mb-8'>
           <button
             onClick={handleBackToHome}
-            className='w-12 h-12 rounded-2xl transition-colors border-2 flex items-center justify-center'
-            style={{
-              backgroundColor: colors.interface.background.secondary,
-              color: colors.base.white,
-              borderColor: colors.interface.background.secondary,
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = colors.interface.background.tertiary;
-              e.currentTarget.style.borderColor = colors.interface.background.tertiary;
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = colors.interface.background.secondary;
-              e.currentTarget.style.borderColor = colors.interface.background.secondary;
-            }}
+            aria-label='Back to home'
+            className='w-12 h-12 rounded-2xl transition-colors border-2 flex items-center justify-center bg-surface text-fg border-surface hover:bg-elevated hover:border-elevated'
           >
             <IoIosArrowBack className='text-xl' />
           </button>
           <div className='flex-1'>
-            <h1 className='text-3xl font-bold' style={{ color: colors.interface.text.primary }}>
-              Generated Recipes
-            </h1>
-            <p className='mt-1' style={{ color: colors.interface.text.secondary }}>
+            <h1 className='text-3xl font-bold text-fg'>Generated Recipes</h1>
+            <p className='mt-1 text-muted'>
               {recipes.length} recipes generated for you
             </p>
           </div>
         </div>
 
-        {/* Recipes Horizontal Scroll */}
+        {/* Card collection — vertical list on mobile, horizontal carousel on desktop */}
         {recipes.length > 0 && (
           <div className='relative flex-1 flex flex-col'>
-            {/* Scroll Container */}
-            <div className='flex gap-6 overflow-x-auto scrollbar-hide items-center flex-1 pt-3 pb-1.5'>
-              {recipes.map(recipe => {
-                console.log(
-                  '🔧 DEBUG: Rendering RecipeCard for:',
-                  recipe.id,
-                  'with onRemoveFromList:',
-                  !!handleRemoveFromList
-                );
-                return (
-                  <div
-                    key={recipe.id}
-                    className={`flex-shrink-0 w-80 transition-all duration-600 ease-in-out ${
-                      removingRecipeId === recipe.id
-                        ? 'opacity-0 scale-95 transform translate-x-4'
-                        : 'opacity-100 scale-100 transform translate-x-0'
-                    }`}
-                  >
-                    <SuspenseWrapper minHeight='400px'>
-                      <LazyRecipeCard
-                        recipe={recipe}
-                        variant='save'
-                        onRemoveFromList={handleRemoveFromList}
-                        isRemoving={removingRecipeId === recipe.id}
-                      />
-                    </SuspenseWrapper>
-                  </div>
-                );
-              })}
+            <div
+              className='flex flex-col gap-lg lg:flex-row lg:gap-6 lg:overflow-x-auto lg:scrollbar-hide lg:items-center lg:flex-1 pt-3 pb-1.5'
+              data-testid='recipes-scroll-container'
+            >
+              {recipes.map(recipe => (
+                <div
+                  key={recipe.id}
+                  className={`w-full lg:w-80 lg:flex-shrink-0 transition-all duration-600 ease-in-out ${
+                    removingRecipeId === recipe.id
+                      ? 'opacity-0 scale-95 transform translate-x-4'
+                      : 'opacity-100 scale-100 transform translate-x-0'
+                  }`}
+                >
+                  <SuspenseWrapper minHeight='400px'>
+                    <LazyRecipeCard
+                      recipe={recipe}
+                      variant='save'
+                      onRemoveFromList={handleRemoveFromList}
+                      isRemoving={removingRecipeId === recipe.id}
+                    />
+                  </SuspenseWrapper>
+                </div>
+              ))}
             </div>
 
-            {/* Scroll Indicator - Clickable Navigation */}
-            <div className='flex justify-center mt-2'>
+            {/* Scroll Indicator - desktop carousel navigation only */}
+            <div className='hidden lg:flex justify-center mt-2'>
               <div className='flex gap-2'>
                 {recipes.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => scrollToRecipe(index)}
-                    className='w-3 h-3 rounded-full transition-all duration-300 hover:scale-110 cursor-pointer'
-                    style={{
-                      backgroundColor:
-                        index === activeIndex
-                          ? colors.brand.primary[500]
-                          : colors.interface.background.tertiary,
-                      opacity: index === activeIndex ? 1 : 0.5,
-                    }}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-110 cursor-pointer ${
+                      index === activeIndex
+                        ? 'bg-primary opacity-100'
+                        : 'bg-elevated opacity-50'
+                    }`}
+                    aria-label={`Go to recipe ${index + 1}`}
                     title={`Go to recipe ${index + 1}`}
                   />
                 ))}
@@ -734,35 +710,16 @@ export default function RecipesPage() {
         {recipes.length === 0 && !loading && (
           <div className='text-center py-20'>
             <div className='text-6xl mb-4'>🍽️</div>
-            <h2
-              className='text-2xl font-bold mb-2'
-              style={{ color: colors.interface.text.primary }}
-            >
+            <h2 className='text-2xl font-bold mb-2 text-fg'>
               {error ? 'Error generating recipes' : 'No recipes found'}
             </h2>
-            <p className='mb-6' style={{ color: colors.interface.text.secondary }}>
+            <p className='mb-6 text-muted'>
               {error || "We couldn't generate recipes at the moment. Please try again."}
             </p>
             <div className='flex justify-center'>
-              <button
-                onClick={handleBackToHome}
-                className='px-8 py-3 rounded-lg transition-colors border'
-                style={{
-                  backgroundColor: 'transparent',
-                  color: colors.brand.primary[500],
-                  borderColor: colors.brand.primary[500],
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor = colors.brand.primary[500];
-                  e.currentTarget.style.color = colors.base.white;
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = colors.brand.primary[500];
-                }}
-              >
+              <Button variant='secondary' onClick={handleBackToHome}>
                 Return home
-              </button>
+              </Button>
             </div>
           </div>
         )}

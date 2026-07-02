@@ -93,7 +93,7 @@ function LandingPage() {
             color: colors.interface.text.primary,
           }}
         >
-          <span className='text-primary-500 text-xl'>•</span>
+          <span className='text-primary text-xl'>•</span>
           <span>
             Reduce waste, save money, and
             <br />
@@ -108,7 +108,7 @@ function LandingPage() {
             color: colors.interface.text.primary,
           }}
         >
-          <span className='text-primary-500 text-xl'>•</span>
+          <span className='text-primary text-xl'>•</span>
           <span>
             Unleash your inner chef and create
             <br />

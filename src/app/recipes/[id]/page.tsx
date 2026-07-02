@@ -5,7 +5,6 @@ import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import ImagePlaceholder from '@/components/ImagePlaceholder';
 import IngredientsCard from '@/components/IngredientsCard';
 import Nav from '@/components/Nav';
-import { colors } from '@/design-system';
 import { useAuthUnified } from '@/hooks';
 import { useSavedRecipesStore, useToastStore } from '@/stores';
 import Image from 'next/image';
@@ -321,20 +320,12 @@ export default function RecipeDetailPage() {
 
   if (loading) {
     return (
-      <div
-        className='min-h-screen'
-        style={{ backgroundColor: colors.interface.background.primary }}
-      >
+      <div className='min-h-screen bg-canvas'>
         <Nav showMenu={true} userName={user?.name || 'User'} />
         <div className='flex items-center justify-center py-20'>
           <div className='text-center'>
-            <div
-              className='animate-spin rounded-full h-16 w-16 border-b-2 mx-auto mb-4'
-              style={{ borderColor: colors.brand.primary[500] }}
-            ></div>
-            <p className='text-lg' style={{ color: colors.interface.text.primary }}>
-              Loading recipe...
-            </p>
+            <div className='animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4'></div>
+            <p className='text-lg text-fg'>Loading recipe...</p>
           </div>
         </div>
       </div>
@@ -343,17 +334,11 @@ export default function RecipeDetailPage() {
 
   if (!recipe) {
     return (
-      <div
-        className='min-h-screen'
-        style={{ backgroundColor: colors.interface.background.primary }}
-      >
+      <div className='min-h-screen bg-canvas'>
         <Nav showMenu={true} userName={user?.name || 'User'} />
         <div className='flex items-center justify-center py-20'>
           <div className='text-center'>
-            <h1
-              className='text-2xl font-bold mb-4'
-              style={{ color: colors.interface.text.primary }}
-            >
+            <h1 className='text-2xl font-bold mb-4 text-fg'>
               Recipe not found
             </h1>
             <Button variant='primary' onClick={() => router.push('/recipes')} className='px-6 py-2'>
@@ -366,10 +351,10 @@ export default function RecipeDetailPage() {
   }
 
   return (
-    <div className='min-h-screen' style={{ backgroundColor: colors.interface.background.primary }}>
+    <div className='min-h-screen bg-canvas'>
       <Nav showMenu={true} userName={user?.name || 'User'} />
 
-      <div className='max-w-6xl mx-auto px-4 py-8 mt-20'>
+      <div className='max-w-page mx-auto px-lg lg:px-3xl py-xl mt-20'>
         {/* Recipe Header */}
         <div className='mb-8'>
           <div className='flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6'>
@@ -392,29 +377,23 @@ export default function RecipeDetailPage() {
                 <IoIosArrowBack className='text-xl' />
               </Button>
               <div className='flex-1'>
-                <h1
-                  className='text-4xl font-bold mb-4'
-                  style={{ color: colors.interface.text.primary }}
-                >
+                <h1 className='text-4xl font-bold mb-4 text-fg'>
                   {recipe.title}
                 </h1>
-                <div
-                  className='flex items-center gap-6'
-                  style={{ color: colors.interface.text.secondary }}
-                >
+                <div className='flex items-center gap-6 text-muted'>
                   <div className='flex items-center gap-2'>
-                    <BiUser style={{ color: colors.brand.primary[500] }} />
+                    <BiUser className='text-primary' />
                     <span>for {recipe.servings} people</span>
                   </div>
                   <div className='flex items-center gap-2'>
-                    <BiTime style={{ color: colors.brand.primary[500] }} />
+                    <BiTime className='text-primary' />
                     <span>duration {recipe.cookingTime}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className='flex gap-3 flex-shrink-0'>
+            <div className='flex flex-wrap gap-3 lg:flex-shrink-0'>
               {/* Mostrar botones de receta guardada solo si viene de My Recipes O si está realmente guardada */}
               {isFromMyRecipes || isRecipeSavedState ? (
                 // Si la receta está guardada, mostrar Edit/Delete/Share
@@ -430,7 +409,7 @@ export default function RecipeDetailPage() {
                   <Button
                     variant='secondary'
                     onClick={() => handleDeleteRecipe()}
-                    className='px-6 py-3 flex items-center gap-2 hover:bg-red-500 hover:text-white hover:border-red-500'
+                    className='px-6 py-3 flex items-center gap-2 hover:bg-danger hover:text-on-primary hover:border-danger'
                   >
                     <MdDelete className='text-lg' />
                     Delete
@@ -510,39 +489,24 @@ export default function RecipeDetailPage() {
           </div>
         </div>
 
-        {/* Instructions */}
+        {/* Instructions — stacked steps; each step is number + text, readable at both breakpoints */}
         <div>
-          <h2 className='text-2xl font-bold mb-8' style={{ color: colors.interface.text.primary }}>
-            Instructions
-          </h2>
+          <h2 className='text-2xl font-bold mb-8 text-fg'>Instructions</h2>
 
           <div className='space-y-6'>
             {recipe.instructions && recipe.instructions.length > 0 ? (
               recipe.instructions.map((instruction, index) => (
-                <div key={index} className='flex gap-4'>
-                  <div
-                    className='flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold'
-                    style={{
-                      backgroundColor: colors.brand.primary[500],
-                      color: colors.base.white,
-                    }}
-                  >
+                <div key={index} className='flex flex-col sm:flex-row gap-4'>
+                  <div className='flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold bg-primary text-on-primary'>
                     {index + 1}
                   </div>
                   <div className='flex-1'>
-                    <p
-                      className='leading-relaxed text-lg'
-                      style={{ color: colors.interface.text.primary }}
-                    >
-                      {instruction}
-                    </p>
+                    <p className='leading-relaxed text-lg text-fg'>{instruction}</p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className='text-gray-400' style={{ color: colors.interface.text.secondary }}>
-                No instructions available
-              </p>
+              <p className='text-muted'>No instructions available</p>
             )}
           </div>
         </div>

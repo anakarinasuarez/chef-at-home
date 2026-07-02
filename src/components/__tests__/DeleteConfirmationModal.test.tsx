@@ -288,9 +288,8 @@ describe("DeleteConfirmationModal", () => {
     });
   });
 
-  describe("Hover Effects", () => {
-    it("applies hover effects to cancel button", async () => {
-      const user = userEvent.setup();
+  describe("Token-driven styling", () => {
+    it("renders Cancel as a tertiary Button", () => {
       render(
         <DeleteConfirmationModal
           isOpen={true}
@@ -300,20 +299,11 @@ describe("DeleteConfirmationModal", () => {
         />
       );
 
-      const cancelButton = screen.getByText("Cancel");
-
-      // Hover over the button
-      await user.hover(cancelButton);
-
-      // Check that hover styles are applied
-      expect(cancelButton).toHaveStyle({
-        backgroundColor: "#96b462",
-        color: "#1a1a1a",
-      });
+      // Cancel uses the tertiary Button variant (hover handled by CSS tokens, no inline hex).
+      expect(screen.getByText("Cancel")).toHaveClass("button-tertiary");
     });
 
-    it("removes hover effects when mouse leaves cancel button", async () => {
-      const user = userEvent.setup();
+    it("renders Delete as a danger Button", () => {
       render(
         <DeleteConfirmationModal
           isOpen={true}
@@ -323,59 +313,8 @@ describe("DeleteConfirmationModal", () => {
         />
       );
 
-      const cancelButton = screen.getByText("Cancel");
-
-      // Hover and then leave
-      await user.hover(cancelButton);
-      await user.unhover(cancelButton);
-
-      // Check that the button is still rendered (hover effects removed)
-      expect(cancelButton).toBeInTheDocument();
-    });
-
-    it("applies hover effects to delete button", async () => {
-      const user = userEvent.setup();
-      render(
-        <DeleteConfirmationModal
-          isOpen={true}
-          title="Test Recipe"
-          onConfirm={mockOnConfirm}
-          onCancel={mockOnCancel}
-        />
-      );
-
-      const deleteButton = screen.getByText("Delete");
-
-      // Hover over the button
-      await user.hover(deleteButton);
-
-      // Check that hover styles are applied
-      expect(deleteButton).toHaveStyle({
-        backgroundColor: "#DC2626",
-      });
-    });
-
-    it("removes hover effects when mouse leaves delete button", async () => {
-      const user = userEvent.setup();
-      render(
-        <DeleteConfirmationModal
-          isOpen={true}
-          title="Test Recipe"
-          onConfirm={mockOnConfirm}
-          onCancel={mockOnCancel}
-        />
-      );
-
-      const deleteButton = screen.getByText("Delete");
-
-      // Hover and then leave
-      await user.hover(deleteButton);
-      await user.unhover(deleteButton);
-
-      // Check that hover styles are removed
-      expect(deleteButton).toHaveStyle({
-        backgroundColor: "#EF4444",
-      });
+      // Delete uses the danger token variant instead of hardcoded #EF4444 / #DC2626.
+      expect(screen.getByText("Delete")).toHaveClass("button-danger");
     });
   });
 

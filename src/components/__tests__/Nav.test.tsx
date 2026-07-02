@@ -116,8 +116,8 @@ describe("Nav", () => {
       expect(screen.getByTestId("chef-hat-icon")).toBeInTheDocument();
     });
 
-    it("renders with default props", () => {
-      render(<Nav showMenu={true} />);
+    it("renders the provided user name and menu affordance", () => {
+      render(<Nav showMenu={true} userName="Anna" />);
 
       expect(screen.getByText("Anna")).toBeInTheDocument();
       expect(screen.getByTestId("menu-icon")).toBeInTheDocument();
@@ -258,10 +258,8 @@ describe("Nav", () => {
       await user.click(menuButton);
 
       const createButton = screen.getByText("Create Recipe");
-      expect(createButton.closest("button")).toHaveStyle({
-        backgroundColor: "#96b462",
-        color: "#1a1a1a",
-      });
+      expect(createButton.closest("button")).toHaveClass("bg-primary");
+      expect(createButton.closest("button")).toHaveClass("text-on-primary");
     });
 
     it("highlights generated page when currentPage is generated", async () => {
@@ -273,10 +271,8 @@ describe("Nav", () => {
       await user.click(menuButton);
 
       const generatedButton = screen.getByText("Generated Recipes");
-      expect(generatedButton.closest("button")).toHaveStyle({
-        backgroundColor: "#96b462",
-        color: "#1a1a1a",
-      });
+      expect(generatedButton.closest("button")).toHaveClass("bg-primary");
+      expect(generatedButton.closest("button")).toHaveClass("text-on-primary");
     });
 
     it("highlights my-recipes page when currentPage is my-recipes", async () => {
@@ -288,15 +284,13 @@ describe("Nav", () => {
       await user.click(menuButton);
 
       const myRecipesButton = screen.getByText("My Recipes");
-      expect(myRecipesButton.closest("button")).toHaveStyle({
-        backgroundColor: "#96b462",
-        color: "#1a1a1a",
-      });
+      expect(myRecipesButton.closest("button")).toHaveClass("bg-primary");
+      expect(myRecipesButton.closest("button")).toHaveClass("text-on-primary");
     });
   });
 
   describe("Hover Effects", () => {
-    it("applies hover effects to menu items", async () => {
+    it("inactive menu items carry the token hover utilities", async () => {
       const user = userEvent.setup();
       render(<Nav showMenu={true} currentPage="create" />);
 
@@ -304,19 +298,13 @@ describe("Nav", () => {
       const menuButton = screen.getByLabelText("Menu");
       await user.click(menuButton);
 
-      const generatedButton = screen.getByText("Generated Recipes");
-
-      // Hover over the button
-      await user.hover(generatedButton);
-
-      // Check that hover styles are applied
-      expect(generatedButton.closest("button")).toHaveStyle({
-        backgroundColor: "#96b462",
-        color: "#1a1a1a",
-      });
+      // Hover is now CSS-driven via token utilities, no JS handlers.
+      const generatedButton = screen.getByText("Generated Recipes").closest("button");
+      expect(generatedButton).toHaveClass("hover:bg-primary-hover");
+      expect(generatedButton).toHaveClass("text-fg");
     });
 
-    it("removes hover effects when mouse leaves", async () => {
+    it("does not apply the active fill to inactive items", async () => {
       const user = userEvent.setup();
       render(<Nav showMenu={true} currentPage="create" />);
 
@@ -324,17 +312,8 @@ describe("Nav", () => {
       const menuButton = screen.getByLabelText("Menu");
       await user.click(menuButton);
 
-      const generatedButton = screen.getByText("Generated Recipes");
-
-      // Hover and then leave
-      await user.hover(generatedButton);
-      await user.unhover(generatedButton);
-
-      // Check that hover styles are removed
-      expect(generatedButton.closest("button")).toHaveStyle({
-        backgroundColor: "#2a2a2a",
-        color: "#ffffff",
-      });
+      const generatedButton = screen.getByText("Generated Recipes").closest("button");
+      expect(generatedButton).not.toHaveClass("bg-primary");
     });
   });
 

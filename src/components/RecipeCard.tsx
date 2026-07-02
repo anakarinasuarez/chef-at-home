@@ -1,6 +1,5 @@
 'use client';
 
-import { colors } from '@/design-system';
 import { useRecipeCard } from '@/hooks/useRecipeCard';
 import { RecipeCardData } from '@/types';
 import { memo } from 'react';
@@ -49,13 +48,6 @@ function RecipeCard({
     onRemoveFromList,
   });
 
-  console.log('🔍 RecipeCard DEBUG:', {
-    recipeId,
-    variant,
-    isSaved,
-    recipeTitle: recipe.title,
-  });
-
   return (
     <ErrorBoundaryAdvanced
       level='component'
@@ -65,12 +57,8 @@ function RecipeCard({
     >
       <div
         onClick={handleCardClick}
-        className='rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 group'
+        className='bg-surface rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 group'
         data-testid='recipe-card'
-        style={{
-          backgroundColor: colors.interface.background.secondary,
-          boxShadow: `0 10px 25px ${colors.app.recipeCard.shadow}`,
-        }}
       >
         {/* Recipe Info - Above image */}
         <RecipeInfo recipe={recipe} />
