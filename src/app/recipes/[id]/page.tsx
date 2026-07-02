@@ -5,6 +5,7 @@ import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import ImagePlaceholder from '@/components/ImagePlaceholder';
 import IngredientsCard from '@/components/IngredientsCard';
 import Nav from '@/components/Nav';
+import Badge from '@/components/ui/Badge';
 import { useAuthUnified } from '@/hooks';
 import { useSavedRecipesStore, useToastStore } from '@/stores';
 import Image from 'next/image';
@@ -354,7 +355,159 @@ export default function RecipeDetailPage() {
     <div className='min-h-screen bg-canvas'>
       <Nav showMenu={true} userName={user?.name || 'User'} />
 
-      <div className='max-w-page mx-auto px-lg lg:px-3xl py-xl mt-20'>
+      {/* MOBILE layout — Figma "Recipe detail — Mobile" */}
+      <div className='lg:hidden max-w-page mx-auto px-lg py-xl mt-20'>
+        {/* Back row + compact title */}
+        <div className='flex items-center gap-sm mb-lg'>
+          <button
+            onClick={() => {
+              const urlParams = new URLSearchParams(window.location.search);
+              if (urlParams.get('fromEdit') === 'true') {
+                router.push('/my-recipes');
+              } else {
+                router.back();
+              }
+            }}
+            aria-label='Back'
+            className='text-fg transition-colors hover:text-primary'
+          >
+            <IoIosArrowBack className='text-xl' />
+          </button>
+          <span className='truncate font-semibold text-fg'>{recipe.title}</span>
+        </div>
+
+        {/* Banner */}
+        <div className='relative w-full h-[220px] rounded-lg overflow-hidden mb-md'>
+          {displayImage && !imageError ? (
+            <Image
+              src={displayImage}
+              alt={recipe.title}
+              fill
+              className='object-cover'
+              onError={() => setImageError(true)}
+              priority
+            />
+          ) : (
+            <ImagePlaceholder
+              title={recipe.title}
+              cuisine={recipe.cuisine || 'International'}
+              className='h-full w-full'
+              ingredients={recipe.ingredients.map(ing => ing.name)}
+            />
+          )}
+        </div>
+
+        {/* Meta */}
+        <p className='mb-xl text-sm text-muted'>
+          for {recipe.servings} people · duration {recipe.cookingTime}
+        </p>
+
+        {/* Ingredients card */}
+        <div className='mb-xl rounded-lg bg-surface p-xl'>
+          <div className='mb-lg flex items-center justify-between'>
+            <h2 className='text-xl font-bold text-fg'>Ingredients</h2>
+            <Badge variant='neutral'>{recipe.ingredients?.length ?? 0}</Badge>
+          </div>
+          <div className='flex flex-col gap-sm'>
+            {recipe.ingredients && recipe.ingredients.length > 0 ? (
+              recipe.ingredients.map((ing, i) => (
+                <div key={i} className='flex items-center justify-between gap-md'>
+                  <span className='text-fg'>• {ing.name}</span>
+                  <span className='whitespace-nowrap text-muted'>
+                    {ing.quantity}
+                    {ing.unit}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className='text-muted'>No ingredients available</p>
+            )}
+          </div>
+        </div>
+
+        {/* Steps */}
+        <div className='mb-xl'>
+          <h2 className='mb-lg text-xl font-bold text-fg'>Steps</h2>
+          <div className='flex flex-col gap-xl'>
+            {recipe.instructions && recipe.instructions.length > 0 ? (
+              recipe.instructions.map((instruction, index) => (
+                <div key={index} className='flex flex-col gap-sm'>
+                  <p className='text-sm text-muted'>
+                    Step{' '}
+                    <span className='font-semibold text-primary'>
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                  </p>
+                  <p className='leading-relaxed text-fg'>{instruction}</p>
+                  <div className='relative h-[180px] w-full max-w-[326px] overflow-hidden rounded-md'>
+                    <ImagePlaceholder
+                      title={recipe.title}
+                      cuisine={recipe.cuisine || 'International'}
+                      className='h-full w-full'
+                      ingredients={[]}
+                    />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className='text-muted'>No instructions available</p>
+            )}
+          </div>
+        </div>
+
+        {/* Spacer so the fixed action bar never covers content */}
+        <div className='h-24' aria-hidden='true' />
+      </div>
+
+      {/* MOBILE ActionBar — bottom-pinned */}
+      <div className='lg:hidden fixed inset-x-0 bottom-0 z-40 flex gap-md border-t border-border bg-surface px-lg py-md'>
+        {isFromMyRecipes || isRecipeSavedState ? (
+          <>
+            <Button
+              variant='secondary'
+              onClick={() => handleEditRecipe()}
+              className='flex-1 flex items-center justify-center gap-2'
+            >
+              <FaPencil className='text-lg' />
+              Edit
+            </Button>
+            <Button
+              variant='secondary'
+              onClick={() => handleDeleteRecipe()}
+              className='flex-1 flex items-center justify-center gap-2 hover:bg-danger hover:text-on-primary hover:border-danger'
+            >
+              <MdDelete className='text-lg' />
+              Delete
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              variant={isRecipeSavedState ? 'secondary' : 'primary'}
+              onClick={() => handleSaveRecipe()}
+              className='flex-1 flex items-center justify-center gap-2'
+            >
+              {isRecipeSavedState ? (
+                <span className='text-lg'>✓</span>
+              ) : (
+                <BiPlus className='text-lg' />
+              )}
+              {isRecipeSavedState ? 'Saved' : editMode ? 'Update' : 'Save'}
+            </Button>
+            <Button
+              variant='secondary'
+              onClick={() => handleShareRecipe()}
+              className='flex-1 flex items-center justify-center gap-2'
+            >
+              <BiShareAlt className='text-lg' />
+              Share
+            </Button>
+          </>
+        )}
+      </div>
+
+      {/* DESKTOP layout — unchanged from before */}
+      <div className='hidden lg:block max-w-page mx-auto px-3xl py-xl mt-20'>
         {/* Recipe Header */}
         <div className='mb-8'>
           <div className='flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6'>
