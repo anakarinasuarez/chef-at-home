@@ -5,13 +5,17 @@ import {
   generateMultipleRecipesWithGemini,
 } from "../geminiService";
 
-// Mock Google Generative AI
-vi.mock("@google/generative-ai", () => ({
-  GoogleGenerativeAI: vi.fn().mockImplementation(() => ({
-    getGenerativeModel: vi.fn().mockReturnValue({
-      generateContent: vi.fn(),
-    }),
+// Mock the @google/genai SDK
+vi.mock("@google/genai", () => ({
+  GoogleGenAI: vi.fn().mockImplementation(() => ({
+    models: { generateContent: vi.fn() },
   })),
+  Type: {
+    OBJECT: "OBJECT",
+    STRING: "STRING",
+    ARRAY: "ARRAY",
+    NUMBER: "NUMBER",
+  },
 }));
 
 // Mock prompts
@@ -25,6 +29,7 @@ describe("geminiService", () => {
     vi.clearAllMocks();
     // Reset environment variables
     delete process.env.GOOGLE_GEMINI_API_KEY;
+    delete process.env.GEMINI_API_KEY;
   });
 
   afterEach(() => {
