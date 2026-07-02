@@ -469,17 +469,22 @@ export default function RecipeDetailPage() {
             <Button
               variant='secondary'
               onClick={() => handleEditRecipe()}
-              className='flex-1 flex items-center justify-center gap-2'
+              className='flex-1'
             >
-              <FaPencil className='text-lg' />
               Edit
             </Button>
             <Button
               variant='secondary'
-              onClick={() => handleDeleteRecipe()}
-              className='flex-1 flex items-center justify-center gap-2 hover:bg-danger hover:text-on-primary hover:border-danger'
+              onClick={() => handleShareRecipe()}
+              className='flex-1'
             >
-              <MdDelete className='text-lg' />
+              Share
+            </Button>
+            <Button
+              variant='danger'
+              onClick={() => handleDeleteRecipe()}
+              className='flex-1'
+            >
               Delete
             </Button>
           </>
