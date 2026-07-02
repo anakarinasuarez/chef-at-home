@@ -1,225 +1,162 @@
-# 🍳 Chef at Home - AI Recipe Generator
+# 🍳 Chef at Home — AI Recipe Generator
 
-A modern, full-stack web application that generates personalized recipes using AI technology. Built with Next.js, TypeScript, and OpenAI's GPT and DALL-E APIs.
+Turn your everyday ingredients into gourmet recipes with AI. A modern,
+fully responsive, mobile‑first web app built as a **portfolio piece** to show
+end‑to‑end product work: a design system implemented in code, pixel‑matched to
+Figma, with free & unlimited AI recipe generation.
 
-## ✨ Features
+<p align="center">
+  <a href="https://chef-at-home-v1.vercel.app"><b>🌐 Live Demo</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://www.figma.com/design/wOuCDVihYDlaoOUXhsTDx5/Chef-at-Home"><b>🎨 Figma Design</b></a>
+</p>
 
-- **AI-Powered Recipe Generation**: Create unique recipes from your available ingredients
-- **Smart Image Generation**: Automatically generate photorealistic food images using DALL-E
-- **Intelligent Caching System**: Optimized image caching to reduce API costs
-- **User Authentication**: Secure user registration and login system
-- **Recipe Management**: Save, edit, and organize your favorite recipes
-- **Responsive Design**: Beautiful UI that works on all devices
-- **Session Limits**: Daily recipe generation limits for cost control
-
-## 🚀 Live Demo
-
-[View Live Application](https://chef-at-home-v1.vercel.app)
-
-## 🛠️ Tech Stack
-
-- **Frontend**: Next.js 14, React, TypeScript
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand
-- **Authentication**: Custom JWT-based auth
-- **AI Integration**: OpenAI GPT-3.5-turbo & DALL-E
-- **Testing**: Vitest (Unit Tests), Cypress (E2E Tests)
-- **Deployment**: Vercel
-- **Version Control**: Git & GitHub
-
-## 🏗️ Architecture
-
-### Frontend
-- **Next.js App Router**: Modern React framework with server-side rendering
-- **Component Architecture**: Reusable, modular components
-- **Custom Hooks**: Efficient state management and API integration
-- **Error Boundaries**: Robust error handling and user experience
-
-### Backend
-- **API Routes**: RESTful API endpoints for recipe generation and management
-- **Image Caching**: Multi-layer caching system (server-side + client-side)
-- **User Management**: Secure authentication and user-specific data storage
-- **Cost Optimization**: Smart caching to minimize OpenAI API costs
-
-### AI Integration
-- **Recipe Generation**: GPT-3.5-turbo for intelligent recipe creation
-- **Image Generation**: DALL-E for photorealistic food photography
-- **Prompt Engineering**: Optimized prompts for consistent, high-quality results
-
-## 🔧 Key Features Implemented
-
-### 🎯 Cost Optimization
-- **Smart Image Caching**: Images generated once per recipe, cached indefinitely
-- **Server-side Caching**: Reduces redundant API calls
-- **Client-side Deduplication**: Prevents duplicate requests
-- **Session Limits**: Daily limits to control costs
-
-### 🛡️ Data Security
-- **User-specific Storage**: Prevents cross-user data leakage
-- **Automatic Cleanup**: Cleans old data on login/logout
-- **Secure Authentication**: JWT-based user management
-
-### ⚡ Performance
-- **Image Optimization**: Next.js Image component with lazy loading
-- **Caching Strategy**: Multi-layer caching for optimal performance
-- **Code Splitting**: Automatic code splitting for faster load times
+---
 
 ## 📱 Screenshots
 
-*Screenshots will be added after deployment*
+The UI is a 1:1 implementation of the Figma design system (dark‑first, mobile 390 → desktop 1280).
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/home.png" width="220"/><br/><sub>Home</sub></td>
+    <td align="center"><img src="docs/screenshots/create.png" width="220"/><br/><sub>Create wizard</sub></td>
+    <td align="center"><img src="docs/screenshots/loading.png" width="220"/><br/><sub>Generating</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/recipe-card.png" width="220"/><br/><sub>Recipe results</sub></td>
+    <td align="center"><img src="docs/screenshots/recipe-detail.png" width="220"/><br/><sub>Recipe detail</sub></td>
+    <td align="center"><img src="docs/screenshots/my-recipes.png" width="220"/><br/><sub>My recipes</sub></td>
+  </tr>
+</table>
+
+> 👉 Try the interactive app on the [**live demo**](https://chef-at-home-v1.vercel.app).
+
+---
+
+## ✨ Features
+
+- **🤖 AI recipe generation** — describe your ingredients and get complete,
+  structured recipes (title, ingredients, steps, timing) powered by **Google
+  Gemini 2.5 Flash** with JSON structured output.
+- **🆓 Free & unlimited** — recipe generation runs on Gemini's free tier, with
+  no daily limits and no paid image APIs.
+- **📱 100% responsive** — mobile‑first (390px) scaling to desktop (1280px),
+  matching the Figma designs section by section.
+- **🎨 Design system in code** — semantic design tokens, Light/Dark theming,
+  Poppins type scale, 4/8pt spacing, and reusable token‑driven components.
+- **🔐 Authentication** — register / login with JWT‑based sessions.
+- **📒 Recipe management** — save, edit, and delete your favorite recipes.
+- **🔎 SEO ready** — per‑route metadata, Open Graph / Twitter cards,
+  `robots.txt`, `sitemap.xml`, PWA manifest and theme‑color.
+
+---
+
+## 🛠️ Tech Stack
+
+| Area | Tech |
+|---|---|
+| Framework | **Next.js 15** (App Router, Turbopack) · **React 19** · TypeScript |
+| Styling | **Tailwind CSS v4** (CSS‑first `@theme`, semantic tokens, dark/light) |
+| State | Zustand |
+| AI | **Google Gemini 2.5 Flash** via `@google/genai` (structured JSON output) |
+| Data | Prisma + PostgreSQL (Neon) |
+| Auth | JWT‑based sessions (bcrypt) |
+| Testing | Vitest (unit) · Cypress (E2E) |
+| Tooling | ESLint (flat config) · Prettier |
+| Deployment | Vercel |
+
+---
+
+## 🎨 Design System
+
+The app implements the [Chef at Home Figma design system](https://www.figma.com/design/wOuCDVihYDlaoOUXhsTDx5/Chef-at-Home) in code:
+
+- **Semantic tokens** (`globals.css`, Tailwind v4 `@theme`) — `bg-canvas`,
+  `bg-surface`, `text-fg`, `text-muted`, `text-primary`, `border-border`, … —
+  mode‑aware for **Dark (default)** and **Light**.
+- **Type scale** — Poppins, Display → Button, with a wordmark in Alegreya.
+- **Spacing / radius** — 4/8pt scale (`sm 8 · md 12 · lg 16 · xl 24 …`) and
+  `rounded-sm/md/lg/full`.
+- **Components** — token‑driven `Button` (primary/secondary/tertiary/danger/icon),
+  `Input`, `Card`, `Nav`, `Badge`, `Tag`, `Chip`, `ServingSelector`, modal…
+- **Breakpoints** — Mobile 390 ↔ Desktop 1280, WCAG AA contrast in both modes.
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- OpenAI API key
+
+- Node.js **20+**
+- A **Google Gemini API key** (free — [Google AI Studio](https://aistudio.google.com/apikey))
+- A PostgreSQL database URL (e.g. [Neon](https://neon.tech))
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/chef-at-home.git
-   cd chef-at-home
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Environment Setup**
-   ```bash
-   cp .env.example .env.local
-   ```
-   
-   Add your environment variables:
-   ```env
-   OPENAI_API_KEY=your_openai_api_key_here
-   NEXTAUTH_SECRET=your_nextauth_secret_here
-   ```
-
-4. **Run the development server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open your browser**
-   Navigate to [http://localhost:3001](http://localhost:3001)
-
-## 🧪 Testing
-
-This project uses a comprehensive testing strategy with **Vitest** for unit tests and **Cypress** for end-to-end testing.
-
-### Unit Testing (Vitest)
 ```bash
-# Run unit tests
-npm test
+# 1. Clone
+git clone https://github.com/anakarinasuarez/chef-at-home.git
+cd chef-at-home
 
-# Run tests with UI
-npm run test:ui
+# 2. Install
+npm install
 
-# Run tests once (CI mode)
-npm run test:run
+# 3. Environment — create .env.local
+cp .env.example .env.local   # then fill in the values below
 
-# Run tests with coverage
-npm run test:coverage
+# 4. Database
+npx prisma generate
+
+# 5. Run (Turbopack dev server)
+npm run dev
 ```
 
-### End-to-End Testing (Cypress)
+Open [http://localhost:3000](http://localhost:3000).
+
+### Environment variables
+
+| Variable | Description | Required |
+|---|---|---|
+| `GOOGLE_GEMINI_API_KEY` | Google Gemini API key (free tier) for recipe generation | ✅ |
+| `DATABASE_URL` | PostgreSQL connection string | ✅ |
+| `JWT_SECRET` | Secret for signing auth tokens | ✅ |
+| `OPENAI_API_KEY` | Optional fallback for recipe generation | ⬜ |
+
+---
+
+## 🧪 Testing & Quality
+
 ```bash
-# Open Cypress Test Runner
-npm run cypress:open
-
-# Run E2E tests headlessly
-npm run cypress:run
-
-# Run E2E tests with browser visible
-npm run cypress:run:headed
-
-# Alternative E2E commands
-npm run e2e
-npm run e2e:open
+npm run type-check      # TypeScript
+npm run lint            # ESLint
+npm test                # Vitest (unit)
+npm run cypress:run     # Cypress (E2E)
+npm run quality         # type-check + lint + tests
 ```
 
-### Test Coverage
-- **Unit Tests**: Components, hooks, services, and utilities
-- **E2E Tests**: Complete user workflows and integrations
-- **Coverage Reports**: Available via `npm run test:coverage`
-
-### Quality Assurance
-```bash
-# Run all quality checks (TypeScript, ESLint, Tests)
-npm run quality
-```
-
-## 📦 Build for Production
+## 📦 Build
 
 ```bash
-# Build the application
 npm run build
-
-# Start production server
 npm start
 ```
 
 ## 🌐 Deployment
 
-### Vercel (Recommended)
-1. Push your code to GitHub
-2. Connect your GitHub repository to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy automatically on every push
-
-### Manual Deployment
-```bash
-# Build for production
-npm run build
-
-# Deploy to your preferred platform
-```
-
-## 🔑 Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `OPENAI_API_KEY` | OpenAI API key for GPT and DALL-E | Yes |
-| `NEXTAUTH_SECRET` | Secret for JWT token signing | Yes |
-| `NEXTAUTH_URL` | Application URL (for production) | Yes |
-
-## 📊 Performance Metrics
-
-- **Lighthouse Score**: 95+ (Performance, Accessibility, Best Practices, SEO)
-- **Core Web Vitals**: Optimized for excellent user experience
-- **API Response Time**: < 2s for recipe generation
-- **Image Load Time**: < 1s with caching
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Author
-
-**Ana Karina Suarez Gonzalez**
-- GitHub: [@anakarinasuarezgonzalez](https://github.com/anakarinasuarezgonzalez)
-- LinkedIn: [Ana Karina Suarez Gonzalez](https://linkedin.com/in/anakarinasuarezgonzalez)
-- Portfolio: [Your Portfolio URL]
-
-## 🙏 Acknowledgments
-
-- OpenAI for providing the GPT and DALL-E APIs
-- Next.js team for the amazing framework
-- Vercel for seamless deployment
-- The open-source community for inspiration and tools
+Deployed on **Vercel** with automatic deploys from `main`. Add the environment
+variables above in the Vercel dashboard.
 
 ---
 
-⭐ **Star this repository if you found it helpful!**
+## 👩‍💻 Author
+
+**Ana Karina Suarez Gonzalez** — UX/UI Designer & Frontend Developer
+
+- GitHub: [@anakarinasuarez](https://github.com/anakarinasuarez)
+- Live demo: [chef-at-home-v1.vercel.app](https://chef-at-home-v1.vercel.app)
+- Figma: [Chef at Home design](https://www.figma.com/design/wOuCDVihYDlaoOUXhsTDx5/Chef-at-Home)
+
+---
+
+<p align="center">⭐ Star this repo if you like it!</p>
