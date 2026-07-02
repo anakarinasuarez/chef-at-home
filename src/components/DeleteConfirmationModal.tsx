@@ -27,19 +27,24 @@ export default function DeleteConfirmationModal({
       }}
     >
       <div
-        className='mx-lg flex w-full max-w-form flex-col gap-2xl rounded-lg bg-surface px-2xl py-3xl shadow-2xl'
+        className='mx-lg flex w-full max-w-form flex-col gap-2xl rounded-lg bg-elevated px-2xl py-2xl shadow-2xl'
         onClick={e => e.stopPropagation()}
       >
-        <h3 className='text-xl font-semibold text-fg'>Delete Recipe</h3>
-        <p className='text-muted'>
-          Are you sure you want to delete &quot;{title}&quot;? This action cannot be
-          undone.
-        </p>
-        <div className='flex gap-md'>
-          <Button variant='tertiary' onClick={onCancel} className='flex-1'>
+        <h3
+          className='text-xl font-semibold leading-snug text-fg'
+          title={title}
+        >
+          Are you sure you want to delete the recipe?
+        </h3>
+        <div className='flex justify-end gap-md'>
+          <Button variant='tertiary' onClick={onCancel}>
             Cancel
           </Button>
-          <Button variant='danger' onClick={onConfirm} className='flex-1'>
+          <Button
+            variant='danger'
+            onClick={onConfirm}
+            className='border border-danger'
+          >
             Delete
           </Button>
         </div>
