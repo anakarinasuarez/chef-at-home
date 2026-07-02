@@ -7,10 +7,11 @@ import { sessionLimitsManager } from '@/lib/sessionLimits';
 import { useSavedRecipesStore, useToastStore } from '@/stores';
 import { User } from '@/types';
 import { normalizeIngredientName } from '@/utils/ingredientUtils';
-import plateImage from '@/assets/images/plate.png';
+import saladPlate from '@/assets/images/salad-plate.png';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { FiPlus } from 'react-icons/fi';
 
 interface CreateRecipePageProps {
   userName: string;
@@ -349,8 +350,8 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
       {/* Mobile illustration banner (desktop shows it in the side column) */}
       <div className='mb-xl flex justify-center lg:hidden'>
         <Image
-          src={plateImage}
-          alt='Gourmet dish'
+          src={saladPlate}
+          alt='Fresh salad plate'
           className='h-auto w-64'
           priority
         />
@@ -389,10 +390,11 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
           <Button
             variant='secondary'
             onClick={handleAddIngredient}
-            className='px-6'
+            aria-label='Add ingredient'
+            className='px-lg'
             data-testid='add-ingredient-button'
           >
-            +
+            <FiPlus className='text-xl' />
           </Button>
         </div>
 
@@ -451,8 +453,14 @@ export default function CreateRecipePage({ userName, user }: CreateRecipePagePro
                 min='1'
                 autoFocus
               />
-              <Button variant='secondary' size='sm' onClick={handleCustomServings}>
-                Add
+              <Button
+                variant='secondary'
+                size='sm'
+                aria-label='Add servings'
+                data-testid='confirm-serving-button'
+                onClick={handleCustomServings}
+              >
+                <FiPlus className='text-lg' />
               </Button>
               <Button
                 variant='tertiary'

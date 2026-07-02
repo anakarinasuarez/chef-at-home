@@ -51,12 +51,21 @@ vi.mock('@/components/layouts/MainLayout', () => ({
 
 // Mock Button
 vi.mock('@/components/Button', () => ({
-  default: ({ children, variant, onClick, disabled, className }: any) => (
+  default: ({
+    children,
+    variant,
+    onClick,
+    disabled,
+    className,
+    'data-testid': dataTestId,
+    'aria-label': ariaLabel,
+  }: any) => (
     <button
       onClick={onClick}
       disabled={disabled}
       className={className}
-      data-testid={`button-${variant}`}
+      aria-label={ariaLabel}
+      data-testid={dataTestId || `button-${variant}`}
     >
       {children}
     </button>
@@ -202,7 +211,7 @@ describe('CreateRecipePage', () => {
       render(<CreateRecipePage {...mockProps} />);
 
       const input = screen.getByPlaceholderText('Add an ingredient...');
-      const addButton = screen.getAllByTestId('button-secondary')[0]; // First button (add ingredient)
+      const addButton = screen.getByTestId('add-ingredient-button'); // First button (add ingredient)
 
       await user.type(input, 'Tomato');
       await user.click(addButton);
@@ -228,7 +237,7 @@ describe('CreateRecipePage', () => {
 
       // Add ingredient
       const input = screen.getByPlaceholderText('Add an ingredient...');
-      const addButton = screen.getAllByTestId('button-secondary')[0]; // First button (add ingredient)
+      const addButton = screen.getByTestId('add-ingredient-button'); // First button (add ingredient)
 
       await user.type(input, 'Garlic');
       await user.click(addButton);
@@ -245,7 +254,7 @@ describe('CreateRecipePage', () => {
       render(<CreateRecipePage {...mockProps} />);
 
       const input = screen.getByPlaceholderText('Add an ingredient...');
-      const addButton = screen.getAllByTestId('button-secondary')[0]; // First button (add ingredient)
+      const addButton = screen.getByTestId('add-ingredient-button'); // First button (add ingredient)
 
       await user.type(input, '   ');
       await user.click(addButton);
@@ -270,7 +279,7 @@ describe('CreateRecipePage', () => {
       const user = userEvent.setup();
       render(<CreateRecipePage {...mockProps} />);
 
-      const customButton = screen.getAllByText('+')[1]; // serving custom "+" chip
+      const customButton = screen.getByText('+'); // serving custom "+" chip
       await user.click(customButton);
 
       expect(screen.getByPlaceholderText('e.g. 3')).toBeInTheDocument();
@@ -281,13 +290,13 @@ describe('CreateRecipePage', () => {
       render(<CreateRecipePage {...mockProps} />);
 
       // Open custom input
-      const customButton = screen.getAllByText('+')[1];
+      const customButton = screen.getByText('+');
       await user.click(customButton);
 
       // Enter custom value and confirm
       const customInput = screen.getByPlaceholderText('e.g. 3');
       await user.type(customInput, '10');
-      await user.click(screen.getByText('Add'));
+      await user.click(screen.getByTestId('confirm-serving-button'));
 
       // The custom value becomes a selectable serving chip
       expect(screen.getByText('10')).toBeInTheDocument();
@@ -298,7 +307,7 @@ describe('CreateRecipePage', () => {
       render(<CreateRecipePage {...mockProps} />);
 
       // Open custom input
-      const customButton = screen.getAllByText('+')[1];
+      const customButton = screen.getByText('+');
       await user.click(customButton);
 
       // Close custom input
@@ -323,7 +332,7 @@ describe('CreateRecipePage', () => {
 
       // Add ingredient
       const input = screen.getByPlaceholderText('Add an ingredient...');
-      const addButton = screen.getAllByTestId('button-secondary')[0]; // First button (add ingredient)
+      const addButton = screen.getByTestId('add-ingredient-button'); // First button (add ingredient)
 
       await user.type(input, 'Tomato');
       await user.click(addButton);
@@ -338,7 +347,7 @@ describe('CreateRecipePage', () => {
 
       // Add ingredient
       const input = screen.getByPlaceholderText('Add an ingredient...');
-      const addButton = screen.getAllByTestId('button-secondary')[0]; // First button (add ingredient)
+      const addButton = screen.getByTestId('add-ingredient-button'); // First button (add ingredient)
 
       await user.type(input, 'Tomato');
       await user.click(addButton);
@@ -362,7 +371,7 @@ describe('CreateRecipePage', () => {
 
       // Add ingredient and select serving
       const input = screen.getByPlaceholderText('Add an ingredient...');
-      const addButton = screen.getAllByTestId('button-secondary')[0]; // First button (add ingredient)
+      const addButton = screen.getByTestId('add-ingredient-button'); // First button (add ingredient)
       const servingButton = screen.getByText('4');
 
       await user.type(input, 'Tomato');
@@ -388,7 +397,7 @@ describe('CreateRecipePage', () => {
 
       // Add ingredient and select serving
       const input = screen.getByPlaceholderText('Add an ingredient...');
-      const addButton = screen.getAllByTestId('button-secondary')[0]; // First button (add ingredient)
+      const addButton = screen.getByTestId('add-ingredient-button'); // First button (add ingredient)
       const servingButton = screen.getByText('4');
 
       await user.type(input, 'Tomato');
@@ -416,7 +425,7 @@ describe('CreateRecipePage', () => {
 
       // Add ingredient and select serving
       const input = screen.getByPlaceholderText('Add an ingredient...');
-      const addButton = screen.getAllByTestId('button-secondary')[0]; // First button (add ingredient)
+      const addButton = screen.getByTestId('add-ingredient-button'); // First button (add ingredient)
       const servingButton = screen.getByText('4');
 
       await user.type(input, 'Tomato');
@@ -531,7 +540,7 @@ describe('CreateRecipePage', () => {
 
       // Add ingredient but no servings
       const input = screen.getByPlaceholderText('Add an ingredient...');
-      const addButton = screen.getAllByTestId('button-secondary')[0]; // First button (add ingredient)
+      const addButton = screen.getByTestId('add-ingredient-button'); // First button (add ingredient)
 
       await user.type(input, 'Tomato');
       await user.click(addButton);
@@ -572,13 +581,13 @@ describe('CreateRecipePage', () => {
       render(<CreateRecipePage {...mockProps} />);
 
       // Open custom input
-      const customButton = screen.getAllByText('+')[1];
+      const customButton = screen.getByText('+');
       await user.click(customButton);
 
       // Enter invalid value and confirm
       const customInput = screen.getByPlaceholderText('e.g. 3');
       await user.type(customInput, 'invalid');
-      await user.click(screen.getByText('Add'));
+      await user.click(screen.getByTestId('confirm-serving-button'));
 
       // Invalid input keeps the field open and surfaces an error
       expect(screen.getByPlaceholderText('e.g. 3')).toBeInTheDocument();
