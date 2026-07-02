@@ -39,10 +39,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en' suppressHydrationWarning>
+    <html lang='en' data-theme='dark' suppressHydrationWarning>
+      <head>
+        {/* Apply the saved theme before paint to avoid a flash of the wrong mode */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('chef-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body
         className={`${poppins.variable} ${inter.variable} ${alegreya.variable} antialiased`}
-        style={{ fontFamily: 'var(--font-poppins), system-ui, sans-serif' }}
       >
         <ErrorBoundaryAdvanced
           level='critical'
