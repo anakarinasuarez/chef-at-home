@@ -22,30 +22,28 @@ interface RecipeImageProps {
 }
 
 /**
- * Componente simple para mostrar imagen de receta SIN generación automática
- * Solo usa la imagen existente de la receta o fallback
+ * Imagen de la card: ancho completo, ratio 4:3, object-cover, esquinas redondeadas.
+ * Usa la foto real de la receta (recipe.image) y cae en ImagePlaceholder si falta o falla.
  */
 export const RecipeImageSimple = ({ recipe, imageError, onImageError }: RecipeImageProps) => {
-  // Solo usar imagen existente o fallback - NO llamadas API
   const displayImage =
-    recipe.image && recipe.image !== '/images/plate.png' ? recipe.image : '/images/plate.png';
+    recipe.image && recipe.image !== '/images/plate.png' ? recipe.image : null;
 
   return (
-    <div className='px-6'>
-      <div className='relative h-48 overflow-hidden rounded-lg'>
-        {displayImage && !imageError ? (
-          <Image
-            src={displayImage}
-            alt={recipe.title}
-            fill
-            className='object-cover'
-            onError={onImageError}
-            priority
-          />
-        ) : (
-          <ImagePlaceholder title={recipe.title} />
-        )}
-      </div>
+    <div className='relative aspect-[4/3] w-full overflow-hidden rounded-lg'>
+      {displayImage && !imageError ? (
+        <Image
+          src={displayImage}
+          alt={recipe.title}
+          fill
+          className='object-cover'
+          onError={onImageError}
+          sizes='(max-width: 1024px) 100vw, 320px'
+          priority
+        />
+      ) : (
+        <ImagePlaceholder title={recipe.title} className='h-full w-full' />
+      )}
     </div>
   );
 };

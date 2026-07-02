@@ -8,6 +8,8 @@ import { useAuthUnified } from '@/hooks';
 import { UniversalCacheManager } from '@/lib/universal-cache';
 import { useToastStore } from '@/stores';
 import { deduplicateIngredientsNumeric } from '@/utils/ingredientUtils';
+import saladPlate from '@/assets/images/salad-plate.png';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { IoIosArrowBack } from 'react-icons/io';
@@ -620,16 +622,25 @@ export default function RecipesPage() {
     return null;
   }
 
-  // Loading state
+  // Loading state — Figma "Creating flavor" (logo-only nav, centered)
   if (loading) {
     return (
-      <div className='h-screen overflow-hidden bg-canvas text-fg'>
-        <Nav showMenu={true} userName={user.name} currentPage='generated' />
-        <div className='flex items-center justify-center h-[calc(100vh-120px)]'>
-          <div className='text-center'>
-            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4'></div>
-            <p>Generating your recipes...</p>
-          </div>
+      <div className='min-h-screen bg-canvas'>
+        <Nav />
+        <div className='flex min-h-[calc(100vh-72px)] flex-col items-center justify-center gap-xl px-lg text-center'>
+          <h1 className='text-2xl font-bold text-fg'>Creating flavor........</h1>
+          <Image
+            src={saladPlate}
+            alt=''
+            aria-hidden='true'
+            priority
+            className='w-72 h-auto'
+          />
+          <div
+            role='status'
+            aria-label='Loading'
+            className='h-12 w-12 animate-spin rounded-full border-4 border-elevated border-t-primary'
+          />
         </div>
       </div>
     );
@@ -640,8 +651,23 @@ export default function RecipesPage() {
       <Nav showMenu={true} userName={user.name} currentPage='generated' />
 
       <div className='max-w-page mx-auto px-lg lg:px-3xl py-xl mt-20 lg:h-[calc(100vh-120px)] flex flex-col'>
-        {/* Header */}
-        <div className='flex items-start gap-4 mb-8'>
+        {/* Header — mobile (Figma copy) */}
+        <div className='lg:hidden mb-8'>
+          <div className='flex items-center gap-sm mb-md'>
+            <button
+              onClick={handleBackToHome}
+              aria-label='Back to home'
+              className='flex items-center justify-center text-fg transition-colors hover:text-primary'
+            >
+              <IoIosArrowBack className='text-xl' />
+            </button>
+            <span className='text-base text-muted'>these are the recipe options</span>
+          </div>
+          <h1 className='text-2xl font-bold text-fg'>What would you like to do today?</h1>
+        </div>
+
+        {/* Header — desktop (unchanged) */}
+        <div className='hidden lg:flex items-start gap-4 mb-8'>
           <button
             onClick={handleBackToHome}
             aria-label='Back to home'

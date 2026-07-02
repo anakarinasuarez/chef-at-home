@@ -19,8 +19,8 @@ declare global {
 class SessionLimitsManager {
   private sessions: Map<string, SessionData>;
 
-  // Configuration
-  private readonly MAX_RECIPES_PER_SESSION = 1;
+  // Configuration — generation is free (Gemini), so effectively unlimited
+  private readonly MAX_RECIPES_PER_SESSION = 1000;
   private readonly SESSION_TIMEOUT = 24 * 60 * 60 * 1000; // 24 hours
 
   constructor() {
