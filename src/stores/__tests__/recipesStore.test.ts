@@ -43,6 +43,23 @@ Object.defineProperty(window, 'localStorage', {
   value: mockLocalStorage,
 });
 
+// Factory for a valid UnifiedRecipe — pass overrides for the fields a test cares about.
+const makeRecipe = (overrides: Partial<UnifiedRecipe> = {}): UnifiedRecipe => ({
+  id: '1',
+  title: 'Test Recipe',
+  description: 'A test recipe',
+  ingredients: [{ name: 'ingredient1', quantity: '1', unit: 'unit' }],
+  instructions: ['instruction1'],
+  prepTime: '15 min',
+  cookingTime: '30 min',
+  totalTime: '45 min',
+  servings: 2,
+  cuisine: 'Italian',
+  image: 'image1.jpg',
+  source: 'test',
+  ...overrides,
+});
+
 describe('RecipesStore', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -102,34 +119,8 @@ describe('RecipesStore', () => {
     it('should set recipes correctly', () => {
       const { result } = renderHook(() => useRecipesStore());
       const mockRecipes: UnifiedRecipe[] = [
-        {
-          id: '1',
-          title: 'Test Recipe 1',
-          ingredients: ['ingredient1'],
-          instructions: ['instruction1'],
-          servings: 2,
-          prepTime: 30,
-          cookTime: 45,
-          difficulty: 'Easy',
-          cuisine: 'Italian',
-          tags: ['healthy'],
-          imageUrl: 'image1.jpg',
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          title: 'Test Recipe 2',
-          ingredients: ['ingredient2'],
-          instructions: ['instruction2'],
-          servings: 4,
-          prepTime: 20,
-          cookTime: 30,
-          difficulty: 'Medium',
-          cuisine: 'Mexican',
-          tags: ['spicy'],
-          imageUrl: 'image2.jpg',
-          createdAt: new Date().toISOString(),
-        },
+        makeRecipe({ id: '1', title: 'Test Recipe 1' }),
+        makeRecipe({ id: '2', title: 'Test Recipe 2', servings: 4, cuisine: 'Mexican' }),
       ];
 
       act(() => {
@@ -142,35 +133,8 @@ describe('RecipesStore', () => {
 
     it('should add recipe correctly', () => {
       const { result } = renderHook(() => useRecipesStore());
-      const existingRecipe: UnifiedRecipe = {
-        id: '1',
-        title: 'Existing Recipe',
-        ingredients: ['ingredient1'],
-        instructions: ['instruction1'],
-        servings: 2,
-        prepTime: 30,
-        cookTime: 45,
-        difficulty: 'Easy',
-        cuisine: 'Italian',
-        tags: ['healthy'],
-        imageUrl: 'image1.jpg',
-        createdAt: new Date().toISOString(),
-      };
-
-      const newRecipe: UnifiedRecipe = {
-        id: '2',
-        title: 'New Recipe',
-        ingredients: ['ingredient2'],
-        instructions: ['instruction2'],
-        servings: 4,
-        prepTime: 20,
-        cookTime: 30,
-        difficulty: 'Medium',
-        cuisine: 'Mexican',
-        tags: ['spicy'],
-        imageUrl: 'image2.jpg',
-        createdAt: new Date().toISOString(),
-      };
+      const existingRecipe = makeRecipe({ id: '1', title: 'Existing Recipe' });
+      const newRecipe = makeRecipe({ id: '2', title: 'New Recipe', servings: 4 });
 
       act(() => {
         result.current.setRecipes([existingRecipe]);
@@ -188,34 +152,8 @@ describe('RecipesStore', () => {
     it('should remove recipe correctly', () => {
       const { result } = renderHook(() => useRecipesStore());
       const recipes: UnifiedRecipe[] = [
-        {
-          id: '1',
-          title: 'Recipe 1',
-          ingredients: ['ingredient1'],
-          instructions: ['instruction1'],
-          servings: 2,
-          prepTime: 30,
-          cookTime: 45,
-          difficulty: 'Easy',
-          cuisine: 'Italian',
-          tags: ['healthy'],
-          imageUrl: 'image1.jpg',
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          title: 'Recipe 2',
-          ingredients: ['ingredient2'],
-          instructions: ['instruction2'],
-          servings: 4,
-          prepTime: 20,
-          cookTime: 30,
-          difficulty: 'Medium',
-          cuisine: 'Mexican',
-          tags: ['spicy'],
-          imageUrl: 'image2.jpg',
-          createdAt: new Date().toISOString(),
-        },
+        makeRecipe({ id: '1', title: 'Recipe 1' }),
+        makeRecipe({ id: '2', title: 'Recipe 2', servings: 4 }),
       ];
 
       act(() => {
@@ -311,22 +249,7 @@ describe('RecipesStore', () => {
 
     it('should clear recipes', () => {
       const { result } = renderHook(() => useRecipesStore());
-      const mockRecipes: UnifiedRecipe[] = [
-        {
-          id: '1',
-          title: 'Test Recipe',
-          ingredients: ['ingredient1'],
-          instructions: ['instruction1'],
-          servings: 2,
-          prepTime: 30,
-          cookTime: 45,
-          difficulty: 'Easy',
-          cuisine: 'Italian',
-          tags: ['healthy'],
-          imageUrl: 'image1.jpg',
-          createdAt: new Date().toISOString(),
-        },
-      ];
+      const mockRecipes: UnifiedRecipe[] = [makeRecipe({ id: '1', title: 'Test Recipe' })];
 
       act(() => {
         result.current.setRecipes(mockRecipes);
@@ -349,20 +272,16 @@ describe('RecipesStore', () => {
     it('should generate recipes successfully', async () => {
       const { result } = renderHook(() => useRecipesStore());
       const mockRecipes: UnifiedRecipe[] = [
-        {
+        makeRecipe({
           id: '1',
           title: 'Generated Recipe 1',
-          ingredients: ['tomato', 'onion'],
-          instructions: ['Chop ingredients', 'Cook together'],
           servings: 4,
-          prepTime: 15,
-          cookTime: 30,
-          difficulty: 'Easy',
-          cuisine: 'Italian',
-          tags: ['healthy'],
-          imageUrl: 'generated1.jpg',
-          createdAt: new Date().toISOString(),
-        },
+          ingredients: [
+            { name: 'tomato', quantity: '2', unit: 'units' },
+            { name: 'onion', quantity: '1', unit: 'unit' },
+          ],
+          instructions: ['Chop ingredients', 'Cook together'],
+        }),
       ];
 
       vi.mocked(recipeGenerationService.generateRecipes).mockResolvedValue({
@@ -461,22 +380,7 @@ describe('RecipesStore', () => {
   describe('Clear Cache Action', () => {
     it('should clear cache successfully', async () => {
       const { result } = renderHook(() => useRecipesStore());
-      const mockRecipes: UnifiedRecipe[] = [
-        {
-          id: '1',
-          title: 'Test Recipe',
-          ingredients: ['ingredient1'],
-          instructions: ['instruction1'],
-          servings: 2,
-          prepTime: 30,
-          cookTime: 45,
-          difficulty: 'Easy',
-          cuisine: 'Italian',
-          tags: ['healthy'],
-          imageUrl: 'image1.jpg',
-          createdAt: new Date().toISOString(),
-        },
-      ];
+      const mockRecipes: UnifiedRecipe[] = [makeRecipe({ id: '1', title: 'Test Recipe' })];
 
       // Set up initial state
       act(() => {
@@ -529,22 +433,7 @@ describe('RecipesStore', () => {
   describe('Selectors', () => {
     it('should return recipes with useRecipes selector', () => {
       const { result } = renderHook(() => useRecipes());
-      const mockRecipes: UnifiedRecipe[] = [
-        {
-          id: '1',
-          title: 'Test Recipe',
-          ingredients: ['ingredient1'],
-          instructions: ['instruction1'],
-          servings: 2,
-          prepTime: 30,
-          cookTime: 45,
-          difficulty: 'Easy',
-          cuisine: 'Italian',
-          tags: ['healthy'],
-          imageUrl: 'image1.jpg',
-          createdAt: new Date().toISOString(),
-        },
-      ];
+      const mockRecipes: UnifiedRecipe[] = [makeRecipe({ id: '1', title: 'Test Recipe' })];
 
       act(() => {
         useRecipesStore.getState().setRecipes(mockRecipes);

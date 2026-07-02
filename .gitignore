@@ -9,6 +9,8 @@ yarn-error.log*
 out/
 build/
 dist/
+next-env.d.ts
+tsconfig.tsbuildinfo
 
 # Environment variables
 .env
@@ -16,6 +18,9 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+
+# MCP config (may contain API keys — keep local)
+.mcp.json
 
 # Vercel
 .vercel
