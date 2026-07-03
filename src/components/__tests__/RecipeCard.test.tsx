@@ -235,12 +235,13 @@ describe('RecipeCard', () => {
       expect(image.getAttribute('src')).toContain('example.com/image.jpg');
     });
 
-    it('renders ImagePlaceholder when no image', () => {
+    it('renders a coherent stock food photo when no image is provided', () => {
       const recipeWithoutImage = { ...mockRecipe, image: undefined };
       render(<RecipeCard recipe={recipeWithoutImage} />);
 
-      expect(screen.getAllByText('Test Recipe')).toHaveLength(2); // One in card title, one in placeholder
-      expect(screen.getByText('International Cuisine')).toBeInTheDocument();
+      // No real image → coherent loremflickr stock photo (not the placeholder).
+      const img = screen.getByAltText('Test Recipe');
+      expect(img.getAttribute('src')).toContain('loremflickr.com');
     });
 
     it('renders ImagePlaceholder when image fails to load', async () => {
@@ -455,7 +456,7 @@ describe('RecipeCard', () => {
       });
     });
 
-    it('shows fallback-enhanced cuisine for fallback-enhanced source', () => {
+    it('renders a stock food photo (no placeholder) for fallback-enhanced source without image', () => {
       const recipeWithFallbackSource = {
         ...mockRecipe,
         source: 'fallback-enhanced',
@@ -463,9 +464,9 @@ describe('RecipeCard', () => {
       };
       render(<RecipeCard recipe={recipeWithFallbackSource} />);
 
-      // RecipeCard now renders the placeholder via RecipeImageSimple, which does
-      // not derive a cuisine from `source`, so it falls back to the default label.
-      expect(screen.getByText('International Cuisine')).toBeInTheDocument();
+      // No image → coherent stock photo instead of the cuisine placeholder.
+      const img = screen.getByAltText('Test Recipe');
+      expect(img.getAttribute('src')).toContain('loremflickr.com');
     });
 
     it('handles multiple image errors gracefully', async () => {
