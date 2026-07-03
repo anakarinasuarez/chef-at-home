@@ -14,15 +14,16 @@ export function recipeStockPhoto(
   cuisine?: string,
   opts?: { w?: number; h?: number; seed?: string | number }
 ): string {
-  const words = (title || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .split(/\s+/)
-    .filter(w => w.length > 2 && !STOP_WORDS.has(w))
-    .slice(0, 3);
-
-  const terms = [...words, (cuisine || '').toLowerCase(), 'food'].filter(Boolean);
-  const keyword = encodeURIComponent([...new Set(terms)].join(',')) || 'food';
+  // Pick ONE food-ish keyword. loremflickr ANDs comma-separated tags and
+  // returns a junk default image when the combo matches nothing, so we use a
+  // single tag: the first meaningful dish word, else "food" (always resolves).
+  const word =
+    (title || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .find(w => w.length > 3 && !STOP_WORDS.has(w)) || 'food';
+  const keyword = encodeURIComponent(word);
 
   const seedStr = String(opts?.seed ?? title ?? 'recipe');
   const lock = Math.abs(
