@@ -1,3 +1,11 @@
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+} from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ErrorBoundaryAdvanced } from "../ErrorBoundaryAdvanced";
 
@@ -146,8 +154,7 @@ describe("ErrorBoundaryAdvanced", () => {
   });
 
   it("shows error details in development mode", () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "development";
+    vi.stubEnv("NODE_ENV", "development");
 
     render(
       <ErrorBoundaryAdvanced showDetails={true}>
@@ -157,7 +164,7 @@ describe("ErrorBoundaryAdvanced", () => {
 
     expect(screen.getByText("Error Details")).toBeInTheDocument();
 
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
   });
 
   it("handles report error functionality", () => {

@@ -21,6 +21,7 @@ import {
   generateMultipleRecipesWithGemini,
 } from "../geminiService";
 import { generateRecipeImageWithOpenAI } from "../openaiImageService";
+import type { Recipe as PrismaRecipe, User as PrismaUser } from "@prisma/client";
 
 // Mock Prisma
 vi.mock("@/lib/prisma", () => ({
@@ -55,26 +56,38 @@ vi.mock("../openaiImageService", () => ({
 }));
 
 describe("recipeService", () => {
-  const mockUser = {
+  const mockUser: PrismaUser = {
     id: "user-1",
     name: "Test User",
     email: "test@example.com",
+    password: "hashedPassword",
+    resetToken: null,
+    resetTokenExpiry: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
-  const mockRecipe = {
+  const mockRecipe: PrismaRecipe & {
+    user: { id: string; name: string; email: string };
+  } = {
     id: "recipe-1",
     title: "Test Recipe",
     description: "A test recipe",
-    ingredients: ["ingredient1", "ingredient2"],
-    instructions: ["step1", "step2"],
-    cookingTime: "30 minutes",
+    ingredients: JSON.stringify(["ingredient1", "ingredient2"]),
+    instructions: JSON.stringify(["step1", "step2"]),
+    cookingTime: 30,
+    difficulty: null,
     servings: 4,
     imageUrl: "https://example.com/image.jpg",
     isPublic: true,
     userId: "user-1",
     createdAt: new Date(),
     updatedAt: new Date(),
-    user: mockUser,
+    user: {
+      id: mockUser.id,
+      name: mockUser.name,
+      email: mockUser.email,
+    },
   };
 
   beforeEach(() => {
@@ -89,9 +102,9 @@ describe("recipeService", () => {
     const createRecipeData = {
       title: "Test Recipe",
       description: "A test recipe",
-      ingredients: ["ingredient1", "ingredient2"],
-      instructions: ["step1", "step2"],
-      cookingTime: "30 minutes",
+      ingredients: JSON.stringify(["ingredient1", "ingredient2"]),
+      instructions: JSON.stringify(["step1", "step2"]),
+      cookingTime: 30,
       servings: 4,
       imageUrl: "https://example.com/image.jpg",
       isPublic: true,
@@ -140,7 +153,7 @@ describe("recipeService", () => {
     });
 
     it("returns error when user not found", async () => {
-      vi.mocked(prisma).user.findUnique.mockResolvedValue(null);
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
 
       const result = await createRecipe(createRecipeData);
 
@@ -150,8 +163,8 @@ describe("recipeService", () => {
     });
 
     it("handles database errors", async () => {
-      vi.mocked(prisma).user.findUnique.mockResolvedValue(mockUser);
-      vi.mocked(prisma).recipe.create.mockRejectedValue(
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
+      vi.mocked(prisma.recipe.create).mockRejectedValue(
         new Error("Database error")
       );
 
@@ -165,7 +178,7 @@ describe("recipeService", () => {
   describe("getPublicRecipes", () => {
     it("returns public recipes successfully", async () => {
       const mockRecipes = [mockRecipe];
-      vi.mocked(prisma).recipe.findMany.mockResolvedValue(mockRecipes);
+      vi.mocked(prisma.recipe.findMany).mockResolvedValue(mockRecipes);
 
       const result = await getPublicRecipes();
 
@@ -188,7 +201,7 @@ describe("recipeService", () => {
     });
 
     it("handles database errors", async () => {
-      vi.mocked(prisma).recipe.findMany.mockRejectedValue(
+      vi.mocked(prisma.recipe.findMany).mockRejectedValue(
         new Error("Database error")
       );
 
@@ -202,7 +215,7 @@ describe("recipeService", () => {
   describe("getUserRecipes", () => {
     it("returns user recipes successfully", async () => {
       const mockRecipes = [mockRecipe];
-      vi.mocked(prisma).recipe.findMany.mockResolvedValue(mockRecipes);
+      vi.mocked(prisma.recipe.findMany).mockResolvedValue(mockRecipes);
 
       const result = await getUserRecipes("user-1");
 
@@ -225,7 +238,7 @@ describe("recipeService", () => {
     });
 
     it("handles database errors", async () => {
-      vi.mocked(prisma).recipe.findMany.mockRejectedValue(
+      vi.mocked(prisma.recipe.findMany).mockRejectedValue(
         new Error("Database error")
       );
 
@@ -238,7 +251,7 @@ describe("recipeService", () => {
 
   describe("getRecipeById", () => {
     it("returns recipe by ID successfully", async () => {
-      vi.mocked(prisma).recipe.findUnique.mockResolvedValue(mockRecipe);
+      vi.mocked(prisma.recipe.findUnique).mockResolvedValue(mockRecipe);
 
       const result = await getRecipeById("recipe-1");
 
@@ -260,7 +273,7 @@ describe("recipeService", () => {
     });
 
     it("returns error when recipe not found", async () => {
-      vi.mocked(prisma).recipe.findUnique.mockResolvedValue(null);
+      vi.mocked(prisma.recipe.findUnique).mockResolvedValue(null);
 
       const result = await getRecipeById("nonexistent");
 
@@ -269,7 +282,7 @@ describe("recipeService", () => {
     });
 
     it("handles database errors", async () => {
-      vi.mocked(prisma).recipe.findUnique.mockRejectedValue(
+      vi.mocked(prisma.recipe.findUnique).mockRejectedValue(
         new Error("Database error")
       );
 
@@ -287,8 +300,8 @@ describe("recipeService", () => {
     };
 
     it("updates recipe successfully", async () => {
-      vi.mocked(prisma).recipe.findUnique.mockResolvedValue(mockRecipe);
-      vi.mocked(prisma).recipe.update.mockResolvedValue({
+      vi.mocked(prisma.recipe.findUnique).mockResolvedValue(mockRecipe);
+      vi.mocked(prisma.recipe.update).mockResolvedValue({
         ...mockRecipe,
         ...updateData,
       });
@@ -317,7 +330,7 @@ describe("recipeService", () => {
     });
 
     it("returns error when recipe not found", async () => {
-      vi.mocked(prisma).recipe.findUnique.mockResolvedValue(null);
+      vi.mocked(prisma.recipe.findUnique).mockResolvedValue(null);
 
       const result = await updateRecipe("nonexistent", "user-1", updateData);
 
@@ -326,7 +339,7 @@ describe("recipeService", () => {
     });
 
     it("returns error when user is not authorized", async () => {
-      vi.mocked(prisma).recipe.findUnique.mockResolvedValue({
+      vi.mocked(prisma.recipe.findUnique).mockResolvedValue({
         ...mockRecipe,
         userId: "different-user",
       });
@@ -338,8 +351,8 @@ describe("recipeService", () => {
     });
 
     it("handles database errors", async () => {
-      vi.mocked(prisma).recipe.findUnique.mockResolvedValue(mockRecipe);
-      vi.mocked(prisma).recipe.update.mockRejectedValue(
+      vi.mocked(prisma.recipe.findUnique).mockResolvedValue(mockRecipe);
+      vi.mocked(prisma.recipe.update).mockRejectedValue(
         new Error("Database error")
       );
 
@@ -352,8 +365,8 @@ describe("recipeService", () => {
 
   describe("deleteRecipe", () => {
     it("deletes recipe successfully", async () => {
-      vi.mocked(prisma).recipe.findUnique.mockResolvedValue(mockRecipe);
-      vi.mocked(prisma).recipe.delete.mockResolvedValue(mockRecipe);
+      vi.mocked(prisma.recipe.findUnique).mockResolvedValue(mockRecipe);
+      vi.mocked(prisma.recipe.delete).mockResolvedValue(mockRecipe);
 
       const result = await deleteRecipe("recipe-1", "user-1");
 
@@ -365,7 +378,7 @@ describe("recipeService", () => {
     });
 
     it("returns error when recipe not found", async () => {
-      vi.mocked(prisma).recipe.findUnique.mockResolvedValue(null);
+      vi.mocked(prisma.recipe.findUnique).mockResolvedValue(null);
 
       const result = await deleteRecipe("nonexistent", "user-1");
 
@@ -374,7 +387,7 @@ describe("recipeService", () => {
     });
 
     it("returns error when user is not authorized", async () => {
-      vi.mocked(prisma).recipe.findUnique.mockResolvedValue({
+      vi.mocked(prisma.recipe.findUnique).mockResolvedValue({
         ...mockRecipe,
         userId: "different-user",
       });
@@ -386,8 +399,8 @@ describe("recipeService", () => {
     });
 
     it("handles database errors", async () => {
-      vi.mocked(prisma).recipe.findUnique.mockResolvedValue(mockRecipe);
-      vi.mocked(prisma).recipe.delete.mockRejectedValue(
+      vi.mocked(prisma.recipe.findUnique).mockResolvedValue(mockRecipe);
+      vi.mocked(prisma.recipe.delete).mockRejectedValue(
         new Error("Database error")
       );
 
@@ -414,11 +427,15 @@ describe("recipeService", () => {
       vi.mocked(isOpenAIServiceAvailable).mockReturnValue(false);
       vi.mocked(generateRecipeWithGemini).mockResolvedValue({
         title: "Generated Recipe",
+        description: "A generated recipe",
         ingredients: [{ name: "ingredient1", quantity: "1", unit: "piece" }],
         instructions: ["step1", "step2"],
+        prepTime: "10 minutes",
         cookingTime: "30 minutes",
+        totalTime: "40 minutes",
         cuisine: "international",
         servings: 4,
+        source: "gemini",
       });
       vi.mocked(generateRecipeImageWithOpenAI).mockResolvedValue(
         "https://example.com/image.jpg"
@@ -426,7 +443,11 @@ describe("recipeService", () => {
     });
 
     it("generates recipe with Gemini fallback", async () => {
-      const result = await generateRecipe(["ingredient1"], 4, "international");
+      const result = (await generateRecipe(
+        ["ingredient1"],
+        4,
+        "international"
+      ))!;
 
       expect(result.title).toBe("Generated Recipe");
       expect(result.source).toBe("gemini-fallback");
@@ -439,6 +460,7 @@ describe("recipeService", () => {
         recipes: [
           {
             title: "OpenAI Recipe",
+            description: "An OpenAI recipe",
             ingredients: [
               { name: "ingredient1", quantity: "1", unit: "piece" },
             ],
@@ -452,7 +474,11 @@ describe("recipeService", () => {
         source: "openai-gpt4",
       });
 
-      const result = await generateRecipe(["ingredient1"], 4, "international");
+      const result = (await generateRecipe(
+        ["ingredient1"],
+        4,
+        "international"
+      ))!;
 
       expect(result.title).toBe("OpenAI Recipe");
       expect(result.source).toBe("openai-gpt4");
@@ -463,7 +489,11 @@ describe("recipeService", () => {
         new Error("API error")
       );
 
-      const result = await generateRecipe(["ingredient1"], 4, "international");
+      const result = (await generateRecipe(
+        ["ingredient1"],
+        4,
+        "international"
+      ))!;
 
       expect(result.title).toContain("Special");
       expect(result.source).toBe("fallback-template");
@@ -476,19 +506,27 @@ describe("recipeService", () => {
       vi.mocked(generateMultipleRecipesWithGemini).mockResolvedValue([
         {
           title: "Recipe 1",
+          description: "Recipe 1 description",
           ingredients: [{ name: "ingredient1", quantity: "1", unit: "piece" }],
           instructions: ["step1"],
+          prepTime: "10 minutes",
           cookingTime: "30 minutes",
+          totalTime: "40 minutes",
           cuisine: "international",
           servings: 4,
+          source: "gemini",
         },
         {
           title: "Recipe 2",
+          description: "Recipe 2 description",
           ingredients: [{ name: "ingredient1", quantity: "1", unit: "piece" }],
           instructions: ["step1"],
+          prepTime: "10 minutes",
           cookingTime: "30 minutes",
+          totalTime: "40 minutes",
           cuisine: "international",
           servings: 4,
+          source: "gemini",
         },
       ]);
       vi.mocked(generateRecipeImageWithOpenAI).mockResolvedValue(
@@ -510,6 +548,7 @@ describe("recipeService", () => {
         recipes: [
           {
             title: "OpenAI Recipe 1",
+            description: "OpenAI Recipe 1 description",
             ingredients: [
               { name: "ingredient1", quantity: "1", unit: "piece" },
             ],
@@ -520,6 +559,7 @@ describe("recipeService", () => {
           },
           {
             title: "OpenAI Recipe 2",
+            description: "OpenAI Recipe 2 description",
             ingredients: [
               { name: "ingredient1", quantity: "1", unit: "piece" },
             ],

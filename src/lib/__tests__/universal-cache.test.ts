@@ -77,7 +77,7 @@ describe('Universal Cache', () => {
 
       const ingredients = ['beef'];
       const servings = 2;
-      const recipes = [];
+      const recipes: Parameters<typeof cacheRecipesData>[2] = [];
 
       await cacheRecipesData(ingredients, servings, recipes, 1800);
 
@@ -282,7 +282,7 @@ describe('Universal Cache', () => {
 
       const ingredients = ['chicken'];
       const servings = 1;
-      const recipes = [];
+      const recipes: Parameters<typeof UniversalCacheManager.cacheRecipes>[2] = [];
 
       await UniversalCacheManager.cacheRecipes(ingredients, servings, recipes);
 
@@ -305,7 +305,17 @@ describe('Universal Cache', () => {
       const { getCachedRecipes } = await import('../localStorage-cache');
       const mockGetCachedRecipes = vi.mocked(getCachedRecipes);
 
-      const mockRecipes = [{ id: '1', title: 'Test' }];
+      const mockRecipes = [
+        {
+          id: '1',
+          title: 'Test',
+          servings: 1,
+          cookingTime: '10 min',
+          source: 'AI',
+          ingredients: ['chicken'],
+          instructions: ['Cook'],
+        },
+      ];
       mockGetCachedRecipes.mockReturnValue(mockRecipes);
 
       const result = await UniversalCacheManager.getCachedRecipes(['chicken'], 1);

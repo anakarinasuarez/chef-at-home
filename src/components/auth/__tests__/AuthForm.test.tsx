@@ -124,7 +124,7 @@ describe("AuthForm", () => {
     vi.clearAllMocks();
 
     // Setup default mock implementations
-    vi.mocked(safeValidateSchema).mockReturnValue({ success: true });
+    vi.mocked(safeValidateSchema).mockReturnValue({ success: true, data: {} });
     vi.mocked(getFirstZodError).mockReturnValue("Validation error");
   });
 
@@ -211,7 +211,7 @@ describe("AuthForm", () => {
           "password123"
         );
         expect(mockShowSuccess).toHaveBeenCalledWith("Welcome back!");
-        expect(mockPush).toHaveBeenCalledWith("/");
+        expect(mockPush).toHaveBeenCalledWith("/create");
       });
     });
 
@@ -272,11 +272,13 @@ describe("AuthForm", () => {
       const nameInput = screen.getByTestId("input-name");
       const emailInput = screen.getByTestId("input-email");
       const passwordInput = screen.getByTestId("input-password");
+      const confirmPasswordInput = screen.getByTestId("input-confirmPassword");
       const submitButton = screen.getByTestId("submit-button");
 
       await user.type(nameInput, "Test User");
       await user.type(emailInput, "test@example.com");
       await user.type(passwordInput, "password123");
+      await user.type(confirmPasswordInput, "password123");
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -288,7 +290,7 @@ describe("AuthForm", () => {
         expect(mockShowSuccess).toHaveBeenCalledWith(
           "Account created successfully!"
         );
-        expect(mockPush).toHaveBeenCalledWith("/");
+        expect(mockPush).toHaveBeenCalledWith("/create");
       });
     });
 
@@ -301,11 +303,13 @@ describe("AuthForm", () => {
       const nameInput = screen.getByTestId("input-name");
       const emailInput = screen.getByTestId("input-email");
       const passwordInput = screen.getByTestId("input-password");
+      const confirmPasswordInput = screen.getByTestId("input-confirmPassword");
       const submitButton = screen.getByTestId("submit-button");
 
       await user.type(nameInput, "Test User");
       await user.type(emailInput, "test@example.com");
       await user.type(passwordInput, "password123");
+      await user.type(confirmPasswordInput, "password123");
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -332,7 +336,9 @@ describe("AuthForm", () => {
         },
       };
 
-      vi.mocked(safeValidateSchema).mockReturnValue(mockValidation);
+      vi.mocked(safeValidateSchema).mockReturnValue(
+        mockValidation as unknown as ReturnType<typeof safeValidateSchema>
+      );
       vi.mocked(getFirstZodError).mockReturnValue("Invalid email format");
 
       render(<AuthForm type="login" title="Login" />);

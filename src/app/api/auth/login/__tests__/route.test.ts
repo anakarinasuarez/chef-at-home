@@ -1,5 +1,6 @@
 import { getFirstZodError, safeValidateSchema } from '@/schemas';
 import { authBackendService } from '@/services/authBackendService';
+import type { UserResponse } from '@/types/auth';
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { POST } from '../route';
@@ -43,7 +44,7 @@ describe('/api/auth/login', () => {
           id: '1',
           email: 'test@example.com',
           name: 'Test User',
-        },
+        } as UserResponse,
       });
 
       const response = await POST(mockRequest);
@@ -77,7 +78,7 @@ describe('/api/auth/login', () => {
       mockSafeValidateSchema.mockReturnValue({
         success: false,
         error: { issues: [{ message: 'Invalid email format' }] },
-      });
+      } as unknown as ReturnType<typeof safeValidateSchema>);
 
       mockGetFirstZodError.mockReturnValue('Invalid email format');
 

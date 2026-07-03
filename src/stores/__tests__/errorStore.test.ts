@@ -136,7 +136,7 @@ describe('ErrorStore', () => {
         severity: 'medium' as const,
       };
 
-      let error: AppError;
+      let error!: AppError;
 
       act(() => {
         result.current.addError(errorData);
@@ -266,7 +266,7 @@ describe('ErrorStore', () => {
         severity: 'medium' as const,
       };
 
-      let error: AppError;
+      let error!: AppError;
 
       act(() => {
         result.current.addError(errorData);
@@ -296,7 +296,7 @@ describe('ErrorStore', () => {
         severity: 'medium' as const,
       };
 
-      let error: AppError;
+      let error!: AppError;
 
       act(() => {
         result.current.addError(errorData);
@@ -338,7 +338,7 @@ describe('ErrorStore', () => {
         severity: 'medium' as const,
       };
 
-      let error: AppError;
+      let error!: AppError;
 
       act(() => {
         result.current.addError(errorData);
@@ -493,7 +493,7 @@ describe('ErrorStore', () => {
         severity: 'medium' as const,
       };
 
-      let error: AppError;
+      let error!: AppError;
 
       act(() => {
         useErrorStore.getState().addError(errorData);

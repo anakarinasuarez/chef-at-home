@@ -60,11 +60,11 @@ describe('/api/recipes/generate', () => {
       mockGenerateRecipeWithGemini.mockResolvedValue({
         id: '1',
         title: 'Chicken Risotto',
-        ingredients: [{ name: 'chicken', quantity: '500g' }],
+        ingredients: [{ name: 'chicken', quantity: '500g', unit: 'g' }],
         instructions: ['Cook chicken', 'Add rice'],
         servings: 4,
         cookingTime: '30 minutes',
-      });
+      } as unknown as Awaited<ReturnType<typeof generateRecipeWithGemini>>);
 
       const response = await POST(mockRequest);
       const responseData = await response.json();
@@ -101,13 +101,13 @@ describe('/api/recipes/generate', () => {
           {
             id: '1',
             title: 'Chicken Risotto',
-            ingredients: [{ name: 'chicken', quantity: '500g' }],
+            ingredients: [{ name: 'chicken', quantity: '500g', unit: 'g' }],
             instructions: ['Cook chicken', 'Add rice'],
             servings: 4,
             cookingTime: '30 minutes',
           },
         ],
-      });
+      } as unknown as Awaited<ReturnType<typeof generateRecipeWithOpenAI>>);
 
       const response = await POST(mockRequest);
       const responseData = await response.json();
@@ -137,11 +137,11 @@ describe('/api/recipes/generate', () => {
       mockGenerateRecipeWithGemini.mockResolvedValue({
         id: '1',
         title: 'Chicken Risotto',
-        ingredients: [{ name: 'chicken', quantity: '500g' }],
+        ingredients: [{ name: 'chicken', quantity: '500g', unit: 'g' }],
         instructions: ['Cook chicken', 'Add rice'],
         servings: 4,
         cookingTime: '30 minutes',
-      });
+      } as unknown as Awaited<ReturnType<typeof generateRecipeWithGemini>>);
 
       const response = await POST(mockRequest);
       const responseData = await response.json();
@@ -167,7 +167,7 @@ describe('/api/recipes/generate', () => {
       mockSafeValidateSchema.mockReturnValue({
         success: false,
         error: { issues: [{ message: 'Ingredients are required' }] },
-      });
+      } as unknown as ReturnType<typeof safeValidateSchema>);
 
       mockGetFirstZodError.mockReturnValue('Ingredients are required');
 
@@ -204,7 +204,7 @@ describe('/api/recipes/generate', () => {
         {
           id: 'cached-1',
           title: 'Cached Chicken Risotto',
-          ingredients: [{ name: 'chicken', quantity: '500g' }],
+          ingredients: [{ name: 'chicken', quantity: '500g', unit: 'g' }],
           instructions: ['Cook chicken', 'Add rice'],
           servings: 4,
           cookingTime: '30 minutes',
@@ -243,11 +243,11 @@ describe('/api/recipes/generate', () => {
       mockGenerateRecipeWithGemini.mockResolvedValue({
         id: '1',
         title: 'Chicken Risotto',
-        ingredients: [{ name: 'chicken', quantity: '500g' }],
+        ingredients: [{ name: 'chicken', quantity: '500g', unit: 'g' }],
         instructions: ['Cook chicken', 'Add rice'],
         servings: 4,
         cookingTime: '30 minutes',
-      });
+      } as unknown as Awaited<ReturnType<typeof generateRecipeWithGemini>>);
 
       const response = await POST(mockRequest);
       const responseData = await response.json();

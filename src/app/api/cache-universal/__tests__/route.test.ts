@@ -39,7 +39,11 @@ describe('/api/cache-universal', () => {
         memoryUsage: '1.2 KB',
       };
 
-      mockUniversalCacheManager.getCacheStats.mockResolvedValue(mockStats);
+      mockUniversalCacheManager.getCacheStats.mockResolvedValue(
+        mockStats as unknown as Awaited<
+          ReturnType<typeof UniversalCacheManager.getCacheStats>
+        >
+      );
       mockUniversalCacheManager.getCurrentProvider.mockReturnValue('localStorage');
 
       const mockRequest = {
@@ -355,7 +359,11 @@ describe('/api/cache-universal', () => {
 
     it('should force provider', async () => {
       mockUniversalCacheManager.forceProvider.mockImplementation(() => {});
-      mockUniversalCacheManager.getCurrentProvider.mockReturnValue('memory');
+      mockUniversalCacheManager.getCurrentProvider.mockReturnValue(
+        'memory' as unknown as ReturnType<
+          typeof UniversalCacheManager.getCurrentProvider
+        >
+      );
 
       const requestBody = {
         action: 'force-provider',

@@ -264,7 +264,7 @@ describe('RecipeCard', () => {
 
       expect(mockPush).toHaveBeenCalledWith('/recipes/test-recipe-id');
       expect(localStorage.setItem).toHaveBeenCalledWith(
-        'recipe-test-recipe-id',
+        'recipe-test-user-id-test-recipe-id',
         JSON.stringify(mockRecipe)
       );
     });
@@ -318,7 +318,7 @@ describe('RecipeCard', () => {
     it('redirects to login when user is not authenticated', async () => {
       const user = userEvent.setup();
 
-      mockAuthContext.user = null;
+      mockAuthContext.user = null as unknown as typeof mockAuthContext.user;
 
       render(<RecipeCard recipe={mockRecipe} />);
 
@@ -463,7 +463,9 @@ describe('RecipeCard', () => {
       };
       render(<RecipeCard recipe={recipeWithFallbackSource} />);
 
-      expect(screen.getByText('Italian Cuisine')).toBeInTheDocument();
+      // RecipeCard now renders the placeholder via RecipeImageSimple, which does
+      // not derive a cuisine from `source`, so it falls back to the default label.
+      expect(screen.getByText('International Cuisine')).toBeInTheDocument();
     });
 
     it('handles multiple image errors gracefully', async () => {

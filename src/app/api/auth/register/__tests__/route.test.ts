@@ -1,5 +1,6 @@
 import { getFirstZodError, safeValidateSchema } from '@/schemas';
 import { authBackendService } from '@/services/authBackendService';
+import type { UserResponse } from '@/types/auth';
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { POST } from '../route';
@@ -44,7 +45,7 @@ describe('/api/auth/register', () => {
           id: '1',
           email: 'test@example.com',
           name: 'Test User',
-        },
+        } as UserResponse,
       });
 
       const response = await POST(mockRequest);
@@ -80,7 +81,7 @@ describe('/api/auth/register', () => {
       mockSafeValidateSchema.mockReturnValue({
         success: false,
         error: { issues: [{ message: 'Name is required' }] },
-      });
+      } as unknown as ReturnType<typeof safeValidateSchema>);
 
       mockGetFirstZodError.mockReturnValue('Name is required');
 
