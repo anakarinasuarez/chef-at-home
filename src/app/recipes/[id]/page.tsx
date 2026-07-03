@@ -676,7 +676,7 @@ export default function RecipeDetailPage() {
         <div>
           <h2 className='text-2xl font-bold mb-8 text-fg'>Instructions</h2>
 
-          <div className='space-y-6'>
+          <div className='flex flex-col gap-6'>
             {recipe.instructions && recipe.instructions.length > 0 ? (
               recipe.instructions.map((instruction, index) => {
                 // Coherent step photo (same source as mobile): Pexels/TheMealDB
@@ -685,33 +685,51 @@ export default function RecipeDetailPage() {
                   recipe.stepImages && recipe.stepImages.length > 0
                     ? recipe.stepImages[index % recipe.stepImages.length]
                     : recipeStockPhoto(recipe.title, recipe.cuisine, {
-                        w: 400,
-                        h: 260,
+                        w: 732,
+                        h: 466,
                         seed: `step-${index}`,
                       });
+                // Figma (1319:2529): alternating rows — step card (bg-surface,
+                // "Step" + number pill) beside a large dish photo.
+                const imageRight = index % 2 === 0;
+                const card = (
+                  <div className='flex h-[400px] w-[400px] flex-shrink-0 flex-col gap-lg rounded-lg bg-surface p-2xl'>
+                    <div className='flex items-center justify-between'>
+                      <span className='text-xl font-semibold text-fg'>Step</span>
+                      <span className='rounded-full bg-primary px-lg py-2xs text-lg font-semibold text-on-primary'>
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <p className='overflow-hidden text-base leading-relaxed text-muted'>
+                      {instruction}
+                    </p>
+                  </div>
+                );
+                const image = (
+                  <div className='relative h-[400px] flex-1 overflow-hidden rounded-lg bg-elevated'>
+                    <Image
+                      src={stepImg}
+                      alt={`Step ${index + 1} — ${recipe.title}`}
+                      fill
+                      sizes='(min-width: 1024px) 732px, 100vw'
+                      className='object-cover'
+                      unoptimized
+                    />
+                  </div>
+                );
                 return (
-                  <div
-                    key={index}
-                    className='flex flex-col sm:flex-row gap-4 items-start'
-                  >
-                    <div className='flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold bg-primary text-on-primary'>
-                      {index + 1}
-                    </div>
-                    <div className='flex-1 min-w-0'>
-                      <p className='leading-relaxed text-lg text-fg'>
-                        {instruction}
-                      </p>
-                    </div>
-                    <div className='relative h-[160px] w-full sm:w-[280px] sm:flex-shrink-0 overflow-hidden rounded-lg bg-elevated'>
-                      <Image
-                        src={stepImg}
-                        alt={`Step ${index + 1} — ${recipe.title}`}
-                        fill
-                        sizes='280px'
-                        className='object-cover'
-                        unoptimized
-                      />
-                    </div>
+                  <div key={index} className='flex items-center gap-6'>
+                    {imageRight ? (
+                      <>
+                        {card}
+                        {image}
+                      </>
+                    ) : (
+                      <>
+                        {image}
+                        {card}
+                      </>
+                    )}
                   </div>
                 );
               })
