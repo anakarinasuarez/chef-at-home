@@ -289,7 +289,7 @@ describe("DeleteConfirmationModal", () => {
   });
 
   describe("Token-driven styling", () => {
-    it("renders Cancel as a tertiary Button", () => {
+    it("renders Cancel as a secondary Button", () => {
       render(
         <DeleteConfirmationModal
           isOpen={true}
@@ -299,11 +299,11 @@ describe("DeleteConfirmationModal", () => {
         />
       );
 
-      // Cancel uses the tertiary Button variant (hover handled by CSS tokens, no inline hex).
-      expect(screen.getByText("Cancel")).toHaveClass("button-tertiary");
+      // Figma (1317:253): Cancel is a secondary (outlined) Button.
+      expect(screen.getByText("Cancel")).toHaveClass("button-secondary");
     });
 
-    it("renders Delete as a danger Button", () => {
+    it("renders Delete as a solid danger Button", () => {
       render(
         <DeleteConfirmationModal
           isOpen={true}
@@ -313,8 +313,8 @@ describe("DeleteConfirmationModal", () => {
         />
       );
 
-      // Delete uses the danger token variant instead of hardcoded #EF4444 / #DC2626.
-      expect(screen.getByText("Delete")).toHaveClass("button-danger");
+      // Figma (1317:253): Delete is a filled/solid danger Button (red fill, white label).
+      expect(screen.getByText("Delete")).toHaveClass("button-danger-solid");
     });
   });
 
