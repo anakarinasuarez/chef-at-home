@@ -678,16 +678,43 @@ export default function RecipeDetailPage() {
 
           <div className='space-y-6'>
             {recipe.instructions && recipe.instructions.length > 0 ? (
-              recipe.instructions.map((instruction, index) => (
-                <div key={index} className='flex flex-col sm:flex-row gap-4'>
-                  <div className='flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold bg-primary text-on-primary'>
-                    {index + 1}
+              recipe.instructions.map((instruction, index) => {
+                // Coherent step photo (same source as mobile): Pexels/TheMealDB
+                // dish photos, else a per-step dish stock photo. Always shows.
+                const stepImg =
+                  recipe.stepImages && recipe.stepImages.length > 0
+                    ? recipe.stepImages[index % recipe.stepImages.length]
+                    : recipeStockPhoto(recipe.title, recipe.cuisine, {
+                        w: 400,
+                        h: 260,
+                        seed: `step-${index}`,
+                      });
+                return (
+                  <div
+                    key={index}
+                    className='flex flex-col sm:flex-row gap-4 items-start'
+                  >
+                    <div className='flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold bg-primary text-on-primary'>
+                      {index + 1}
+                    </div>
+                    <div className='flex-1 min-w-0'>
+                      <p className='leading-relaxed text-lg text-fg'>
+                        {instruction}
+                      </p>
+                    </div>
+                    <div className='relative h-[160px] w-full sm:w-[280px] sm:flex-shrink-0 overflow-hidden rounded-lg bg-elevated'>
+                      <Image
+                        src={stepImg}
+                        alt={`Step ${index + 1} — ${recipe.title}`}
+                        fill
+                        sizes='280px'
+                        className='object-cover'
+                        unoptimized
+                      />
+                    </div>
                   </div>
-                  <div className='flex-1'>
-                    <p className='leading-relaxed text-lg text-fg'>{instruction}</p>
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <p className='text-muted'>No instructions available</p>
             )}
