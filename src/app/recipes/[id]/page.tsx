@@ -9,6 +9,7 @@ import Badge from '@/components/ui/Badge';
 import { useAuthUnified } from '@/hooks';
 import { useSavedRecipesStore, useToastStore } from '@/stores';
 import Image from 'next/image';
+import { recipeStockPhoto } from '@/lib/recipeImage';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BiPlus, BiShare, BiShareAlt, BiTime, BiUser } from 'react-icons/bi';
@@ -51,9 +52,13 @@ export default function RecipeDetailPage() {
   const [imageError, setImageError] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
-  // Use existing image directly - NO API calls
+  // Always show a coherent food photo: real image → dish-name stock photo.
   const displayImage =
-    recipe?.image && recipe.image !== '/images/plate.png' ? recipe.image : '/images/plate.png';
+    recipe?.image && recipe.image !== '/images/plate.png'
+      ? recipe.image
+      : recipe
+        ? recipeStockPhoto(recipe.title, recipe.cuisine)
+        : '/images/plate.png';
 
   useEffect(() => {
     const loadRecipe = () => {
@@ -443,14 +448,16 @@ export default function RecipeDetailPage() {
                   <p className='leading-relaxed text-fg'>{instruction}</p>
                   {(() => {
                     // Coherent step photo: rotate through the dish's Pexels
-                    // photos; fall back to the recipe's main image. Skip if none.
+                    // photos; otherwise a per-step dish-name stock photo. Always
+                    // shows something coherent (never blank).
                     const stepImg =
                       recipe.stepImages && recipe.stepImages.length > 0
                         ? recipe.stepImages[index % recipe.stepImages.length]
-                        : displayImage !== '/images/plate.png'
-                          ? displayImage
-                          : null;
-                    if (!stepImg) return null;
+                        : recipeStockPhoto(recipe.title, recipe.cuisine, {
+                            w: 326,
+                            h: 180,
+                            seed: `step-${index}`,
+                          });
                     return (
                       <div className='relative h-[180px] w-full max-w-[326px] overflow-hidden rounded-md bg-elevated'>
                         <Image

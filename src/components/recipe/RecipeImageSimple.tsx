@@ -1,6 +1,7 @@
 'use client';
 
 import ImagePlaceholder from '@/components/ImagePlaceholder';
+import { recipeStockPhoto } from '@/lib/recipeImage';
 import Image from 'next/image';
 
 interface Recipe {
@@ -26,8 +27,12 @@ interface RecipeImageProps {
  * Usa la foto real de la receta (recipe.image) y cae en ImagePlaceholder si falta o falla.
  */
 export const RecipeImageSimple = ({ recipe, imageError, onImageError }: RecipeImageProps) => {
+  // Always show a coherent food photo: real image → dish-name stock photo.
+  // ImagePlaceholder is only reached if the stock photo itself fails to load.
   const displayImage =
-    recipe.image && recipe.image !== '/images/plate.png' ? recipe.image : null;
+    recipe.image && recipe.image !== '/images/plate.png'
+      ? recipe.image
+      : recipeStockPhoto(recipe.title, recipe.cuisine);
 
   return (
     <div className='relative aspect-[4/3] w-full overflow-hidden rounded-lg'>

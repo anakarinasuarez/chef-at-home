@@ -15,6 +15,7 @@ export interface UnifiedRecipe {
   servings: number;
   cuisine: string;
   image?: string;
+  stepImages?: string[];
   source: string;
   optionalIngredients?: Array<{
     name: string;
@@ -105,6 +106,9 @@ export const convertToUnifiedRecipe = (
     servings: (recipe.servings as number) || 4,
     cuisine: (recipe.cuisine as string) || "international",
     image: (recipe.image as string) || (recipe.imageUrl as string),
+    stepImages: Array.isArray(recipe.stepImages)
+      ? (recipe.stepImages as string[])
+      : undefined,
     source: (recipe.source as string) || "ai-generated",
     optionalIngredients:
       (recipe.optionalIngredients as Array<{ name: string; reason: string }>) ||
