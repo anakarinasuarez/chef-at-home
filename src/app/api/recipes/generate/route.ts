@@ -151,52 +151,91 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Assign IDs/titles + a FREE stock food photo (loremflickr, no API key,
-    // no paid DALL-E). The keyword is built from the DISH NAME (+ main
-    // ingredient + cuisine) so the photo is coherent with the recipe; the
-    // per-recipe lock keeps the same image stable across reloads.
+    // Assign IDs/titles + a COHERENT food photo. Prefer Pexels (free API key,
+    // searched by the dish name → relevant photo); fall back to a free
+    // loremflickr stock photo when PEXELS_API_KEY is missing or the lookup
+    // fails. No paid image APIs.
     const STOP_WORDS = new Set([
       'with','and','the','for','a','an','of','in','on','to','style','recipe','homemade','fresh','easy',
     ]);
-    const recipesWithImages = recipes.map((recipe, index) => {
-      const finalTitle =
-        customTitle && index === 0
-          ? customTitle
-          : recipe?.title || `Generated Recipe ${index + 1}`;
-      const recipeId = `recipe_${Date.now()}_${Math.random()
-        .toString(36)
-        .substr(2, 9)}`;
 
-      // Main words from the dish title → the most descriptive image query.
-      const titleWords = finalTitle
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, ' ')
-        .split(/\s+/)
-        .filter(w => w.length > 2 && !STOP_WORDS.has(w))
-        .slice(0, 3);
-      const firstIngredient = (recipe?.ingredients?.[0]?.name || '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '');
-      const terms = [
-        ...titleWords,
-        firstIngredient,
-        recipe?.cuisine?.toLowerCase(),
-        'food',
-      ].filter(Boolean);
-      const keyword = encodeURIComponent([...new Set(terms)].join(','));
-      const lock = Math.abs(
-        Array.from(recipeId).reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)
-      );
-      const image = `https://loremflickr.com/640/480/${keyword}?lock=${lock}`;
+    const fetchPexelsImage = async (query: string): Promise<string | null> => {
+      const key = process.env.PEXELS_API_KEY;
+      if (!key) return null;
+      try {
+        const res = await fetch(
+          `https://api.pexels.com/v1/search?query=${encodeURIComponent(
+            query
+          )}&per_page=1&orientation=landscape`,
+          { headers: { Authorization: key } }
+        );
+        if (!res.ok) return null;
+        const data = await res.json();
+        const src = data?.photos?.[0]?.src;
+        return src?.large || src?.landscape || src?.medium || null;
+      } catch {
+        return null;
+      }
+    };
 
-      return {
-        ...recipe,
-        id: recipeId,
-        title: finalTitle,
-        image,
-        imageSource: 'stock',
-      };
-    });
+    const recipesWithImages = await Promise.all(
+      recipes.map(async (recipe, index) => {
+        const finalTitle =
+          customTitle && index === 0
+            ? customTitle
+            : recipe?.title || `Generated Recipe ${index + 1}`;
+        const recipeId = `recipe_${Date.now()}_${Math.random()
+          .toString(36)
+          .substr(2, 9)}`;
+
+        // Main words from the dish title → the most descriptive image query.
+        const titleWords = finalTitle
+          .toLowerCase()
+          .replace(/[^a-z0-9\s]/g, ' ')
+          .split(/\s+/)
+          .filter(w => w.length > 2 && !STOP_WORDS.has(w));
+
+        // 1) Try Pexels, searched by the dish name (coherent, free).
+        const pexelsQuery = [...titleWords.slice(0, 4), recipe?.cuisine, 'food']
+          .filter(Boolean)
+          .join(' ');
+        let image = await fetchPexelsImage(pexelsQuery);
+        let imageSource = 'pexels';
+
+        // 2) Fallback: free loremflickr stock photo (no key required).
+        if (!image) {
+          const firstIngredient = (recipe?.ingredients?.[0]?.name || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '');
+          const keyword = encodeURIComponent(
+            [
+              ...new Set([
+                ...titleWords.slice(0, 3),
+                firstIngredient,
+                recipe?.cuisine?.toLowerCase(),
+                'food',
+              ].filter(Boolean)),
+            ].join(',')
+          );
+          const lock = Math.abs(
+            Array.from(recipeId).reduce(
+              (h, c) => (h * 31 + c.charCodeAt(0)) | 0,
+              7
+            )
+          );
+          image = `https://loremflickr.com/640/480/${keyword}?lock=${lock}`;
+          imageSource = 'stock';
+        }
+
+        return {
+          ...recipe,
+          id: recipeId,
+          title: finalTitle,
+          image,
+          imageSource,
+        };
+      })
+    );
 
     console.log(`Recipes generated with: ${source}`);
 
