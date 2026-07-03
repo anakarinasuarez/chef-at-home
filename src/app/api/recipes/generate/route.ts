@@ -183,6 +183,35 @@ export async function POST(request: NextRequest) {
       }
     };
 
+    // Keyless coherent fallback: TheMealDB returns REAL dish photos. Try each
+    // term (main ingredient, dish words, cuisine) until one matches. This avoids
+    // loremflickr's junk default image for unmatched multi-keyword queries.
+    const fetchMealDbImages = async (
+      terms: string[],
+      count: number
+    ): Promise<string[]> => {
+      for (const term of terms) {
+        if (!term || term.length < 3) continue;
+        try {
+          const res = await fetch(
+            `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(
+              term
+            )}`
+          );
+          if (!res.ok) continue;
+          const data = await res.json();
+          const meals = (data?.meals as Array<{ strMealThumb?: string }>) || [];
+          const thumbs = meals
+            .map(m => m?.strMealThumb)
+            .filter((u): u is string => Boolean(u));
+          if (thumbs.length > 0) return thumbs.slice(0, count);
+        } catch {
+          // try the next term
+        }
+      }
+      return [];
+    };
+
     const recipesWithImages = await Promise.all(
       recipes.map(async (recipe, index) => {
         const finalTitle =
@@ -200,44 +229,37 @@ export async function POST(request: NextRequest) {
           .split(/\s+/)
           .filter(w => w.length > 2 && !STOP_WORDS.has(w));
 
-        // 1) Try Pexels (coherent, free): ONE call returns several photos of the
-        //    dish — the first is the main image, the rest illustrate the steps.
+        // 1) Try Pexels (coherent, free with a key): ONE call returns several
+        //    photos of the dish — first is the main image, rest are the steps.
         const pexelsQuery = [...titleWords.slice(0, 4), recipe?.cuisine, 'food']
           .filter(Boolean)
           .join(' ');
-        const pexels = await fetchPexelsImages(pexelsQuery, 6);
-
-        let image: string;
-        let stepImages: string[] = [];
+        let photos = await fetchPexelsImages(pexelsQuery, 6);
         let imageSource = 'pexels';
 
-        if (pexels.length > 0) {
-          image = pexels[0];
-          stepImages = pexels;
-        } else {
-          // 2) Fallback: free loremflickr stock photo (no key required).
+        // 2) Keyless coherent fallback: TheMealDB real dish photos.
+        if (photos.length === 0) {
           const firstIngredient = (recipe?.ingredients?.[0]?.name || '')
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, '');
-          const keyword = encodeURIComponent(
-            [
-              ...new Set([
-                ...titleWords.slice(0, 3),
-                firstIngredient,
-                recipe?.cuisine?.toLowerCase(),
-                'food',
-              ].filter(Boolean)),
-            ].join(',')
-          );
-          const lock = Math.abs(
-            Array.from(recipeId).reduce(
-              (h, c) => (h * 31 + c.charCodeAt(0)) | 0,
-              7
-            )
-          );
-          image = `https://loremflickr.com/640/480/${keyword}?lock=${lock}`;
-          imageSource = 'stock';
+            .replace(/[^a-zA-Z0-9 ]/g, '')
+            .trim();
+          const mealTerms = [
+            firstIngredient,
+            ...titleWords,
+            recipe?.cuisine,
+          ].filter(Boolean) as string[];
+          photos = await fetchMealDbImages(mealTerms, 6);
+          imageSource = photos.length > 0 ? 'themealdb' : 'stock';
         }
+
+        // 3) Last resort: a SINGLE-tag loremflickr food photo. (loremflickr ANDs
+        //    multiple comma tags and returns a junk default when none match, so
+        //    we use one broad tag that always resolves to a food photo.)
+        const lock = Math.abs(
+          Array.from(recipeId).reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)
+        );
+        const image =
+          photos[0] || `https://loremflickr.com/640/480/food?lock=${lock}`;
+        const stepImages = photos;
 
         return {
           ...recipe,

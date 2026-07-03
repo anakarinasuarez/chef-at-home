@@ -31,6 +31,8 @@ const nextConfig = {
       { protocol: 'https', hostname: 'api.openai.com', pathname: '/**' },
       // Coherent food photos via Pexels (free API key)
       { protocol: 'https', hostname: 'images.pexels.com', pathname: '/**' },
+      // Keyless coherent dish photos (TheMealDB)
+      { protocol: 'https', hostname: 'www.themealdb.com', pathname: '/**' },
       // Free stock food images fallback (no API key)
       { protocol: 'https', hostname: 'loremflickr.com', pathname: '/**' },
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
