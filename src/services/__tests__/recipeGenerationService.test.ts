@@ -1,6 +1,23 @@
 import { convertToUnifiedRecipe } from '@/types/recipe';
+import type { UnifiedRecipe } from '@/types/recipe';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RecipeGenerationService, recipeGenerationService } from '../recipeGenerationService';
+
+// Helper to build a complete UnifiedRecipe for test doubles
+const makeUnifiedRecipe = (overrides: Partial<UnifiedRecipe> = {}): UnifiedRecipe => ({
+  id: '1',
+  title: 'Recipe',
+  description: '',
+  ingredients: [],
+  instructions: [],
+  prepTime: '15 minutes',
+  cookingTime: '30 minutes',
+  totalTime: '45 minutes',
+  servings: 4,
+  cuisine: 'international',
+  source: 'ai-generated',
+  ...overrides,
+});
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -58,8 +75,8 @@ describe('RecipeGenerationService', () => {
       ];
 
       const mockUnifiedRecipes = [
-        { id: '1', title: 'Recipe 1', ingredients: [], instructions: [] },
-        { id: '2', title: 'Recipe 2', ingredients: [], instructions: [] },
+        makeUnifiedRecipe({ id: '1', title: 'Recipe 1' }),
+        makeUnifiedRecipe({ id: '2', title: 'Recipe 2' }),
       ];
 
       vi.mocked(fetch).mockResolvedValue({
@@ -91,12 +108,9 @@ describe('RecipeGenerationService', () => {
         json: () => Promise.resolve({ recipes: mockRecipes }),
       } as Response);
 
-      vi.mocked(convertToUnifiedRecipe).mockReturnValue({
-        id: '1',
-        title: 'Recipe',
-        ingredients: [],
-        instructions: [],
-      });
+      vi.mocked(convertToUnifiedRecipe).mockReturnValue(
+        makeUnifiedRecipe({ id: '1', title: 'Recipe' })
+      );
 
       await recipeGenerationService.generateRecipes({
         ingredients: ['chicken'],
@@ -192,8 +206,8 @@ describe('RecipeGenerationService', () => {
   describe('saveRecipesToSession', () => {
     it('should save recipes to sessionStorage', () => {
       const recipes = [
-        { id: '1', title: 'Recipe 1', ingredients: [], instructions: [] },
-        { id: '2', title: 'Recipe 2', ingredients: [], instructions: [] },
+        makeUnifiedRecipe({ id: '1', title: 'Recipe 1' }),
+        makeUnifiedRecipe({ id: '2', title: 'Recipe 2' }),
       ];
 
       recipeGenerationService.saveRecipesToSession(recipes);
@@ -209,7 +223,7 @@ describe('RecipeGenerationService', () => {
       const originalWindow = global.window;
       delete (global as any).window;
 
-      const recipes = [{ id: '1', title: 'Recipe' }];
+      const recipes = [makeUnifiedRecipe({ id: '1', title: 'Recipe' })];
       recipeGenerationService.saveRecipesToSession(recipes);
 
       // Should not throw error

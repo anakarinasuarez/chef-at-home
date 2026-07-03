@@ -8,6 +8,7 @@ export type ButtonVariant =
   | 'secondary'
   | 'tertiary'
   | 'danger'
+  | 'danger-solid'
   | 'icon';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
@@ -49,6 +50,8 @@ const VARIANT: Record<ButtonVariant, string> = {
     'text-primary hover:text-primary-hover disabled:text-fg-disabled',
   danger:
     'text-danger hover:text-danger-hover disabled:text-fg-disabled',
+  'danger-solid':
+    'bg-danger text-white hover:bg-danger-hover disabled:bg-disabled disabled:text-fg-disabled',
   icon: 'p-md rounded-sm text-fg hover:bg-elevated disabled:text-fg-disabled disabled:hover:bg-transparent',
 };
 

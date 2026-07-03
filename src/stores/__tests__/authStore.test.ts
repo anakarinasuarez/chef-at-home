@@ -74,7 +74,7 @@ describe('AuthStore', () => {
         id: '1',
         name: 'Test User',
         email: 'test@example.com',
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       };
 
       act(() => {
@@ -134,7 +134,7 @@ describe('AuthStore', () => {
         id: '1',
         name: 'Test User',
         email: 'test@example.com',
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       };
 
       act(() => {
@@ -160,7 +160,7 @@ describe('AuthStore', () => {
         id: '1',
         name: 'Test User',
         email: 'test@example.com',
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       };
 
       vi.mocked(authService.login).mockResolvedValue({
@@ -168,7 +168,7 @@ describe('AuthStore', () => {
         user: mockUser,
       });
 
-      let loginResult: boolean;
+      let loginResult!: boolean;
 
       await act(async () => {
         loginResult = await result.current.login('test@example.com', 'password');
@@ -189,7 +189,7 @@ describe('AuthStore', () => {
         error: 'Invalid credentials',
       });
 
-      let loginResult: boolean;
+      let loginResult!: boolean;
 
       await act(async () => {
         loginResult = await result.current.login('test@example.com', 'wrongpassword');
@@ -206,7 +206,7 @@ describe('AuthStore', () => {
 
       vi.mocked(authService.login).mockRejectedValue(new Error('Network error'));
 
-      let loginResult: boolean;
+      let loginResult!: boolean;
 
       await act(async () => {
         loginResult = await result.current.login('test@example.com', 'password');
@@ -222,7 +222,7 @@ describe('AuthStore', () => {
       const { result } = renderHook(() => useAuthStore());
 
       vi.mocked(authService.login).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ success: true, user: null }), 100))
+        () => new Promise(resolve => setTimeout(() => resolve({ success: true, user: undefined }), 100))
       );
 
       act(() => {
@@ -236,18 +236,26 @@ describe('AuthStore', () => {
   describe('Register Action', () => {
     it('should register successfully', async () => {
       const { result } = renderHook(() => useAuthStore());
+      const mockUser: UserResponse = {
+        id: '1',
+        name: 'Test User',
+        email: 'test@example.com',
+        createdAt: new Date(),
+      };
 
       vi.mocked(authService.register).mockResolvedValue({
         success: true,
+        user: mockUser,
       });
 
-      let registerResult: boolean;
+      let registerResult!: boolean;
 
       await act(async () => {
         registerResult = await result.current.register('Test User', 'test@example.com', 'password');
       });
 
       expect(registerResult).toBe(true);
+      expect(result.current.user).toEqual(mockUser);
       expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeNull();
     });
@@ -260,7 +268,7 @@ describe('AuthStore', () => {
         error: 'Email already exists',
       });
 
-      let registerResult: boolean;
+      let registerResult!: boolean;
 
       await act(async () => {
         registerResult = await result.current.register('Test User', 'test@example.com', 'password');
@@ -276,7 +284,7 @@ describe('AuthStore', () => {
 
       vi.mocked(authService.register).mockRejectedValue(new Error('Network error'));
 
-      let registerResult: boolean;
+      let registerResult!: boolean;
 
       await act(async () => {
         registerResult = await result.current.register('Test User', 'test@example.com', 'password');
@@ -309,7 +317,7 @@ describe('AuthStore', () => {
         id: '1',
         name: 'Test User',
         email: 'test@example.com',
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       };
 
       act(() => {
@@ -349,7 +357,7 @@ describe('AuthStore', () => {
         id: '1',
         name: 'Test User',
         email: 'test@example.com',
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       };
 
       act(() => {
@@ -370,10 +378,10 @@ describe('AuthStore', () => {
 
       vi.mocked(authService.login).mockResolvedValue({
         success: true,
-        user: null,
+        user: undefined,
       });
 
-      let loginResult: boolean;
+      let loginResult!: boolean;
 
       await act(async () => {
         loginResult = await result.current.login('test@example.com', 'password');

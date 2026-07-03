@@ -9,35 +9,36 @@ vi.mock('@prisma/client', () => ({
   })),
 }));
 
-// Mock global object
-const mockGlobal = {
-  prisma: undefined,
+// Typed view of the real global object used by src/lib/prisma.ts
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
 };
-
-vi.stubGlobal('globalThis', mockGlobal);
 
 describe('Prisma Client', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGlobal.prisma = undefined;
+    vi.resetModules();
+    globalForPrisma.prisma = undefined;
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+    globalForPrisma.prisma = undefined;
   });
 
   it('should create a new PrismaClient instance when none exists', async () => {
-    // Import after mocking
+    // Import after resetting modules and clearing the global
     const { prisma } = await import('../prisma');
 
     expect(PrismaClient).toHaveBeenCalledTimes(1);
     expect(prisma).toBeDefined();
   });
 
-  it('should reuse existing PrismaClient instance in development', async () => {
-    // Create a mock instance
+  it('should reuse existing PrismaClient instance', async () => {
+    // Create a mock instance and expose it on the global
     const mockPrismaInstance = new PrismaClient();
-    mockGlobal.prisma = mockPrismaInstance;
+    globalForPrisma.prisma = mockPrismaInstance;
+    vi.clearAllMocks(); // ignore the manual instantiation above
 
     // Import after setting global
     const { prisma } = await import('../prisma');
@@ -47,28 +48,22 @@ describe('Prisma Client', () => {
   });
 
   it('should set global prisma in non-production environment', async () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'development';
+    vi.stubEnv('NODE_ENV', 'development');
 
     // Import after setting environment
     const { prisma } = await import('../prisma');
 
-    expect(mockGlobal.prisma).toBe(prisma);
-
-    process.env.NODE_ENV = originalEnv;
+    expect(globalForPrisma.prisma).toBe(prisma);
   });
 
   it('should not set global prisma in production environment', async () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'production';
+    vi.stubEnv('NODE_ENV', 'production');
 
     // Import after setting environment
     const { prisma } = await import('../prisma');
 
-    expect(mockGlobal.prisma).toBeUndefined();
+    expect(globalForPrisma.prisma).toBeUndefined();
     expect(prisma).toBeDefined();
-
-    process.env.NODE_ENV = originalEnv;
   });
 
   it('should handle PrismaClient instantiation errors gracefully', async () => {
@@ -79,10 +74,8 @@ describe('Prisma Client', () => {
       throw new Error('Connection failed');
     });
 
-    // Import should not throw
-    await expect(async () => {
-      await import('../prisma');
-    }).rejects.toThrow('Connection failed');
+    // Import should propagate the instantiation error
+    await expect(import('../prisma')).rejects.toThrow('Connection failed');
 
     consoleErrorSpy.mockRestore();
   });

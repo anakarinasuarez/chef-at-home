@@ -197,7 +197,7 @@ describe("Nav", () => {
       const createButton = screen.getByText("Create Recipe");
       await user.click(createButton);
 
-      expect(mockPush).toHaveBeenCalledWith("/");
+      expect(mockPush).toHaveBeenCalledWith("/create");
     });
 
     it("navigates to my-recipes page when My Recipe is clicked", async () => {

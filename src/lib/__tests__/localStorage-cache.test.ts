@@ -99,7 +99,7 @@ describe('localStorage-cache', () => {
     it('should sort ingredients for consistent cache keys', () => {
       const ingredients = ['zucchini', 'apple', 'banana'];
       const servings = 3;
-      const recipes = [];
+      const recipes: Parameters<typeof cacheRecipes>[2] = [];
 
       cacheRecipes(ingredients, servings, recipes);
 
@@ -116,7 +116,7 @@ describe('localStorage-cache', () => {
 
       const ingredients = ['chicken'];
       const servings = 1;
-      const recipes = [];
+      const recipes: Parameters<typeof cacheRecipes>[2] = [];
 
       expect(() => {
         cacheRecipes(ingredients, servings, recipes);

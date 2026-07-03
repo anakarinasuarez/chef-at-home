@@ -54,11 +54,14 @@ describe('AuthBackendService', () => {
         name: 'Test User',
         email: 'test@example.com',
         password: 'hashedPassword',
+        resetToken: null,
+        resetTokenExpiry: null,
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
-      vi.mocked(bcrypt.compare).mockResolvedValue(true);
+      vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
 
       const result = await authBackendService.login({
         email: 'test@example.com',
@@ -94,11 +97,14 @@ describe('AuthBackendService', () => {
         name: 'Test User',
         email: 'test@example.com',
         password: 'hashedPassword',
+        resetToken: null,
+        resetTokenExpiry: null,
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
-      vi.mocked(bcrypt.compare).mockResolvedValue(false);
+      vi.mocked(bcrypt.compare).mockResolvedValue(false as never);
 
       const result = await authBackendService.login({
         email: 'test@example.com',
@@ -131,11 +137,14 @@ describe('AuthBackendService', () => {
         name: 'New User',
         email: 'new@example.com',
         password: 'hashedPassword',
+        resetToken: null,
+        resetTokenExpiry: null,
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
-      vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword');
+      vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword' as never);
       vi.mocked(prisma.user.create).mockResolvedValue(mockUser);
 
       const result = await authBackendService.register({
@@ -160,7 +169,10 @@ describe('AuthBackendService', () => {
         name: 'Existing User',
         email: 'existing@example.com',
         password: 'hashedPassword',
+        resetToken: null,
+        resetTokenExpiry: null,
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue(existingUser);
@@ -196,11 +208,14 @@ describe('AuthBackendService', () => {
         name: 'New User',
         email: 'new@example.com',
         password: 'hashedPassword',
+        resetToken: null,
+        resetTokenExpiry: null,
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
-      vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword');
+      vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword' as never);
       vi.mocked(prisma.user.create).mockResolvedValue(mockUser);
 
       await authBackendService.register({
@@ -220,7 +235,10 @@ describe('AuthBackendService', () => {
         name: 'Test User',
         email: 'test@example.com',
         password: 'hashedPassword',
+        resetToken: null,
+        resetTokenExpiry: null,
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
