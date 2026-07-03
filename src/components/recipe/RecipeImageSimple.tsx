@@ -40,6 +40,9 @@ export const RecipeImageSimple = ({ recipe, imageError, onImageError }: RecipeIm
           onError={onImageError}
           sizes='(max-width: 1024px) 100vw, 320px'
           priority
+          // External stock/AI photos load directly (bypass the Vercel image
+          // optimizer, which times out on slow sources like loremflickr).
+          unoptimized
         />
       ) : (
         <ImagePlaceholder title={recipe.title} className='h-full w-full' />

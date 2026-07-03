@@ -159,22 +159,27 @@ export async function POST(request: NextRequest) {
       'with','and','the','for','a','an','of','in','on','to','style','recipe','homemade','fresh','easy',
     ]);
 
-    const fetchPexelsImage = async (query: string): Promise<string | null> => {
+    const fetchPexelsImages = async (
+      query: string,
+      count: number
+    ): Promise<string[]> => {
       const key = process.env.PEXELS_API_KEY;
-      if (!key) return null;
+      if (!key) return [];
       try {
         const res = await fetch(
           `https://api.pexels.com/v1/search?query=${encodeURIComponent(
             query
-          )}&per_page=1&orientation=landscape`,
+          )}&per_page=${count}&orientation=landscape`,
           { headers: { Authorization: key } }
         );
-        if (!res.ok) return null;
+        if (!res.ok) return [];
         const data = await res.json();
-        const src = data?.photos?.[0]?.src;
-        return src?.large || src?.landscape || src?.medium || null;
+        const photos = (data?.photos as Array<{ src?: Record<string, string> }>) || [];
+        return photos
+          .map(p => p?.src?.large || p?.src?.landscape || p?.src?.medium)
+          .filter((u): u is string => Boolean(u));
       } catch {
-        return null;
+        return [];
       }
     };
 
@@ -195,15 +200,22 @@ export async function POST(request: NextRequest) {
           .split(/\s+/)
           .filter(w => w.length > 2 && !STOP_WORDS.has(w));
 
-        // 1) Try Pexels, searched by the dish name (coherent, free).
+        // 1) Try Pexels (coherent, free): ONE call returns several photos of the
+        //    dish — the first is the main image, the rest illustrate the steps.
         const pexelsQuery = [...titleWords.slice(0, 4), recipe?.cuisine, 'food']
           .filter(Boolean)
           .join(' ');
-        let image = await fetchPexelsImage(pexelsQuery);
+        const pexels = await fetchPexelsImages(pexelsQuery, 6);
+
+        let image: string;
+        let stepImages: string[] = [];
         let imageSource = 'pexels';
 
-        // 2) Fallback: free loremflickr stock photo (no key required).
-        if (!image) {
+        if (pexels.length > 0) {
+          image = pexels[0];
+          stepImages = pexels;
+        } else {
+          // 2) Fallback: free loremflickr stock photo (no key required).
           const firstIngredient = (recipe?.ingredients?.[0]?.name || '')
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '');
@@ -233,6 +245,7 @@ export async function POST(request: NextRequest) {
           title: finalTitle,
           image,
           imageSource,
+          stepImages,
         };
       })
     );

@@ -30,6 +30,7 @@ interface Recipe {
   cuisine?: string;
   servings: number;
   image?: string;
+  stepImages?: string[];
   source: string;
 }
 
@@ -386,6 +387,7 @@ export default function RecipeDetailPage() {
               className='object-cover'
               onError={() => setImageError(true)}
               priority
+              unoptimized
             />
           ) : (
             <ImagePlaceholder
@@ -439,17 +441,29 @@ export default function RecipeDetailPage() {
                     </span>
                   </p>
                   <p className='leading-relaxed text-fg'>{instruction}</p>
-                  <div className='relative h-[180px] w-full max-w-[326px] overflow-hidden rounded-md bg-elevated'>
-                    <Image
-                      src={`https://loremflickr.com/326/180/${encodeURIComponent(
-                        recipe.cuisine || 'food'
-                      )},food,cooking?lock=${index + 11}`}
-                      alt={`Step ${index + 1}`}
-                      fill
-                      sizes='326px'
-                      className='object-cover'
-                    />
-                  </div>
+                  {(() => {
+                    // Coherent step photo: rotate through the dish's Pexels
+                    // photos; fall back to the recipe's main image. Skip if none.
+                    const stepImg =
+                      recipe.stepImages && recipe.stepImages.length > 0
+                        ? recipe.stepImages[index % recipe.stepImages.length]
+                        : displayImage !== '/images/plate.png'
+                          ? displayImage
+                          : null;
+                    if (!stepImg) return null;
+                    return (
+                      <div className='relative h-[180px] w-full max-w-[326px] overflow-hidden rounded-md bg-elevated'>
+                        <Image
+                          src={stepImg}
+                          alt={`Step ${index + 1} — ${recipe.title}`}
+                          fill
+                          sizes='326px'
+                          className='object-cover'
+                          unoptimized
+                        />
+                      </div>
+                    );
+                  })()}
                 </div>
               ))
             ) : (
@@ -626,6 +640,7 @@ export default function RecipeDetailPage() {
                   className='object-cover'
                   onError={() => setImageError(true)}
                   priority
+                  unoptimized
                 />
               ) : (
                 <ImagePlaceholder
