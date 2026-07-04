@@ -183,31 +183,46 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    // Keyless coherent fallback: TheMealDB returns REAL dish photos. Try each
-    // term (main ingredient, dish words, cuisine) until one matches. This avoids
-    // loremflickr's junk default image for unmatched multi-keyword queries.
+    // Keyless coherent fallback: TheMealDB returns REAL dish photos. Prefer
+    // filter-by-ingredient (best coverage: chicken/rice/beef/tomato…), then
+    // search-by-dish-name. Avoids loremflickr's junk default for unmatched
+    // multi-keyword queries.
+    const mealDbThumbs = async (url: string): Promise<string[]> => {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return [];
+        const data = await res.json();
+        const meals = (data?.meals as Array<{ strMealThumb?: string }>) || [];
+        return meals
+          .map(m => m?.strMealThumb)
+          .filter((u): u is string => Boolean(u));
+      } catch {
+        return [];
+      }
+    };
     const fetchMealDbImages = async (
-      terms: string[],
+      ingredients: string[],
+      nameTerms: string[],
       count: number
     ): Promise<string[]> => {
-      for (const term of terms) {
+      const base = 'https://www.themealdb.com/api/json/v1/1';
+      // 1) By main ingredient (real dishes that contain it).
+      for (const ing of ingredients) {
+        const clean = ing.replace(/[^a-zA-Z ]/g, '').trim();
+        const word = clean.split(/\s+/).pop() || clean; // "chicken breast" → "chicken"
+        if (word.length < 3) continue;
+        const thumbs = await mealDbThumbs(
+          `${base}/filter.php?i=${encodeURIComponent(word)}`
+        );
+        if (thumbs.length > 0) return thumbs.slice(0, count);
+      }
+      // 2) By dish name / cuisine word.
+      for (const term of nameTerms) {
         if (!term || term.length < 3) continue;
-        try {
-          const res = await fetch(
-            `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(
-              term
-            )}`
-          );
-          if (!res.ok) continue;
-          const data = await res.json();
-          const meals = (data?.meals as Array<{ strMealThumb?: string }>) || [];
-          const thumbs = meals
-            .map(m => m?.strMealThumb)
-            .filter((u): u is string => Boolean(u));
-          if (thumbs.length > 0) return thumbs.slice(0, count);
-        } catch {
-          // try the next term
-        }
+        const thumbs = await mealDbThumbs(
+          `${base}/search.php?s=${encodeURIComponent(term)}`
+        );
+        if (thumbs.length > 0) return thumbs.slice(0, count);
       }
       return [];
     };
@@ -239,15 +254,16 @@ export async function POST(request: NextRequest) {
 
         // 2) Keyless coherent fallback: TheMealDB real dish photos.
         if (photos.length === 0) {
-          const firstIngredient = (recipe?.ingredients?.[0]?.name || '')
-            .replace(/[^a-zA-Z0-9 ]/g, '')
-            .trim();
-          const mealTerms = [
-            firstIngredient,
-            ...titleWords,
-            recipe?.cuisine,
-          ].filter(Boolean) as string[];
-          photos = await fetchMealDbImages(mealTerms, 6);
+          const ingredientNames = (
+            (recipe?.ingredients as Array<{ name?: string }>) || []
+          )
+            .map(i => i?.name)
+            .filter((n): n is string => Boolean(n))
+            .slice(0, 4);
+          const nameTerms = [...titleWords, recipe?.cuisine].filter(
+            Boolean
+          ) as string[];
+          photos = await fetchMealDbImages(ingredientNames, nameTerms, 6);
           imageSource = photos.length > 0 ? 'themealdb' : 'stock';
         }
 

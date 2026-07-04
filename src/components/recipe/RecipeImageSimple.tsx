@@ -32,7 +32,10 @@ export const RecipeImageSimple = ({ recipe, imageError, onImageError }: RecipeIm
   const displayImage =
     recipe.image && recipe.image !== '/images/plate.png'
       ? recipe.image
-      : recipeStockPhoto(recipe.title, recipe.cuisine);
+      : recipeStockPhoto(
+          recipe.ingredients?.[0]?.name || recipe.title,
+          recipe.cuisine
+        );
 
   return (
     <div className='relative aspect-[4/3] w-full overflow-hidden rounded-lg'>
