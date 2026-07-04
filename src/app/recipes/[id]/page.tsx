@@ -689,9 +689,8 @@ export default function RecipeDetailPage() {
                         h: 466,
                         seed: `step-${index}`,
                       });
-                // Figma (1319:2529): alternating rows — step card (bg-surface,
-                // "Step" + number pill) beside a large dish photo.
-                const imageRight = index % 2 === 0;
+                // Figma (1319:2529): step card (bg-surface, "Step" + number
+                // pill) on the LEFT, large dish photo on the RIGHT — every row.
                 const card = (
                   <div className='flex h-[400px] w-[400px] flex-shrink-0 flex-col gap-lg rounded-lg bg-surface p-2xl'>
                     <div className='flex items-center justify-between'>
@@ -719,17 +718,8 @@ export default function RecipeDetailPage() {
                 );
                 return (
                   <div key={index} className='flex items-center gap-6'>
-                    {imageRight ? (
-                      <>
-                        {card}
-                        {image}
-                      </>
-                    ) : (
-                      <>
-                        {image}
-                        {card}
-                      </>
-                    )}
+                    {card}
+                    {image}
                   </div>
                 );
               })
