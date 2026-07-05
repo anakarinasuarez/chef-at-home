@@ -381,6 +381,9 @@ export default function RecipesPage() {
             servings: (aiRecipe.servings as number) || servings,
             cookingTime: (aiRecipe.cookingTime as string) || '30 minutes',
             image: (aiRecipe.image as string) || null,
+            stepImages: Array.isArray(aiRecipe.stepImages)
+              ? (aiRecipe.stepImages as string[])
+              : undefined,
             source: (aiRecipe.source as string) || 'gemini',
             ingredients: processedIngredients,
             instructions: (aiRecipe.instructions as string[]) || [],
